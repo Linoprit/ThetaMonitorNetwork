@@ -41,8 +41,8 @@ int SerialIO::transmitCommand(string command) {
 
 	cout << "ANS = " << std::flush;
 	while ((count < _varMap["waitstates"].as<uint>())) {
-		if (readString(answer) == FAIL) {
-			return FAIL;
+		if (readString(answer) == _FAIL_) {
+			return _FAIL_;
 		}
 		this_thread::sleep_for(chrono::milliseconds(500));
 		if (answer.str().size() == 0) {
@@ -50,11 +50,11 @@ int SerialIO::transmitCommand(string command) {
 			count++;
 		} else {
 			cout << answer.str() << endl;
-			return SUCCESS;
+			return _SUCCESS_;
 		}
 	}
 	cout << endl;
-	return FAIL;
+	return _FAIL_;
 }
 
 int SerialIO::transmitCommands(vector<string> commands) {
@@ -67,8 +67,8 @@ int SerialIO::transmitCommands(vector<string> commands) {
 		writeString(item);
 
 		while ((count < _varMap["waitstates"].as<uint>()) || (ackOk)) {
-			if (readString(answer) == FAIL) {
-				return FAIL;
+			if (readString(answer) == _FAIL_) {
+				return _FAIL_;
 			}
 
 			string toFind = _varMap["acknowledge"].as<string>();
@@ -82,35 +82,35 @@ int SerialIO::transmitCommands(vector<string> commands) {
 			cout << "." << std::flush;
 		}
 		if (ackOk != true) {
-			return FAIL;
+			return _FAIL_;
 		}
 	}
-	return SUCCESS;
+	return _SUCCESS_;
 }
 
 int SerialIO::writeString(string msg) {
 	if (!_serial.isOpen()) {
-		return FAIL;
+		return _FAIL_;
 	}
 	try {
 		_serial.writeString(msg);
 	} catch (boost::system::system_error &e) {
 		cout << "SerialIO error: " << e.what() << endl;
-		return FAIL;
+		return _FAIL_;
 	}
-	return SUCCESS;
+	return _SUCCESS_;
 }
 
 int SerialIO::readString(stringstream &receivedMsg) {
 	if (!_serial.isOpen()) {
-		return FAIL;
+		return _FAIL_;
 	}
 	try {
 		receivedMsg << _serial.readString();
 	} catch (boost::system::system_error &e) {
 		cout << "SerialIO error: " << e.what() << endl;
-		return FAIL;
+		return _FAIL_;
 	}
-	return SUCCESS;
+	return _SUCCESS_;
 }
 

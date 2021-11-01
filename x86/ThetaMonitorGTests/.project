@@ -24,4 +24,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>Framework</name>
+			<type>2</type>
+			<location>/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework</location>
+		</link>
+	</linkedResources>
 </projectDescription>

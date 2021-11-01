@@ -82,7 +82,7 @@ int ProgramOptions::init(int argc, char *argv[]) {
 		ifstream ifs(config_file.c_str());
 		if (!ifs) {
 			cout << "can not open config file: " << config_file << "\n";
-			return FAIL;
+			return _FAIL_;
 		} else {
 			store(parse_config_file(ifs, config_file_options), _vm);
 			notify(_vm);
@@ -100,7 +100,7 @@ int ProgramOptions::init(int argc, char *argv[]) {
 		cout << e.what() << "\n";
 		return 1;
 	}
-	return SUCCESS;
+	return _SUCCESS_;
 }
 
 void ProgramOptions::checkIfTest(int argc, char *argv[]) {

@@ -8,8 +8,8 @@
 #ifndef PROJECTTYPES_H_
 #define PROJECTTYPES_H_
 
-constexpr int SUCCESS = 0;
-constexpr int FAIL = -1;
+constexpr int _SUCCESS_ = 0;
+constexpr int _FAIL_ = -1;
 
 
 #endif /* PROJECTTYPES_H_ */

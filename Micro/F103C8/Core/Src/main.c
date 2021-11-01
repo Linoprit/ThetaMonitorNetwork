@@ -56,28 +56,28 @@ DMA_HandleTypeDef hdma_spi2_tx;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
-/* Definitions for measureTsk */
-osThreadId_t measureTskHandle;
-uint32_t measureTskBuffer[ 128 ];
-osStaticThreadDef_t measureTskControlBlock;
-const osThreadAttr_t measureTsk_attributes = {
-  .name = "measureTsk",
-  .cb_mem = &measureTskControlBlock,
-  .cb_size = sizeof(measureTskControlBlock),
-  .stack_mem = &measureTskBuffer[0],
-  .stack_size = sizeof(measureTskBuffer),
+/* Definitions for measureTask */
+osThreadId_t measureTaskHandle;
+uint32_t measureTaskBuffer[ 128 ];
+osStaticThreadDef_t measureTaskControlBlock;
+const osThreadAttr_t measureTask_attributes = {
+  .name = "measureTask",
+  .cb_mem = &measureTaskControlBlock,
+  .cb_size = sizeof(measureTaskControlBlock),
+  .stack_mem = &measureTaskBuffer[0],
+  .stack_size = sizeof(measureTaskBuffer),
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for nRF24Tsk */
 osThreadId_t nRF24TskHandle;
-uint32_t nRF24TskBuffer[ 128 ];
-osStaticThreadDef_t nRF24TskControlBlock;
+uint32_t nRF24TaskBuffer[ 128 ];
+osStaticThreadDef_t nRF24TaskControlBlock;
 const osThreadAttr_t nRF24Tsk_attributes = {
   .name = "nRF24Tsk",
-  .cb_mem = &nRF24TskControlBlock,
-  .cb_size = sizeof(nRF24TskControlBlock),
-  .stack_mem = &nRF24TskBuffer[0],
-  .stack_size = sizeof(nRF24TskBuffer),
+  .cb_mem = &nRF24TaskControlBlock,
+  .cb_size = sizeof(nRF24TaskControlBlock),
+  .stack_mem = &nRF24TaskBuffer[0],
+  .stack_size = sizeof(nRF24TaskBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for displayTask */
@@ -94,7 +94,7 @@ const osThreadAttr_t displayTask_attributes = {
 };
 /* Definitions for masterSerialTas */
 osThreadId_t masterSerialTasHandle;
-uint32_t masterSerialTasBuffer[ 128 ];
+uint32_t masterSerialTasBuffer[ 512 ];
 osStaticThreadDef_t masterSerialTasControlBlock;
 const osThreadAttr_t masterSerialTas_attributes = {
   .name = "masterSerialTas",
@@ -119,8 +119,8 @@ static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_CRC_Init(void);
-void startMeasureTsk(void *argument);
-extern void startnRF24Tsk(void *argument);
+void startMeasureTask(void *argument);
+extern void startnRF24Task(void *argument);
 extern void startDisplayTask(void *argument);
 extern void startMasterSerialTask(void *argument);
 
@@ -193,11 +193,11 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of measureTsk */
-  measureTskHandle = osThreadNew(startMeasureTsk, NULL, &measureTsk_attributes);
+  /* creation of measureTask */
+  measureTaskHandle = osThreadNew(startMeasureTask, NULL, &measureTask_attributes);
 
   /* creation of nRF24Tsk */
-  nRF24TskHandle = osThreadNew(startnRF24Tsk, NULL, &nRF24Tsk_attributes);
+  nRF24TskHandle = osThreadNew(startnRF24Task, NULL, &nRF24Tsk_attributes);
 
   /* creation of displayTask */
   displayTaskHandle = osThreadNew(startDisplayTask, NULL, &displayTask_attributes);
@@ -609,14 +609,14 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_startMeasureTsk */
+/* USER CODE BEGIN Header_startMeasureTask */
 /**
-  * @brief  Function implementing the measureTsk thread.
+  * @brief  Function implementing the measureTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_startMeasureTsk */
-__weak void startMeasureTsk(void *argument)
+/* USER CODE END Header_startMeasureTask */
+__weak void startMeasureTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
@@ -627,7 +627,7 @@ __weak void startMeasureTsk(void *argument)
   /* USER CODE END 5 */
 }
 
- /**
+/**
   * @brief  Period elapsed callback in non blocking mode
   * @note   This function is called  when TIM4 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment

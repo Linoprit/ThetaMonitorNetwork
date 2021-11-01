@@ -24,7 +24,7 @@ using namespace std;
 ProgramOptions progOptions;
 
 void finalMessage(int result) {
-	if (result == SUCCESS) {
+	if (result == _SUCCESS_) {
 		cout << "SerialIO finished successfully." << endl;
 	} else {
 		cout << "Sorry, SerialIO failed." << endl;
@@ -39,8 +39,8 @@ void sendCommand(po::variables_map varMap, vector<string> commands) {
 }
 
 int main(int argc, char *argv[]) {
-	if (FAIL == progOptions.init(argc, argv)) {
-		return FAIL;
+	if (_FAIL_ == progOptions.init(argc, argv)) {
+		return _FAIL_;
 	}
 	po::variables_map varMap = progOptions.getVarMap();
 

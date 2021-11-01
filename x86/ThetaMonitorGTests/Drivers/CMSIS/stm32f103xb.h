@@ -41,6 +41,11 @@
  extern "C" {
 #endif 
 
+// 20211031 HG: CR1 ... CR3 are numeric constants
+#undef CR1
+#undef CR2
+#undef CR3
+
 /** @addtogroup Configuration_section_for_CMSIS
   * @{
   */
@@ -458,7 +463,6 @@ typedef struct
 /** 
   * @brief Serial Peripheral Interface
   */
-
 typedef struct
 {
   uint32_t CR1;
@@ -474,6 +478,7 @@ typedef struct
 /**
   * @brief TIM Timers
   */
+
 typedef struct
 {
   uint32_t CR1;             /*!< TIM control register 1,                      Address offset: 0x00 */
@@ -503,7 +508,6 @@ typedef struct
 /** 
   * @brief Universal Synchronous Asynchronous Receiver Transmitter
   */
- 
 typedef struct
 {
   uint32_t SR;         /*!< USART Status register,                   Address offset: 0x00 */

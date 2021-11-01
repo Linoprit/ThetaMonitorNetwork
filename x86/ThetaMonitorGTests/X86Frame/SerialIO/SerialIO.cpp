@@ -35,7 +35,7 @@ void SerialIO::open(void) {
 int SerialIO::transmit(uint8_t *buffer, uint16_t size) {
 	char *buff = reinterpret_cast<char*>(buffer);
 	_serial.write(const_cast<const char*>(buff), size);
-	return SUCCESS;
+	return _SUCCESS_;
 }
 
 size_t SerialIO::receive(uint8_t *buffer, uint16_t size) {
@@ -45,27 +45,27 @@ size_t SerialIO::receive(uint8_t *buffer, uint16_t size) {
 
 int SerialIO::writeString(string msg) {
 	if (!_serial.isOpen()) {
-		return FAIL;
+		return _FAIL_;
 	}
 	try {
 		_serial.writeString(msg);
 	} catch (boost::system::system_error &e) {
 		cout << "SerialIO error: " << e.what() << endl;
-		return FAIL;
+		return _FAIL_;
 	}
-	return SUCCESS;
+	return _SUCCESS_;
 }
 
 int SerialIO::readString(stringstream &receivedMsg) {
 	if (!_serial.isOpen()) {
-		return FAIL;
+		return _FAIL_;
 	}
 	try {
 		receivedMsg << _serial.readString();
 	} catch (boost::system::system_error &e) {
 		cout << "SerialIO error: " << e.what() << endl;
-		return FAIL;
+		return _FAIL_;
 	}
-	return SUCCESS;
+	return _SUCCESS_;
 }
 

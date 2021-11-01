@@ -8,7 +8,7 @@
 #ifndef PROJECTTYPES_H_
 #define PROJECTTYPES_H_
 
-#include <Types/AppTypes.h>
+#include <Config/Types/AppTypes.h>
 
 //constexpr int SUCCESS = 0;
 //constexpr int FAIL = -1;

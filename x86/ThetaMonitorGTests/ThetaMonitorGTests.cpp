@@ -4,9 +4,9 @@
 #include <boost/program_options.hpp>
 #include <ProgramOptions.h>
 #include <thread>
-#include <Tasks/CommandLineTask.h>
-#include <Tasks/SimulationTask.h>
+#include <Tasks/tasksDef.h>
 #include <EepromEmulation.h>
+#include <X86Tasks/SimulationTask.h>
 
 using namespace boost::program_options;
 using namespace std;
@@ -27,7 +27,7 @@ void startSimulation(po::variables_map varMap) {
 
 
 	// start the simulation tasks
-	std::thread commandLineTask(startCommandLineTask);
+	std::thread commandLineTask(startMasterSerialTask);
 
 	for (;;) {
 		// you must end the program with ctrl-c
@@ -38,8 +38,8 @@ void startSimulation(po::variables_map varMap) {
 ProgramOptions progOptions;
 
 int main(int argc, char **argv) {
-	if (FAIL == progOptions.init(argc, argv)) {
-		return FAIL;
+	if (_FAIL_ == progOptions.init(argc, argv)) {
+		return _FAIL_;
 	}
 	po::variables_map varMap = progOptions.getVarMap();
 

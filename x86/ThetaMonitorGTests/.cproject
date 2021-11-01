@@ -25,12 +25,12 @@
 								<option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.exe.debug.option.debugging.level.5404469" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.982375192" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/googletest}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/STM32F1xx_HAL_Driver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/CMSIS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/Emulation}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/X86Frame}&quot;"/>
+									<listOptionValue builtIn="false" value="/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.232176096" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F103xB"/>
@@ -42,12 +42,12 @@
 								<option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.exe.debug.option.debugging.level.623503284" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1782992451" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/googletest}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/STM32F1xx_HAL_Driver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/CMSIS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/Emulation}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/X86Frame}&quot;"/>
+									<listOptionValue builtIn="false" value="/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.1869165454" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F103xB"/>
@@ -77,19 +77,20 @@
 							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1406540941" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.18373478" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/googletest}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/STM32F1xx_HAL_Driver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/CMSIS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/Emulation}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/X86Frame}&quot;"/>
+									<listOptionValue builtIn="false" value="/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.909885172" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Framework" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Devices/ds18b20" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Framework"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -127,6 +128,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/CMSIS/Device/ST/STM32F1xx/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/Emulation}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/X86Frame}&quot;"/>
+									<listOptionValue builtIn="false" value="/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.497090223" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F103xB"/>
@@ -145,6 +147,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/CMSIS/Device/ST/STM32F1xx/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/Emulation}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/X86Frame}&quot;"/>
+									<listOptionValue builtIn="false" value="/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.1930799250" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F103xB"/>
@@ -179,13 +182,14 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/CMSIS/Device/ST/STM32F1xx/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/Drivers/Emulation}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ThetaMonitorGTests/X86Frame}&quot;"/>
+									<listOptionValue builtIn="false" value="/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1969485011" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Framework/Devices/ds18b20" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

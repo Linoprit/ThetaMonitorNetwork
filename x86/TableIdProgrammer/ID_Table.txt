@@ -45,6 +45,7 @@
 
 		# unaligned comment
 # setSensId 3103548024 -12.7	12.7 0 0 	"INNEN   "
+# setSensId 3103548024 -12.7 12.7 0 0 "INNEN   "
 
 # hash [4byte uint]: crc32, calculated from sensor-address
 # tp = sensor type [0 - 15]: TEMP = 0, HUMIDITY = 1, PRESS = 2
