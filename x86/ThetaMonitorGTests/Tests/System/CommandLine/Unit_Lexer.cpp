@@ -237,6 +237,8 @@ TEST(Lexer, printCmdHashes) {
 	char setStationId[] = "setStationId";
 	char getStationId[] = "getStationId";
 	char reboot[] = "reboot";
+	char clrSensIdTable[] = "clrSensIdTable";
+	char calcHash[] = "calcHash";
 
 	CmdBufferType comLine;
 	comLine.fill('\0');
@@ -267,4 +269,18 @@ TEST(Lexer, printCmdHashes) {
 	cmdToken = (CmdToken*) lex.getNextToken();
 	EXPECT_EQ(cmdToken->getType(), Token::Command);
 	printf("reboot: %u\n", cmdToken->getVal());
+
+	comLine.fill('\0');
+	memcpy(comLine.data(), clrSensIdTable, sizeof(clrSensIdTable));
+	lex.setComLine(&comLine);
+	cmdToken = (CmdToken*) lex.getNextToken();
+	EXPECT_EQ(cmdToken->getType(), Token::Command);
+	printf("clrSensIdTable: %u\n", cmdToken->getVal());
+
+	comLine.fill('\0');
+	memcpy(comLine.data(), calcHash, sizeof(calcHash));
+	lex.setComLine(&comLine);
+	cmdToken = (CmdToken*) lex.getNextToken();
+	EXPECT_EQ(cmdToken->getType(), Token::Command);
+	printf("calcHash: %u\n", cmdToken->getVal());
 }

@@ -36,6 +36,7 @@ uint16_t tx_free_bytes(void);
 #ifdef __x86_64
 #include <SerialIO/SerialIO.h>
 int tx_cycle(SerialIO* serialIO);
+int tx_cycle(void);
 #else
 	int tx_cycle(void);
 #endif

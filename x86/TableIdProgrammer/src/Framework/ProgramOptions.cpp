@@ -52,7 +52,7 @@ int ProgramOptions::init(int argc, char *argv[]) {
 				("idTableFile", po::value<string>(&idTableFileName),
 						"Input ID-Table file, with plain sensor-addresses")
 				("progid,p", "write ID-Table to device")
-				("readid,r", "Read ID-Table to File")
+				("readid,r", "Read ID-Table from device")
 				("setstatid", po::value<uint32_t>(&stationId),
 						"<uint32> write station-ID to device")
 				("getstatid", "read station-ID from device")
@@ -65,7 +65,7 @@ int ProgramOptions::init(int argc, char *argv[]) {
 						po::value<uint>(&waitstates)->default_value(20),
 						"time to wait, after command was sent, in 500ms steps")
 				 ("acknowledge",
-						 po::value<string>(&acknowledge)->default_value("**DONE**"),
+						 po::value<string>(&acknowledge)->default_value("** DONE **"),
 						 "Response string from device")
 				("setSensorIdCmd", po::value<string>(&setSensorId),
 						"Device's command to set sensor-values")

@@ -68,7 +68,7 @@ void startMasterSerialTask(void *argument) {
 
 	for (;;) {
 		osDelay(20);
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
 		//tx_printf("Message from hell\n");
 

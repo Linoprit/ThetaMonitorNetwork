@@ -37,8 +37,10 @@ public:
 		uint8_t checkSum;
 	} Theta_sens_typeE2;
 
+	void startIter(void);
 	Theta_sens_typeE2 iter(void);
 	ID_Table::Theta_sens_type getIdTableData(uint32_t sensorIdHash);
+	ErrorCode clrIdTableData(void);
 	ErrorCode writeIdTableData(ID_Table::Theta_sens_type sensVals);
 	ErrorCode writeStatId(uint32_t stationId);
 	uint32_t getStatId(void);
@@ -59,6 +61,7 @@ private:
 	static constexpr uint16_t NUM_OF_ID_ENTRIES = 100U;
 	static constexpr uint16_t ID_TABLE_LEN = NUM_OF_ID_ENTRIES
 			* sizeof(ID_Table::Theta_sens_type);
+	static constexpr uint32_t EMPTY_SENS_ID = UINT32_MAX;
 	uint16_t _currAddress;
 	uint16_t _oldAddress;
 };

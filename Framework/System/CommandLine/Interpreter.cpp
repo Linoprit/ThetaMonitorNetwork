@@ -33,11 +33,30 @@ bool Interpreter::doit(CmdBufferType comLine) {
 	else if (cmd == 3913104177) { result = getSensIdTable(&lex); 	} // getSensIdTable
 	else if (cmd == 1925253141) { result = setStationId(&lex); 		} // setStationId
 	else if (cmd == 2948963465) { result = getStationId(&lex); 		} // getStationId
+	else if (cmd == 4035361305) { result = clrSensIdTable(&lex); 	} // clrSensIdTable
+	else if (cmd == 1050090700) { result = calcHash(&lex); 			} // calcHash
 	else if (cmd == 1676458703) { OsHelpers::SYSTEM_REBOOT();		} // reboot
 	else if (cmd == 1973435441) { OsHelpers::SYSTEM_EXIT();			} // exit
 //@formatter:on
 
 	return result;
+}
+
+bool Interpreter::clrSensIdTable(Lexer *lex) {
+	msmnt::ThetaMeasurement::instance().getNonVolatileData().clrIdTableData();
+	tx_printf("\nID-Table cleared.\n");
+	return true;
+}
+
+bool Interpreter::calcHash(Lexer *lex) {
+	CmdToken *cmdToken = (CmdToken*) lex->getNextToken();
+	if (cmdToken->getType() != Token::Command) {
+		tx_printf("\nUsage: calcHash <commandString>\n");
+		return false;
+	}
+	tx_printf("\nHash = %lu\n", cmdToken->getVal());
+
+	return true;
 }
 
 bool Interpreter::setStationId(Lexer *lex) {
@@ -52,7 +71,7 @@ bool Interpreter::setStationId(Lexer *lex) {
 }
 
 bool Interpreter::getSensIdTable(Lexer *lex) {
-	printf("Printing sensor-table from E2:\n");
+	tx_printf("\nPrinting sensor-table from E2:\n");
 	msmnt::ThetaMeasurement::instance().getNonVolatileData().printIdTableRaw();
 	return true;
 }
@@ -105,8 +124,8 @@ bool Interpreter::setSensId(Lexer *lex) {
 	memcpy(sens.shortname, chrToken->getVal(), ID_Table::SHORTNAME_LEN);
 
 	//ErrorCode result =
-			msmnt::ThetaMeasurement::instance().getNonVolatileData().writeIdTableData(
-					sens);
+	msmnt::ThetaMeasurement::instance().getNonVolatileData().writeIdTableData(
+			sens);
 
 	return true;
 }

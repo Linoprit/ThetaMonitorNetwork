@@ -59,6 +59,13 @@ void _putchar(char character){
 uint16_t tx_free_bytes(void) { return TX_BUFF_LEN - tx_act_pos; }
 
 #ifdef __x86_64
+int tx_cycle(void){
+	printf("%s", txBuff);
+	tx_buff_clear();
+	tx_act_pos = 0;
+	return _SUCCESS_;
+}
+
 int tx_cycle(SerialIO* serialIO) {
 #else
 	int tx_cycle(void){

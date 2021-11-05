@@ -82,7 +82,7 @@ Token* Lexer::makeNum(void) {
 	uint8_t *startChar = _comLine->data() + startPos;
 
 	if ((isInteger) && (isSigned == false)) {
-		uint32_t result = std::stol(reinterpret_cast<char*>(startChar), &sz);
+		uint32_t result = std::stoul(reinterpret_cast<char*>(startChar), &sz);
 		return new (tokenBuff) IntToken(result);
 	} else if ((isInteger) && (isSigned)) {
 		int32_t result = std::stol(reinterpret_cast<char*>(startChar), &sz);

@@ -9,6 +9,7 @@
 #define LIBRARIES_HELPERSLIB_H_
 
 #include <stdint.h>
+#include <string>
 
 // value2char: char* len, that holds long type result
 constexpr uint8_t MAX_BUFFER_LEN = 12;
@@ -29,6 +30,7 @@ public:
   HelpersLib ();
   static uint8_t findFirstSetBitFromRight(uint8_t inByte);
   static uint8_t findFirstSetBitFromLeft(uint8_t inByte);
+  static std::string floatToStr(float value, uint8_t decimalPlace);
   static void value2char(
       char* result_buff, uint8_t result_buff_len,
       uint8_t exp, long int value);

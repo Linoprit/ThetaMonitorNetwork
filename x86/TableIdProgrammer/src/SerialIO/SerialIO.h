@@ -20,8 +20,8 @@ public:
 
 	void close(void);
 	void open(void);
-	int transmitCommands(vector<string> commands);
-	int transmitCommand(string command);
+	int transmitCommands(vector<string> commands, bool printAnswer);
+	//int transmitCommand(string command);
 	int readString(stringstream& receivedMsg);
 	int writeString(string msg);
 

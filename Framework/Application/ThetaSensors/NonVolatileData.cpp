@@ -23,9 +23,12 @@ NonVolatileData::NonVolatileData() :
 // due to limitations on the embedded system we cannot print floats
 void NonVolatileData::printIdTableRaw(void) {
 	Theta_sens_typeE2 idE2Data;
-	_currAddress = ID_TABLE_START;
 
+	_currAddress = ID_TABLE_START;
 	idE2Data = iter();
+	if (dataIsEmpty(idE2Data)) {
+		tx_printf("ID-Table is empty.\n");
+	}
 	while (!dataIsEmpty(idE2Data)) {
 		uint8_t chkSum = calcChkSum(idE2Data);
 		std::string shortname(idE2Data.shortname, ID_Table::SHORTNAME_LEN);
@@ -36,11 +39,11 @@ void NonVolatileData::printIdTableRaw(void) {
 				(chkSum == idE2Data.checkSum));
 		idE2Data = iter();
 
-		if(tx_free_bytes() < 50U){
-			OsHelpers::delay(20);
-		}
+		tx_cycle(); // avoid tx-buffer overflow
+		OsHelpers::delay(20);
 	}
 }
+
 /*
  * Looks through the ID-Table section, if a given ID exists. If the hash wasn't found,
  * the sensorIdHash is set to zero in the returned struct.
@@ -63,6 +66,24 @@ ID_Table::Theta_sens_type NonVolatileData::getIdTableData(
 	}
 	return idPhysData;
 }
+
+/*
+ * Writes EMPTY_SENS_ID (=UINT32_MAX) into the ID-Table section.
+ * Thus 'formats' this section.
+ */
+ErrorCode NonVolatileData::clrIdTableData(void) {
+	_currAddress = ID_TABLE_START;
+	uint32_t emptySensId[4] = { EMPTY_SENS_ID, EMPTY_SENS_ID, EMPTY_SENS_ID,
+			EMPTY_SENS_ID, };
+
+	for (uint16_t i = 0; i < NUM_OF_ID_ENTRIES; i++) {
+		AT24Cxxx::write(_currAddress, reinterpret_cast<uint8_t*>(&emptySensId),
+				sizeof(Theta_sens_typeE2));
+		_currAddress += sizeof(Theta_sens_typeE2);
+	}
+	return ERR_OK;
+}
+
 /*
  * Looks through the ID-Table section, if a given ID exists. The data is only renewed,
  * if it's different to idPhysData. If there is no matching ID, the data is written
@@ -107,7 +128,17 @@ void NonVolatileData::findSensIdHashOrEmpty(uint32_t sensorIdHash) {
 	return;
 }
 /**
- * Reads contents at _currAddress, and increases _currAddress, if content is not empty.
+ * If you want to iter through the id-table form outside, you have to call
+ * this first, to set the current address pointer to the beginning of the
+ * table.
+ */
+void NonVolatileData::startIter(void) {
+	_currAddress = ID_TABLE_START;
+}
+
+/**
+ * Reads contents at _currAddress, and increases _currAddress,
+ * if content is not empty.
  */
 NonVolatileData::Theta_sens_typeE2 NonVolatileData::iter(void) {
 	Theta_sens_typeE2 idE2Data;

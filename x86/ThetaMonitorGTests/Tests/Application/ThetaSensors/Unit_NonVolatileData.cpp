@@ -10,6 +10,7 @@
 #include <Application/ThetaSensors/NonVolatileData.h>
 #include <Devices/Eeprom_at24c256/AT24Cxxx.h>
 #include <Libraries/HelpersLib.h>
+#include <System/serialPrintf.h>
 
 using ::testing::Expectation;
 using namespace msmnt;
@@ -114,8 +115,8 @@ TEST(NonVolatileData, readWrite) {
 	EepromEmulation::fillEepromWith(0xFF);
 	NonVolatileData nvd;
 
-	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, 1.0F, 50.0F,
-			ID_Table::SensorType::TEMP, 1,
+	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, 1.0F,
+			50.0F, ID_Table::SensorType::TEMP, 1,
 			std::string("LGR_O   ", ID_Table::SHORTNAME_LEN));
 	nvd.writeIdTableData(idPhysData);
 	ID_Table::Theta_sens_type idPhysDataTst = nvd.getIdTableData(4232230555U);
@@ -160,7 +161,7 @@ TEST(NonVolatileData, readWriteMore) {
 	checkPhyEqual(idPhysDataRef, idPhysDataTst);
 }
 
-TEST(NonVolatileData, updateId){
+TEST(NonVolatileData, updateId) {
 	EepromEmulation::init();
 	EepromEmulation::fillEepromWith(0xFF);
 	NonVolatileData nvd;
@@ -191,8 +192,8 @@ TEST(NonVolatileData, updateId){
 TEST(NonVolatileData, convPhysToE2_Temp) {
 	NonVolatileData nvd;
 
-	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, -1.0F, 50.0F,
-			ID_Table::SensorType::TEMP, 1,
+	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, -1.0F,
+			50.0F, ID_Table::SensorType::TEMP, 1,
 			std::string("LGR_O   ", ID_Table::SHORTNAME_LEN));
 
 	NonVolatileData::Theta_sens_typeE2 idE2Data = nvd.physToE2(idPhysData);
@@ -208,8 +209,8 @@ TEST(NonVolatileData, convPhysToE2_Temp) {
 TEST(NonVolatileData, convPhysToE2_Hum) {
 	NonVolatileData nvd;
 
-	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, 30.0F, 50.0F,
-			ID_Table::SensorType::HUMIDITY, 1,
+	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, 30.0F,
+			50.0F, ID_Table::SensorType::HUMIDITY, 1,
 			std::string("LGR_O   ", ID_Table::SHORTNAME_LEN));
 
 	NonVolatileData::Theta_sens_typeE2 idE2Data = nvd.physToE2(idPhysData);
@@ -225,8 +226,8 @@ TEST(NonVolatileData, convPhysToE2_Hum) {
 TEST(NonVolatileData, convPhysToE2_Pres) {
 	NonVolatileData nvd;
 
-	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, 920.0F, 1200.0F,
-			ID_Table::SensorType::PRESS, 1,
+	ID_Table::Theta_sens_type idPhysData = fillPhysData(4232230555U, 920.0F,
+			1200.0F, ID_Table::SensorType::PRESS, 1,
 			std::string("LGR_O   ", ID_Table::SHORTNAME_LEN));
 
 	NonVolatileData::Theta_sens_typeE2 idE2Data = nvd.physToE2(idPhysData);
@@ -239,6 +240,33 @@ TEST(NonVolatileData, convPhysToE2_Pres) {
 	std::string idRef("LGR_O   ", ID_Table::SHORTNAME_LEN);
 	EXPECT_TRUE(idShortname == idRef);
 }
+
+TEST(NonVolatileData, clrIdTable) {
+	EepromEmulation::init();
+	NonVolatileData nvd;
+	writeSomeEntries(nvd);
+	// EepromEmulation::dump(64, 255);
+	// nvd.printIdTableRaw();
+	// tx_cycle();
+
+	nvd.startIter();
+	NonVolatileData::Theta_sens_typeE2 idE2Data = nvd.iter();
+	EXPECT_EQ(idE2Data.sensorIdHash, 4232230555U);
+	idE2Data = nvd.iter();
+	EXPECT_EQ(idE2Data.sensorIdHash, 1294211458U);
+	idE2Data = nvd.iter();
+	EXPECT_EQ(idE2Data.sensorIdHash, 3932845497U);
+	idE2Data = nvd.iter();
+	EXPECT_EQ(idE2Data.sensorIdHash, 3822322055U);
+
+	nvd.clrIdTableData();
+	nvd.startIter();
+	idE2Data = nvd.iter();
+	EXPECT_TRUE(nvd.dataIsEmpty(idE2Data));
+	// nvd.printIdTableRaw(); // => "ID-Table is empty."
+	// tx_cycle();
+}
+
 // not realy a test, but shows, how the E2-memory is organized
 TEST(DISABLED_NonVolatileData, printIDTableRaw) {
 	EepromEmulation::init();

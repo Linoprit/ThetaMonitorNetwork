@@ -32,38 +32,38 @@ void SerialIO::open(void) {
 			_varMap["baudrate"].as<uint>());
 }
 
-int SerialIO::transmitCommand(string command) {
-	uint count = 0;
-	stringstream answer;
+//int SerialIO::transmitCommand(string command) {
+//	uint count = 0;
+//	stringstream answer;
+//
+//	cout << "SEND: " << command << endl;
+//	writeString(command);
+//
+//	cout << "ANS = " << std::flush;
+//	while ((count < _varMap["waitstates"].as<uint>())) {
+//		if (readString(answer) == _FAIL_) {
+//			return _FAIL_;
+//		}
+//		this_thread::sleep_for(chrono::milliseconds(500));
+//		if (answer.str().size() == 0) {
+//			this_thread::sleep_for(chrono::milliseconds(500));
+//			count++;
+//		} else {
+//			cout << answer.str() << endl;
+//			return _SUCCESS_;
+//		}
+//	}
+//	cout << endl;
+//	return _FAIL_;
+//}
 
-	cout << "SEND: " << command << endl;
-	writeString(command);
-
-	cout << "ANS = " << std::flush;
-	while ((count < _varMap["waitstates"].as<uint>())) {
-		if (readString(answer) == _FAIL_) {
-			return _FAIL_;
-		}
-		this_thread::sleep_for(chrono::milliseconds(500));
-		if (answer.str().size() == 0) {
-			this_thread::sleep_for(chrono::milliseconds(500));
-			count++;
-		} else {
-			cout << answer.str() << endl;
-			return _SUCCESS_;
-		}
-	}
-	cout << endl;
-	return _FAIL_;
-}
-
-int SerialIO::transmitCommands(vector<string> commands) {
+int SerialIO::transmitCommands(vector<string> commands, bool printAnswer) {
 	for (string item : commands) {
 		uint count = 0;
 		bool ackOk = false;
 		stringstream answer;
 
-		cout << "SEND: " << item << endl;
+		cout << "SENDING: " << item << endl;
 		writeString(item);
 
 		while ((count < _varMap["waitstates"].as<uint>()) || (ackOk)) {
@@ -74,15 +74,20 @@ int SerialIO::transmitCommands(vector<string> commands) {
 			string toFind = _varMap["acknowledge"].as<string>();
 			if (answer.str().find(toFind) != std::string::npos) {
 				ackOk = true;
-				cout << "OK" << endl;
+				cout << "OK" << endl << endl;
 				break;
 			}
 			this_thread::sleep_for(chrono::milliseconds(500));
 			count++;
 			cout << "." << std::flush;
 		}
+
 		if (ackOk != true) {
 			return _FAIL_;
+		} else {
+			if (printAnswer) {
+				cout << answer.str() << endl;
+			}
 		}
 	}
 	return _SUCCESS_;
