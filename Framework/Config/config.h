@@ -44,9 +44,15 @@ constexpr uint32_t	CONVERSION_TIMEOUT_MS = 5000;
 
 // I2C for AT24Cxx EEPROM
 extern I2C_HandleTypeDef hi2c1; // see main.c
-#define EEPROM_HI2C hi2c1;
-#define EEPROM_I2C_ADDRESS 0xA0;
+#define EEPROM_HI2C hi2c1
+#define EEPROM_I2C_ADDRESS 0xA0
 
-
+// I2C for BME280
+extern I2C_HandleTypeDef hi2c2; // see main.c
+#define BME280_HI2C hi2c2
+//#define BME280_I2CADDR	0xEC		// 0x76<<1	SDO -> GND
+#define BME280_I2CADDR	0xEE			// 0x77<<1	SDO -> VCC
+extern TIM_HandleTypeDef htim2;
+constexpr TIM_HandleTypeDef* BME280_TIMER = &htim2;
 
 #endif /* INSTANCES_CONFIG_H_ */

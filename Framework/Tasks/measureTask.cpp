@@ -12,6 +12,8 @@
 #include <Config/config.h>
 #include <Devices/ds18b20/OneWire.h>
 #include <Devices/ds18b20/DS18B20.h>
+#include <Devices/BME280/BME280.h>
+//#include <Devices/BME280/delays.h>
 #endif
 
 #include <System/OsHelpers.h>
@@ -47,60 +49,118 @@ void printChannel(DS18B20 ds18Channel) {
 	}
 }
 
-void callTwoChannelTestOwnOw(void) {
-	owCh1.init();
-//owCh2.init();
+void initTwoChannelTestOwnOw(void) {
+	owCh1.init(); // Init Timer 1
+	//owCh2.init(); notNeeded
 
-//uint8_t rstRes = owCh1.reset();
-//tx_printf("rstRes %i\n", rstRes);
-//owCh2.reset();
-//OsHelpers::delay(500);
-
-	uint8_t resultCh1 = ds18B20Ch1.findAllSensors();
+	int8_t resultCh1 = ds18B20Ch1.findAllSensors();
 	tx_printf("Sensors channel 1: %i\n", resultCh1);
 	uint8_t resultCh2 = ds18B20Ch2.findAllSensors();
 	tx_printf("Sensors channel 2: %i\n", resultCh2);
 
 	ds18B20Ch1.setAllResolution(DS18B20::Resolution_12bits);
 	ds18B20Ch2.setAllResolution(DS18B20::Resolution_12bits);
+}
 
-//volatile uint8_t resCh1 = ds18B20Ch1.getResolution(
-//		ds18B20Ch1.getAllSensors()[0].Address);
+void cycleTwoChannelTestOwnOw(void) {
 
-	for (;;) {
-		if (ds18B20Ch1.doAllMeasure() == true) {
-			tx_printf("Channel 1: ");
-			printChannel(ds18B20Ch1);
-			tx_printf("\n");
-
-			HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_SET);
-		} else {
-			HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_RESET);
-		}
-
-		if (ds18B20Ch2.doAllMeasure() == true) {
-			tx_printf("Channel 2: ");
-			printChannel(ds18B20Ch2);
-			tx_printf("\n");
-
-			HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_SET);
-		} else {
-			HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_RESET);
-		}
-
+	if (ds18B20Ch1.doAllMeasure() == true) {
+		tx_printf("Channel 1: ");
+		printChannel(ds18B20Ch1);
 		tx_printf("\n");
-		osDelay(1000);
+
+		HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_RESET);
 	}
+
+	if (ds18B20Ch2.doAllMeasure() == true) {
+		tx_printf("Channel 2: ");
+		printChannel(ds18B20Ch2);
+		tx_printf("\n");
+
+		HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_RESET);
+	}
+
+	tx_printf("\n");
+}
+
+using namespace boschBme280;
+Bme280 bme280;
+
+void initBme280Test(void) {
+	bme280.init(&BME280_HI2C, TEMPERATURE_16BIT, PRESSURE_ULTRALOWPOWER,
+	HUMINIDITY_STANDARD, NORMALMODE);
+	bme280.setConfig( STANDBY_MS_10, FILTER_OFF);
+}
+
+void cycleBme280Test(void) {
+
+	float temperature;
+	float huminidity;
+	int32_t pressure;
+
+	bme280.readTemperaturePressureHuminidity(&temperature, &pressure,
+			&huminidity);
+
+	std::string temperatureStr = HelpersLib::floatToStr(temperature, 2u);
+	tx_printf("Theta: ");
+	tx_printf(temperatureStr.c_str());
+	tx_printf(" °C / ");
+
+	// Taupunkt
+	float dewpointTemperature = (237.7
+			* (((17.27 * temperature) / (237.7 + temperature))
+					+ logf(huminidity / 100)))
+			/ (17.27
+					- (((17.27 * temperature) / (237.7 + temperature))
+							+ logf(huminidity / 100)));
+
+	std::string dewpointTemperatureStr = HelpersLib::floatToStr(
+			dewpointTemperature, 2u);
+	tx_printf("dew: ");
+	tx_printf(dewpointTemperatureStr.c_str());
+	tx_printf(" °C / ");
+
+	// 1 hPa = 1 mbar
+	std::string pressureStr = HelpersLib::floatToStr((pressure / 100.0f), 2u);
+	tx_printf("press: ");
+	tx_printf(pressureStr.c_str());
+	tx_printf(" hPa / ");
+
+	std::string huminidityStr = HelpersLib::floatToStr(huminidity, 2u);
+	tx_printf("hum: ");
+	tx_printf(huminidityStr.c_str());
+	tx_printf(" %% ");
+
+	float seaLevelPa = 1013.25f;
+	float altitude = bme280.readAltitude(seaLevelPa);
+	std::string altitudeStr = HelpersLib::floatToStr(altitude, 2u);
+	tx_printf("alt: ");
+	tx_printf(altitudeStr.c_str());
+	tx_printf(" m ");
+
+	tx_printf("\n");
 }
 
 void startMeasureTask(void *argument) {
 	UNUSED(argument);
 
-	for (;;) {
-		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-		callTwoChannelTestOwnOw();
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+	initTwoChannelTestOwnOw();
+	initBme280Test();
+	OsHelpers::delay(3000);
 
+	for (;;) {
+
+		cycleTwoChannelTestOwnOw();
 		OsHelpers::delay(1000);
+
+		cycleBme280Test();
+		OsHelpers::delay(1000);
+
 		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
 	}
