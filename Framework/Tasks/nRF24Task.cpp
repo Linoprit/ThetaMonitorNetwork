@@ -13,16 +13,20 @@
 #endif
 #include <System/OsHelpers.h>
 #include "tasksDef.h"
+#include <Application/RadioLink/RadioLink.h>
 // #include <Tasks/nRF24Task.h>
 // #include <Tasks/measureTask.h>
 // #include <Application/ThetaSensors/ID_Table.h>
 
 void startnRF24Task(void *argument) {
 	UNUSED(argument);
+	//radioLink::RadioLink::instance().init();
 
 	for (;;) {
 		OsHelpers::delay(500);
 		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		//radioLink::RadioLink::instance().cycle();
+
 	}
 
 }

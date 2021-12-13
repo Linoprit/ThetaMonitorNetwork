@@ -5,15 +5,16 @@
  *      Author: harald
  */
 
+#include <Application/ThetaSensors/SensorIdTable.h>
 #include <System/CommandLine/Interpreter.h>
 #include <Sockets/CrcSocket.h>
 #include <System/serialPrintf.h>
 #include <cstring>
 #include <Application/ThetaSensors/ThetaMeasurement.h>
-#include <Application/ThetaSensors/ID_Table.h>
 #include <System/OsHelpers.h>
 
 namespace cLine {
+using namespace msmnt;
 
 Interpreter::Interpreter() {
 }
@@ -84,7 +85,7 @@ bool Interpreter::getStationId(Lexer *lex) {
 }
 
 bool Interpreter::setSensId(Lexer *lex) {
-	ID_Table::Theta_sens_type sens;
+	SensorIdTable::SensorConfigType sens;
 
 	IntToken *intToken = (IntToken*) lex->getNextToken();
 	if (intToken->getType() != Token::Integer) {
@@ -108,7 +109,7 @@ bool Interpreter::setSensId(Lexer *lex) {
 	if (intToken->getType() != Token::Integer) {
 		return false;
 	}
-	sens.sensType = static_cast<ID_Table::SensorType>(intToken->getVal());
+	sens.sensType = static_cast<SensorIdTable::SensorType>(intToken->getVal());
 
 	intToken = (IntToken*) lex->getNextToken();
 	if (intToken->getType() != Token::Integer) {
@@ -120,8 +121,8 @@ bool Interpreter::setSensId(Lexer *lex) {
 	if (chrToken->getType() != Token::String) {
 		return false;
 	}
-	memset(sens.shortname, ' ', ID_Table::SHORTNAME_LEN);
-	memcpy(sens.shortname, chrToken->getVal(), ID_Table::SHORTNAME_LEN);
+	memset(sens.shortname, ' ', SensorIdTable::SHORTNAME_LEN);
+	memcpy(sens.shortname, chrToken->getVal(), SensorIdTable::SHORTNAME_LEN);
 
 	//ErrorCode result =
 	msmnt::ThetaMeasurement::instance().getNonVolatileData().writeIdTableData(

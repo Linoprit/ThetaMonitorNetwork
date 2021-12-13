@@ -19,11 +19,13 @@
 #include <stdlib.h>
 #include "stm32f1xx_hal.h"
 
-
+// C only
 //EXTERNC void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 
 #undef EXTERNC
 #ifdef __cplusplus
+
+// cpp stuff here...
 
 #endif // C interface
 

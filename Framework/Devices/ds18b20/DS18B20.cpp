@@ -4,8 +4,15 @@
 
 namespace oneWire {
 
+DS18B20::DS18B20() :
+		_ow { nullptr }, _foundSensors { 0 } {
+}
+
 DS18B20::DS18B20(OneWire *oneWire) :
-		_ow { oneWire } {
+		_ow { oneWire }, _foundSensors { 0 } {
+	for (uint8_t i = 0; i < DS18B20_MAX_DEVICES; i++) {
+		_sensors[i].dataIsValid = false;
+	}
 }
 
 /*
@@ -21,14 +28,16 @@ uint8_t DS18B20::findAllSensors(void) {
 	}
 
 	bool searchSuccess = false;
-	for (uint8_t i = 0; i < MAX_DEVICES_DS18B20; i++) {
+	for (uint8_t i = 0; i < DS18B20_MAX_DEVICES; i++) {
 		_ow->owDelay(100);
 		_foundSensors++;
-		_ow->getFullROM(_sensors[i].Address);
+		_ow->getFullROM(_sensors[i].address);
 
 		tx_printf("Found ROM addr: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n",
-				_sensors[i].Address[0], _sensors[i].Address[1], _sensors[i].Address[2], _sensors[i].Address[3],
-				_sensors[i].Address[4], _sensors[i].Address[5], _sensors[i].Address[6], _sensors[i].Address[7]);
+				_sensors[i].address[0], _sensors[i].address[1],
+				_sensors[i].address[2], _sensors[i].address[3],
+				_sensors[i].address[4], _sensors[i].address[5],
+				_sensors[i].address[6], _sensors[i].address[7]);
 
 		searchSuccess = _ow->next();
 
@@ -38,9 +47,9 @@ uint8_t DS18B20::findAllSensors(void) {
 	return _foundSensors;
 }
 
-bool DS18B20::searchFirstWithRetry(void){
+bool DS18B20::searchFirstWithRetry(void) {
 	bool searchSuccess = false;
-	for (uint8_t i = 0; i < SEARCH_RETRIES; i++) {
+	for (uint8_t i = 0; i < DS18B20_SEARCH_RETRIES; i++) {
 		_ow->InitLine();
 		searchSuccess = _ow->first();
 		tx_printf("Searching sensors, retries: %i\n", i);
@@ -56,9 +65,9 @@ bool DS18B20::setAllResolution(Resolution_t resolution) {
 
 	for (uint8_t i = 0; i < _foundSensors; i++) {
 		osDelay(50);
-		setResolution(_sensors[i].Address, resolution);
+		setResolution(_sensors[i].address, resolution);
 		osDelay(50);
-		disableAlarmTemperature(_sensors[i].Address);
+		disableAlarmTemperature(_sensors[i].address);
 	}
 	return true;
 }
@@ -75,7 +84,7 @@ uint8_t DS18B20::start(uint8_t *ROM) {
 }
 
 bool DS18B20::doAllMeasure(void) {
-	uint16_t timeout = CONVERSION_TIMEOUT_MS / 10;
+	uint16_t timeout = DS18B20_CONVERSION_TIMEOUT_MS / 10;
 	startAll();
 	osDelay(100);
 
@@ -85,15 +94,15 @@ bool DS18B20::doAllMeasure(void) {
 	}
 	if (timeout == 0) {
 		for (uint8_t i = 0; i < _foundSensors; i++) {
-			_sensors[i].DataIsValid = false;
+			_sensors[i].dataIsValid = false;
 		}
 		return false;
 	}
 
 	for (uint8_t i = 0; i < _foundSensors; i++) {
 		osDelay(10);
-		_sensors[i].DataIsValid = read(_sensors[i].Address,
-				&_sensors[i].Temperature);
+		_sensors[i].dataIsValid = read(_sensors[i].address,
+				&_sensors[i].temperature);
 	}
 	return true;
 }

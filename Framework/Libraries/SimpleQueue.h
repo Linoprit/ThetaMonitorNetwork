@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <System/Error_Handler.h>
 
-
+// same, like std::queue, but has a defined maximum of entries
 template <class T, std::size_t _Nm = 1> class SimpleQueue {
 public:
 	SimpleQueue(void) {

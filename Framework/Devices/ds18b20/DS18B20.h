@@ -7,9 +7,9 @@
 #ifndef	_DS18B20NEW_H
 #define	_DS18B20NEW_H
 
-// TODO replace with OsHelper version
 #include "cmsis_os.h"
-#define	Ds18b20Delay(x)			osDelay(x)
+#include <System/OsHelpers.h>
+#define	Ds18b20Delay(x)			OsHelpers::delay(x)
 
 #include <stdbool.h>
 #include "OneWire.h"
@@ -18,10 +18,10 @@ namespace oneWire {
 class DS18B20 {
 public:
 	typedef struct {
-		uint8_t Address[8];
-		float Temperature;
-		bool DataIsValid;
-	} SensorType;
+		uint8_t address[8];
+		float temperature;
+		bool dataIsValid;
+	} DS1820SensorType;
 
 	/* Every onewire chip has different ROM code, but all the same chips has same family code */
 	/* in case of DS18B20 this is 0x28 and this is first byte of ROM address */
@@ -53,6 +53,7 @@ static constexpr uint8_t DATA_LEN			=	9;
 		Resolution_12bits = 12 /*!< DS18B20 12 bits resolution */
 	} Resolution_t;
 
+	DS18B20();
 	DS18B20(OneWire *oneWire);
 	~DS18B20() {
 	}
@@ -74,7 +75,7 @@ static constexpr uint8_t DATA_LEN			=	9;
 	bool searchFirstWithRetry(void);
 	bool setAllResolution(Resolution_t resolution);
 	bool doAllMeasure(void);
-	SensorType* getAllSensors(void) {
+	DS1820SensorType* getAllSensors(void) {
 		return _sensors;
 	}
 	;
@@ -84,7 +85,7 @@ static constexpr uint8_t DATA_LEN			=	9;
 
 private:
 	OneWire *_ow;
-	SensorType _sensors[MAX_DEVICES_DS18B20];
+	DS1820SensorType _sensors[DS18B20_MAX_DEVICES];
 	uint8_t _foundSensors;
 
 };

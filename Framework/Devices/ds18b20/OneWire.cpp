@@ -11,6 +11,12 @@
 namespace oneWire {
 
 // @formatter:off
+OneWire::OneWire() :
+		_GPIO_TX_PORT { nullptr },
+		_GPIO_TX_Pin { 0 },
+		_GPIO_RX_PORT { nullptr },
+		_GPIO_RX_Pin { 0 }
+{ }
 OneWire::OneWire(
 		GPIO_TypeDef *GPIO_TX_PORT,  uint16_t GPIO_TX_Pin,
 		GPIO_TypeDef *GPIO_RX_PORT,  uint16_t GPIO_RX_Pin) :
@@ -21,7 +27,7 @@ OneWire::OneWire(
 { }
 // @formatter:on
 
-void OneWire::init(void) {
+void OneWire::initTimer(void) {
 	HAL_TIM_Base_Start (OW_TIMER);
 }
 

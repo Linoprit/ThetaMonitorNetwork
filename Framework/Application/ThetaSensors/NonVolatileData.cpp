@@ -9,6 +9,7 @@
 #include <Devices/Eeprom_at24c256/AT24Cxxx.h>
 #include <Sockets/CrcSocket.h>
 #include <Libraries/HelpersLib.h>
+#include <Libraries/Convert.h>
 #include <System/serialPrintf.h>
 #include <cstring>
 #include <System/OsHelpers.h>
@@ -16,13 +17,17 @@
 namespace msmnt {
 
 NonVolatileData::NonVolatileData() :
-		_currAddress { 0 }, _oldAddress { 0 } {
-	static_assert(sizeof(Theta_sens_typeE2) == 16U);
+		_currAddress { 0 }, _oldAddress { 0 }, _statIdBuffered { 0 } {
+	static_assert(sizeof(SensorTypeE2) == 16U);
 }
 
 // due to limitations on the embedded system we cannot print floats
 void NonVolatileData::printIdTableRaw(void) {
-	Theta_sens_typeE2 idE2Data;
+	SensorTypeE2 idE2Data;
+
+	Convert cTheta(convTheta);
+	Convert cHumid(convHumid);
+	Convert cPress(convPress);
 
 	_currAddress = ID_TABLE_START;
 	idE2Data = iter();
@@ -31,10 +36,33 @@ void NonVolatileData::printIdTableRaw(void) {
 	}
 	while (!dataIsEmpty(idE2Data)) {
 		uint8_t chkSum = calcChkSum(idE2Data);
-		std::string shortname(idE2Data.shortname, ID_Table::SHORTNAME_LEN);
+		std::string shortname(idE2Data.shortname, SensorIdTable::SHORTNAME_LEN);
 		shortname += "\0";
-		tx_printf("%u %i %i %i %i, %s, %i \n", idE2Data.sensorIdHash,
-				idE2Data.minVal, idE2Data.maxVal, idE2Data.sensType,
+		std::string sensTypeStr = SensorIdTable::sensorType2Str(
+				idE2Data.sensType);
+		std::string minValStr;
+		std::string maxValStr;
+		if (idE2Data.sensType == static_cast<uint8_t>(SensorIdTable::TEMP)) {
+			minValStr = HelpersLib::floatToStr(cTheta.int2Phys(idE2Data.minVal),
+					1u);
+			maxValStr = HelpersLib::floatToStr(cTheta.int2Phys(idE2Data.maxVal),
+					1u);
+		} else if (idE2Data.sensType
+				== static_cast<uint8_t>(SensorIdTable::HUMIDITY)) {
+			minValStr = HelpersLib::floatToStr(cHumid.int2Phys(idE2Data.minVal),
+					1u);
+			maxValStr = HelpersLib::floatToStr(cHumid.int2Phys(idE2Data.maxVal),
+					1u);
+		} else if (idE2Data.sensType
+				== static_cast<uint8_t>(SensorIdTable::PRESS)) {
+			minValStr = HelpersLib::floatToStr(cPress.int2Phys(idE2Data.minVal),
+					1u);
+			maxValStr = HelpersLib::floatToStr(cPress.int2Phys(idE2Data.maxVal),
+					1u);
+		}
+
+		tx_printf("%u %s %s %s %i, %s, %i \n", idE2Data.sensorIdHash,
+				minValStr.c_str(), maxValStr.c_str(), sensTypeStr.c_str(),
 				idE2Data.relayNr, shortname.c_str(),
 				(chkSum == idE2Data.checkSum));
 		idE2Data = iter();
@@ -48,10 +76,10 @@ void NonVolatileData::printIdTableRaw(void) {
  * Looks through the ID-Table section, if a given ID exists. If the hash wasn't found,
  * the sensorIdHash is set to zero in the returned struct.
  */
-ID_Table::Theta_sens_type NonVolatileData::getIdTableData(
+SensorIdTable::SensorConfigType NonVolatileData::getIdTableData(
 		uint32_t sensorIdHash) {
-	Theta_sens_typeE2 idE2Data;
-	ID_Table::Theta_sens_type idPhysData;
+	SensorTypeE2 idE2Data;
+	SensorIdTable::SensorConfigType idPhysData;
 	idPhysData.sensorIdHash = UINT32_MAX;
 
 	_currAddress = ID_TABLE_START;
@@ -73,13 +101,13 @@ ID_Table::Theta_sens_type NonVolatileData::getIdTableData(
  */
 ErrorCode NonVolatileData::clrIdTableData(void) {
 	_currAddress = ID_TABLE_START;
-	uint32_t emptySensId[4] = { EMPTY_SENS_ID, EMPTY_SENS_ID, EMPTY_SENS_ID,
-			EMPTY_SENS_ID, };
+	uint32_t emptySensId[4] = { EMPTY_SENSOR_HASH, EMPTY_SENSOR_HASH, EMPTY_SENSOR_HASH,
+			EMPTY_SENSOR_HASH, };
 
 	for (uint16_t i = 0; i < NUM_OF_ID_ENTRIES; i++) {
 		AT24Cxxx::write(_currAddress, reinterpret_cast<uint8_t*>(&emptySensId),
-				sizeof(Theta_sens_typeE2));
-		_currAddress += sizeof(Theta_sens_typeE2);
+				sizeof(SensorTypeE2));
+		_currAddress += sizeof(SensorTypeE2);
 	}
 	return ERR_OK;
 }
@@ -90,18 +118,18 @@ ErrorCode NonVolatileData::clrIdTableData(void) {
  * to the first free address.
  */
 ErrorCode NonVolatileData::writeIdTableData(
-		ID_Table::Theta_sens_type idPhysData) {
-	Theta_sens_typeE2 idE2Data;
-	Theta_sens_typeE2 idE2ToWrite = physToE2(idPhysData);
+		SensorIdTable::SensorConfigType idPhysData) {
+	SensorTypeE2 idE2Data;
+	SensorTypeE2 idE2ToWrite = physToE2(idPhysData);
 
 	// sets _currAddress
 	findSensIdHashOrEmpty(idE2ToWrite.sensorIdHash);
 	AT24Cxxx::read(_currAddress, reinterpret_cast<uint8_t*>(&idE2Data),
-			sizeof(Theta_sens_typeE2));
+			sizeof(SensorTypeE2));
 
 	if (compareIdTableDatum(idE2Data, idE2ToWrite) == false) {
 		AT24Cxxx::write(_currAddress, reinterpret_cast<uint8_t*>(&idE2ToWrite),
-				sizeof(Theta_sens_typeE2));
+				sizeof(SensorTypeE2));
 		return ERR_OK;
 	}
 
@@ -114,13 +142,13 @@ ErrorCode NonVolatileData::writeIdTableData(
  * So, initial the E2 must be erased by writing 0xFF to the whole device.
  */
 void NonVolatileData::findSensIdHashOrEmpty(uint32_t sensorIdHash) {
-	Theta_sens_typeE2 idE2Data;
+	SensorTypeE2 idE2Data;
 	_currAddress = ID_TABLE_START;
 	idE2Data = iter();
 	while (!dataIsEmpty(idE2Data)) {
 		if (sensorIdHash == idE2Data.sensorIdHash) {
 			// here, iter points to the next data entry
-			_currAddress -= sizeof(Theta_sens_typeE2);
+			_currAddress -= sizeof(SensorTypeE2);
 			return;
 		}
 		idE2Data = iter();
@@ -140,35 +168,36 @@ void NonVolatileData::startIter(void) {
  * Reads contents at _currAddress, and increases _currAddress,
  * if content is not empty.
  */
-NonVolatileData::Theta_sens_typeE2 NonVolatileData::iter(void) {
-	Theta_sens_typeE2 idE2Data;
+NonVolatileData::SensorTypeE2 NonVolatileData::iter(void) {
+	SensorTypeE2 idE2Data;
 	AT24Cxxx::read(_currAddress, reinterpret_cast<uint8_t*>(&idE2Data),
-			sizeof(Theta_sens_typeE2));
+			sizeof(SensorTypeE2));
 	if (!dataIsEmpty(idE2Data)) {
-		_currAddress += sizeof(Theta_sens_typeE2);
+		_currAddress += sizeof(SensorTypeE2);
 	}
 	return idE2Data;
 }
 
-Convert NonVolatileData::getConversion(ID_Table::SensorType sensType) {
+Convert NonVolatileData::getConversion(SensorIdTable::SensorType sensType) {
 	Convert conv;
-	if (sensType == ID_Table::SensorType::TEMP) {
+	if (sensType == SensorIdTable::SensorType::TEMP) {
 		conv.setLimits(convTheta);
-	} else if (sensType == ID_Table::SensorType::HUMIDITY) {
+	} else if (sensType == SensorIdTable::SensorType::HUMIDITY) {
 		conv.setLimits(convHumid);
-	} else if (sensType == ID_Table::SensorType::PRESS) {
+	} else if (sensType == SensorIdTable::SensorType::PRESS) {
 		conv.setLimits(convPress);
 	}
 	return conv;
 }
 
-NonVolatileData::Theta_sens_typeE2 NonVolatileData::physToE2(
-		ID_Table::Theta_sens_type idPhysData) {
-	Theta_sens_typeE2 result;
+NonVolatileData::SensorTypeE2 NonVolatileData::physToE2(
+		SensorIdTable::SensorConfigType idPhysData) {
+	SensorTypeE2 result;
 	result.sensorIdHash = idPhysData.sensorIdHash;
 	result.relayNr = idPhysData.relayNr;
 	result.sensType = idPhysData.sensType;
-	memcpy(result.shortname, idPhysData.shortname, ID_Table::SHORTNAME_LEN);
+	memcpy(result.shortname, idPhysData.shortname,
+			SensorIdTable::SHORTNAME_LEN);
 
 	Convert conv = getConversion(idPhysData.sensType);
 	result.minVal = conv.phys2Int(idPhysData.minVal);
@@ -178,9 +207,9 @@ NonVolatileData::Theta_sens_typeE2 NonVolatileData::physToE2(
 	return result;
 }
 
-ID_Table::Theta_sens_type NonVolatileData::e2ToPhys(
-		NonVolatileData::Theta_sens_typeE2 idE2Data) {
-	ID_Table::Theta_sens_type result;
+SensorIdTable::SensorConfigType NonVolatileData::e2ToPhys(
+		NonVolatileData::SensorTypeE2 idE2Data) {
+	SensorIdTable::SensorConfigType result;
 
 	uint8_t chkSum = calcChkSum(idE2Data);
 	if (chkSum != idE2Data.checkSum) {
@@ -189,19 +218,19 @@ ID_Table::Theta_sens_type NonVolatileData::e2ToPhys(
 		result.sensorIdHash = idE2Data.sensorIdHash;
 	}
 	result.relayNr = idE2Data.relayNr;
-	result.sensType = static_cast<ID_Table::SensorType>(idE2Data.sensType);
-	memcpy(result.shortname, idE2Data.shortname, ID_Table::SHORTNAME_LEN);
+	result.sensType = static_cast<SensorIdTable::SensorType>(idE2Data.sensType);
+	memcpy(result.shortname, idE2Data.shortname, SensorIdTable::SHORTNAME_LEN);
 
 	Convert conv = getConversion(
-			static_cast<ID_Table::SensorType>(idE2Data.sensType));
+			static_cast<SensorIdTable::SensorType>(idE2Data.sensType));
 	result.minVal = conv.int2Phys(idE2Data.minVal);
 	result.maxVal = conv.int2Phys(idE2Data.maxVal);
 
 	return result;
 }
 
-bool NonVolatileData::compareIdTableDatum(Theta_sens_typeE2 tableIDLeft,
-		Theta_sens_typeE2 tableIDRight) {
+bool NonVolatileData::compareIdTableDatum(SensorTypeE2 tableIDLeft,
+		SensorTypeE2 tableIDRight) {
 
 	uint8_t chkSumLeft = calcChkSum(tableIDLeft);
 	uint8_t chkSumRight = calcChkSum(tableIDRight);
@@ -214,34 +243,55 @@ bool NonVolatileData::compareIdTableDatum(Theta_sens_typeE2 tableIDLeft,
 	return true;
 }
 
-uint8_t NonVolatileData::calcChkSum(Theta_sens_typeE2 idTableDatum) {
+uint8_t NonVolatileData::calcChkSum(SensorTypeE2 idTableDatum) {
 	idTableDatum.checkSum = 0;
 	uint8_t hashCode = CrcSocket::calc_chksum(
-			reinterpret_cast<uint8_t*>(&idTableDatum),
-			sizeof(Theta_sens_typeE2));
+			reinterpret_cast<uint8_t*>(&idTableDatum), sizeof(SensorTypeE2));
 	return hashCode;
 }
 
 ErrorCode NonVolatileData::writeStatId(uint32_t stationId) {
 	uint32_t currentId = getStatId();
-
 	if (currentId != stationId) {
 		AT24Cxxx::write(STAT_ID_START, reinterpret_cast<uint8_t*>(&stationId),
 				sizeof(uint32_t));
 		return ERR_OK;
 	}
-
+	_statIdBuffered = currentId;
 	return ERR_OK_E2_NOT_WRITTEN;
 }
 
 uint32_t NonVolatileData::getStatId(void) {
-	uint32_t statId = 0;
-	AT24Cxxx::read(STAT_ID_START, reinterpret_cast<uint8_t*>(&statId),
-			sizeof(uint32_t));
-	return statId;
+	if (_statIdBuffered == 0) {
+		AT24Cxxx::read(STAT_ID_START,
+				reinterpret_cast<uint8_t*>(&_statIdBuffered), sizeof(uint32_t));
+	}
+	return _statIdBuffered;
 }
 
-bool NonVolatileData::dataIsEmpty(Theta_sens_typeE2 idE2Data) {
+SensorIdTable::StationType NonVolatileData::getStatType(void) {
+	uint32_t statId = getStatId();
+
+	if (statId == 0) {
+		return SensorIdTable::NONE;
+	} else if (statId < 0xFF) {
+		return SensorIdTable::MASTER;
+	} else if (statId < 0x1FF) {
+		return SensorIdTable::SLAVE_01;
+	} else if (statId < 0x2FF) {
+		return SensorIdTable::SLAVE_02;
+	} else if (statId < 0x3FF) {
+		return SensorIdTable::SLAVE_03;
+	} else if (statId < 0x4FF) {
+		return SensorIdTable::SLAVE_04;
+	} else if (statId < 0x5FF) {
+		return SensorIdTable::SLAVE_05;
+	}
+
+	return SensorIdTable::NONE;
+}
+
+bool NonVolatileData::dataIsEmpty(SensorTypeE2 idE2Data) {
 	if (idE2Data.sensorIdHash == UINT32_MAX) {
 		return true;
 	}

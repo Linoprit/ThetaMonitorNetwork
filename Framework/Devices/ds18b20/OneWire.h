@@ -14,6 +14,7 @@ namespace oneWire {
 
 class OneWire {
 public:
+	OneWire();
 	OneWire(GPIO_TypeDef *GPIO_TX_PORT, uint16_t GPIO_TX_Pin,
 			GPIO_TypeDef *GPIO_RX_PORT, uint16_t GPIO_RX_Pin);
 	virtual ~OneWire() {
@@ -62,7 +63,7 @@ public:
 #endif
 	}
 
-	void init(void);
+	void initTimer(void);
 	void InitLine(void);
 	uint8_t reset(void);
 	void writeBit(uint8_t bit);

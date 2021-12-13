@@ -16,11 +16,11 @@
 #include "stm32f1xx_hal.h"
 #include <main.h>
 
-// UART for debugging output and commandline input
+// ******* UART for debugging output and commandline input *******
 extern UART_HandleTypeDef huart1; // see main.c
 #define SERIAL_UART huart1
 
-// OneWire definitions
+// ******* OneWire and DS18B20 definitions *******
 extern TIM_HandleTypeDef htim1;
 constexpr TIM_HandleTypeDef* OW_TIMER = &htim1;
 constexpr bool OW_LINE_INVERTED = true;
@@ -35,19 +35,18 @@ constexpr bool OW_LINE_INVERTED = true;
 #define OW_CH1_TX_PIN  CH1_TX_Pin
 #define OW_CH1_TX_PORT CH1_TX_GPIO_Port
 
-// DS18B20
-constexpr uint8_t SEARCH_RETRIES = 6;
-constexpr uint8_t MAX_DEVICES_DS18B20 = 10;
+// ******* DS18B20 device *******
+constexpr uint8_t DS18B20_SEARCH_RETRIES = 6;
+constexpr uint8_t DS18B20_MAX_DEVICES = 6; // in one channel
 // [ms] doAllMeasure(): how long to wait until all devices finished conversion
-constexpr uint32_t	CONVERSION_TIMEOUT_MS = 5000;
-#endif
+constexpr uint32_t	DS18B20_CONVERSION_TIMEOUT_MS = 5000;
 
-// I2C for AT24Cxx EEPROM
+// ******* I2C for AT24Cxx EEPROM *******
 extern I2C_HandleTypeDef hi2c1; // see main.c
 #define EEPROM_HI2C hi2c1
 #define EEPROM_I2C_ADDRESS 0xA0
 
-// I2C for BME280
+// ******* I2C for BME280 *******
 extern I2C_HandleTypeDef hi2c2; // see main.c
 #define BME280_HI2C hi2c2
 //#define BME280_I2CADDR	0xEC		// 0x76<<1	SDO -> GND
@@ -55,4 +54,22 @@ extern I2C_HandleTypeDef hi2c2; // see main.c
 extern TIM_HandleTypeDef htim2;
 constexpr TIM_HandleTypeDef* BME280_TIMER = &htim2;
 
+// ******* SPI for nRF24L01 *******
+extern SPI_HandleTypeDef hspi1;
+#define nRF24_SPI hspi1
+// Pins must be named like this, to get them defined in main.h
+// NRF_IRQ_GPIO_Port, NRF_IRQ_Pin
+// NRF_CE_GPIO_Port, NRF_CE_Pin
+// NRF_CSN_GPIO_Port,  NRF_CSN_Pin
+// Enable IRQ on IRQ-Pin, i.E. EXTI0
+
+// TODO must be altered
+#define nRF_PAYLOAD_LEN	13 // nRF24 payload length for RX and TX
+
+
+// ******* Common  *******
+// DS1820 Sensors * Channels + BME280 Temp/Humi/Press
+constexpr uint8_t MAX_SENSORS = DS18B20_MAX_DEVICES * 2 + 3;
+
+#endif // __x86_64
 #endif /* INSTANCES_CONFIG_H_ */

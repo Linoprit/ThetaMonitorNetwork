@@ -59,7 +59,7 @@ UART_HandleTypeDef huart2;
 
 /* Definitions for measureTask */
 osThreadId_t measureTaskHandle;
-uint32_t measureTaskBuffer[ 256 ];
+uint32_t measureTaskBuffer[ 512 ];
 osStaticThreadDef_t measureTaskControlBlock;
 const osThreadAttr_t measureTask_attributes = {
   .name = "measureTask",
@@ -128,6 +128,14 @@ extern void startDisplayTask(void *argument);
 extern void startMasterSerialTask(void *argument);
 
 /* USER CODE BEGIN PFP */
+osThreadId* 		get_MeasureTask(void)		{ return &measureTaskHandle;  }
+osThreadId* 		get_nRF24Task(void)			{ return &nRF24TskHandle;	 }
+osThreadId* 		get_DisplayTask(void)		{ return &displayTaskHandle; }
+SPI_HandleTypeDef*  get_nRF24_SPI(void)			{ return &hspi1; 			 }
+SPI_HandleTypeDef*  get_LCD_SPI(void)			{ return &hspi2;			 }
+UART_HandleTypeDef* get_huart1(void)			{ return &huart1; 			 }
+UART_HandleTypeDef* get_huart2(void)			{ return &huart2; 			 }
+//UART_HandleTypeDef* get_huart3(void)			{ return &huart3; 			 }
 
 /* USER CODE END PFP */
 
@@ -774,4 +782,3 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

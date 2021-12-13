@@ -99,6 +99,7 @@ uint16_t HelpersLib::swapBytes(uint16_t value) {
 	return (uint16_t) (_lobyte << 8 | _hibyte);
 }
 
+
 uint8_t HelpersLib::findFirstSetBitFromLeft(uint8_t inByte) {
 	if (inByte == 0)
 		return 0xff;

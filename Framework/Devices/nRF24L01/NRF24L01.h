@@ -1,8 +1,9 @@
 /*
  * nRF24L01.h
+ * original code is from LonleyWolf
+ * https://github.com/LonelyWolf/stm32/tree/master/nrf24l01
  *
  *  Created on: 04.11.2018
- *      Author: harald
  */
 
 #ifndef DEVICES_NRF24L01_NRF24L01_H_
@@ -11,8 +12,8 @@
 #ifndef __x86_64
 // FIXME make it working on X86
 
-#include "../../Sockets/spi_socket.h"
-#include "nRF24L01_GPIO.h"
+#include <Sockets/spi_socket.h>
+#include <Sockets/GPIOSocket_nRF24.h>
 
 
 // nRF24L0 instruction definitions
@@ -216,7 +217,8 @@ public:
 		nRF24_TX_MAXRT                   // Transmit failed with maximum auto retransmit count
 	} nRF24_TXResult;
 
-	NRF24L01(Spi_socket* spi_socket, NRF24L01_GPIO* gpio_socket);
+	NRF24L01();
+	NRF24L01(Spi_socket* spi_socket, GPIOSocket_nRF24* gpio_socket);
 	virtual ~NRF24L01() {};
 
 	uint8_t LL_RW(uint8_t data);
@@ -256,17 +258,15 @@ public:
 
 	void DumpConfig(void);
 
-	inline void CE_L(void) { gpio_socket->nRF24_CE_L(); }
-	inline void CE_H(void) { gpio_socket->nRF24_CE_H(); }
-
-	inline void CSN_L(void) { gpio_socket->nRF24_CSN_L(); }
-	inline void CSN_H(void) { gpio_socket->nRF24_CSN_H(); }
+	inline void CE_L(void) { gpio_socket.nRF24_CE_L(); }
+	inline void CE_H(void) { gpio_socket.nRF24_CE_H(); }
+	inline void CSN_L(void) { gpio_socket.nRF24_CSN_L(); }
+	inline void CSN_H(void) { gpio_socket.nRF24_CSN_H(); }
 
 
 private:
-	Spi_socket* 	spi_socket;
-	NRF24L01_GPIO* 	gpio_socket;
-
+	Spi_socket 	spi_socket;
+	GPIOSocket_nRF24 gpio_socket;
 };
 #endif
 #endif /* DEVICES_NRF24L01_NRF24L01_H_ */
