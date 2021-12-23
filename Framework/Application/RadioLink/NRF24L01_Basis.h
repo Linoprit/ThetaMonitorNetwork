@@ -8,6 +8,8 @@
 #ifndef RADIOLINK_NRF24L01_BASIS_H_
 #define RADIOLINK_NRF24L01_BASIS_H_
 
+#include <sys/_stdint.h>
+
 // C interface
 #ifdef __cplusplus
 #define EXTERNC extern "C"
@@ -25,11 +27,13 @@ EXTERNC bool stationType_isMaster(void);
 #include <Libraries/SimpleQueue.h>
 #include <Config/callbacks.h>
 #include <Devices/nRF24L01/NRF24L01.h>
+#include <Application/RadioLink/NRF24L01_Basis.h>
 #include <Libraries/SimpleQueue.h>
-//#include "../Application/ThetaSensors/ID_Table.h"
-#include "Messages.h"
+#include <Config/config.h>
+#include <Application/RadioLink/RadioMessage.h>
+#include <string>
 
-static constexpr uint8_t nRF24_CHANNEL = 115;
+static constexpr uint8_t nRF24_CHANNEL = 118;
 static constexpr int32_t nRF24_WAIT_TIMEOUT = (int32_t) 0x00000FFF;
 static constexpr uint8_t nRF_AUTO_RETRY = 10;
 
@@ -47,45 +51,58 @@ static constexpr uint8_t nRF24_RX_ADDR3[1] = { 'X' };                 // Slave 3
 static constexpr uint8_t nRF24_RX_ADDR4[1] = { 'W' };                 // Slave 4
 static constexpr uint8_t nRF24_RX_ADDR5[1] = { 'V' };                 // Slave 5
 
-static constexpr uint8_t RX_BUFFER_SIZE = 127;
-
 class NRF24L01_Basis {
 public:
+	typedef SimpleQueue<uint8_t, nRF24_RX_BUFFER_SIZE> RxBufferQueue;
+	enum nRFState {
+		none, checkOk, initDone
+	};
+
 	NRF24L01_Basis();
 	virtual ~NRF24L01_Basis() {
 	}
-	;
 
 	void init();
-	NRF24L01::nRF24_TXResult transmitPacket(uint8_t *pBuf, uint8_t length = 0);
-
-	// NRF24L01* get_nRF24(void) {
-	// 	return nRF24;
-	// }
-	// ;
-	uint16_t get_lostPkgCount(void) {
-		return lostPkgCount;
+	void transmitPacket(uint8_t *pBuf, uint8_t length = 0);
+	std::string getNRFStateStr(void);
+	nRFState getNRFState(void) {
+		return _nRFState;
 	}
-	;
-	uint16_t get_retransCount(void) {
-		return retransCount;
+	uint8_t get_lostPkgCount(void) {
+		return _lostPkgCount;
 	}
-	;
+	uint8_t get_retransCount(void) {
+		return _retransCount;
+	}
+	uint8_t get_rxBufferOverflowa(void) {
+		return _rxBufferOverflows;
+	}
 	void reset_stats(void) {
-		lostPkgCount = 0;
-		retransCount = 0;
+		_lostPkgCount = 0;
+		_retransCount = 0;
+		_rxBufferOverflows = 0;
 	}
-	;
-	void add_stats(uint8_t lostPkgCount, uint8_t retransCount);
-
-	void IRQ_Pin_callback(void);
+	void addStats(uint8_t lostPkgCount, uint8_t retransCount);
+	bool isRxBufLocked(void) {
+		return _rxBufIsLocked;
+	}
+	SimpleQueue<uint8_t, nRF24_RX_BUFFER_SIZE>* getRxBuffer(void) {
+		return &_rxBuffer;
+	}
+	NRF24L01::nRF24_TXResult getLastTxResult(void) {
+		return _lastTxResult;
+	}
+	void IrqPinRxCallback(void);
 
 private:
-	NRF24L01 nRF24;
-	uint16_t lostPkgCount;
-	uint16_t retransCount;
-	SimpleQueue<uint8_t, RX_BUFFER_SIZE> rxBuffer;
-
+	NRF24L01 _nRF24;
+	uint8_t _lostPkgCount;
+	uint8_t _retransCount;
+	uint8_t _rxBufferOverflows;
+	bool _rxBufIsLocked;
+	NRF24L01::nRF24_TXResult _lastTxResult;
+	nRFState _nRFState;
+	RxBufferQueue _rxBuffer;
 };
 
 #endif // C interface

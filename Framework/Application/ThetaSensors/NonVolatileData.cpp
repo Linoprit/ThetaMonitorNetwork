@@ -76,10 +76,10 @@ void NonVolatileData::printIdTableRaw(void) {
  * Looks through the ID-Table section, if a given ID exists. If the hash wasn't found,
  * the sensorIdHash is set to zero in the returned struct.
  */
-SensorIdTable::SensorConfigType NonVolatileData::getIdTableData(
+SensorIdTable::SensorIdType NonVolatileData::getIdTableData(
 		uint32_t sensorIdHash) {
 	SensorTypeE2 idE2Data;
-	SensorIdTable::SensorConfigType idPhysData;
+	SensorIdTable::SensorIdType idPhysData;
 	idPhysData.sensorIdHash = UINT32_MAX;
 
 	_currAddress = ID_TABLE_START;
@@ -118,7 +118,7 @@ ErrorCode NonVolatileData::clrIdTableData(void) {
  * to the first free address.
  */
 ErrorCode NonVolatileData::writeIdTableData(
-		SensorIdTable::SensorConfigType idPhysData) {
+		SensorIdTable::SensorIdType idPhysData) {
 	SensorTypeE2 idE2Data;
 	SensorTypeE2 idE2ToWrite = physToE2(idPhysData);
 
@@ -191,7 +191,7 @@ Convert NonVolatileData::getConversion(SensorIdTable::SensorType sensType) {
 }
 
 NonVolatileData::SensorTypeE2 NonVolatileData::physToE2(
-		SensorIdTable::SensorConfigType idPhysData) {
+		SensorIdTable::SensorIdType idPhysData) {
 	SensorTypeE2 result;
 	result.sensorIdHash = idPhysData.sensorIdHash;
 	result.relayNr = idPhysData.relayNr;
@@ -207,9 +207,9 @@ NonVolatileData::SensorTypeE2 NonVolatileData::physToE2(
 	return result;
 }
 
-SensorIdTable::SensorConfigType NonVolatileData::e2ToPhys(
+SensorIdTable::SensorIdType NonVolatileData::e2ToPhys(
 		NonVolatileData::SensorTypeE2 idE2Data) {
-	SensorIdTable::SensorConfigType result;
+	SensorIdTable::SensorIdType result;
 
 	uint8_t chkSum = calcChkSum(idE2Data);
 	if (chkSum != idE2Data.checkSum) {
@@ -245,7 +245,7 @@ bool NonVolatileData::compareIdTableDatum(SensorTypeE2 tableIDLeft,
 
 uint8_t NonVolatileData::calcChkSum(SensorTypeE2 idTableDatum) {
 	idTableDatum.checkSum = 0;
-	uint8_t hashCode = CrcSocket::calc_chksum(
+	uint8_t hashCode = CrcSocket::calcChksum(
 			reinterpret_cast<uint8_t*>(&idTableDatum), sizeof(SensorTypeE2));
 	return hashCode;
 }

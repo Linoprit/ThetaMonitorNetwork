@@ -5,8 +5,7 @@
  *      Author: harald
  */
 
-#include "Messages.h"
-//#include "../../Framework/Instances/Common.h"
+#include <Application/RadioLink/RadioMessage.h>
 #include "cmsis_os.h"
 
 /*

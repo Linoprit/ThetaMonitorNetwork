@@ -57,7 +57,6 @@ static constexpr uint8_t DATA_LEN			=	9;
 	DS18B20(OneWire *oneWire);
 	~DS18B20() {
 	}
-	;
 
 	uint8_t start(uint8_t *ROM);
 	void startAll();

@@ -128,7 +128,7 @@ uint32_t Lexer::makeCmd(void) {
 	uint8_t commandBuf[len32 * 4];
 	memset(commandBuf, '\0', len32 * 4);
 	memcpy(commandBuf, startChar, sz);
-	hashCode = CrcSocket::calc_chksum32(reinterpret_cast<uint32_t*>(commandBuf),
+	hashCode = CrcSocket::calcChksum32(reinterpret_cast<uint32_t*>(commandBuf),
 			len32);
 
 	return hashCode;

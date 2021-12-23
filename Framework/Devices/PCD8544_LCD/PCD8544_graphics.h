@@ -18,10 +18,10 @@
 #include <string.h>
 #include "PCD8544_basis.h"
 
+namespace lcd {
 
 #define _BV(bit) \
 	(1 << (bit))
-
 
 // reduces how much is refreshed, which speeds it up!
 // originally derived from Steve Evans/JCW's mod but cleaned up and
@@ -32,106 +32,86 @@
 #define BLACK 1
 #define WHITE 0
 
-#define swap(a, b) { uint8_t t = a; a = b; b = t; }
+inline void swap(uint8_t &a, uint8_t &b) {
+	uint8_t t = a;
+	a = b;
+	b = t;
+}
 
-
-class PCD8544_graphics: public PCD8544_basis
-{
+class PCD8544_graphics: public PCD8544_basis {
 #ifdef USE_GRAPHICS
 public:
 
-  PCD8544_graphics(PCD8544_socket* socket);
-  uint8_t get_chars_per_line(void);
-  uint8_t get_dispLines(void);
+	PCD8544_graphics();
+	virtual ~PCD8544_graphics() {
+	}
+	;
+	void initHardware(void) {
+		PCD8544_basis::initHardware();
+	}
 
-  void updateBoundingBox(uint8_t xmin,
-						 uint8_t ymin,
-						 uint8_t xmax,
-						 uint8_t ymax);
+	uint8_t get_chars_per_line(void);
+	uint8_t get_dispLines(void);
 
-  void draw_filled_circle(uint8_t x0_px,
-						  uint8_t y0_px,
-						  uint8_t r,
-						  uint8_t color = BLACK);
+	void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax,
+			uint8_t ymax);
 
-  void draw_circle(uint8_t x0_px,
-				   uint8_t y0_px,
-				   uint8_t r_px,
-				   uint8_t color = BLACK);
+	void draw_filled_circle(uint8_t x0_px, uint8_t y0_px, uint8_t r,
+			uint8_t color = BLACK);
 
-  void draw_filled_rectangle(uint8_t x_px,
-							 uint8_t y_px,
-							 uint8_t width,
-							 uint8_t height,
-							 uint8_t color = BLACK);
+	void draw_circle(uint8_t x0_px, uint8_t y0_px, uint8_t r_px, uint8_t color =
+			BLACK);
 
-  void draw_rectangle(uint8_t x_px,
-					  uint8_t y_px,
-					  uint8_t width,
-					  uint8_t height,
-					  uint8_t color = BLACK);
+	void draw_filled_rectangle(uint8_t x_px, uint8_t y_px, uint8_t width,
+			uint8_t height, uint8_t color = BLACK);
 
-  void draw_line(uint8_t x0_px,
-				 uint8_t y0_px,
-				 uint8_t x1_px,
-				 uint8_t y1_px,
-				 uint8_t color = BLACK);
+	void draw_rectangle(uint8_t x_px, uint8_t y_px, uint8_t width,
+			uint8_t height, uint8_t color = BLACK);
 
-  void draw_bitmap(uint8_t x_px,
-				   uint8_t y_px,
-				   const uint8_t *bitmap,
-				   uint8_t width,
-				   uint8_t height,
-				   uint8_t color = BLACK);
+	void draw_line(uint8_t x0_px, uint8_t y0_px, uint8_t x1_px, uint8_t y1_px,
+			uint8_t color = BLACK);
 
+	void draw_bitmap(uint8_t x_px, uint8_t y_px, const uint8_t *bitmap,
+			uint8_t width, uint8_t height, uint8_t color = BLACK);
 
-  void write_string(char *str);
+	void write_string(char *str);
 
-  void write_string(const char *str);
+	void write_string(const char *str);
 
-  void write_string(uint8_t x,
-					uint8_t y,
-					char *character);
+	void write_string(uint8_t x, uint8_t y, char *character);
 
-  void write_string(uint8_t x_px,
-					uint8_t y_px,
-					const char *str);
+	void write_string(uint8_t x_px, uint8_t y_px, const char *str);
 
-  void write_char(char character);
+	void write_char(char character);
 
-  void setCursor(uint8_t x_px,
-				 uint8_t y_px);
+	void setCursor(uint8_t x_px, uint8_t y_px);
 
-  uint8_t line_2_y_pix(uint8_t line);
+	uint8_t line_2_y_pix(uint8_t line);
 
-  void clear(void);
+	void clear(void);
 
-  void set_pixel(uint8_t x_px,
-				 uint8_t y_px,
-				 uint8_t color = BLACK);
+	void set_pixel(uint8_t x_px, uint8_t y_px, uint8_t color = BLACK);
 
-  void display(void);
+	void display(void);
 
-  uint8_t* get_graphics_buffer(void);
+	uint8_t* get_graphics_buffer(void);
 
 private:
-  void draw_char(uint8_t x_px,
-				 uint8_t y_px,
-				 char character);
+	void draw_char(uint8_t x_px, uint8_t y_px, char character);
 
-  uint8_t graphics_buffer[DISPLAY_WIDTH_px * DISPLAY_HEIGHT_px / 8];
-  uint8_t textcolor;
-  uint8_t cursor_x,   cursor_y;
+	uint8_t graphics_buffer[DISPLAY_WIDTH_px * DISPLAY_HEIGHT_px / 8];
+	uint8_t textcolor;
+	uint8_t cursor_x, cursor_y;
 
 #ifdef enablePartialUpdate
-uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
+	uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 #endif
 
 #endif
 };
 
+} //namespace lcd
+
 #endif
 #endif /* DEVICES_PCD8544_LCD_PCD8544_GRAPHICS_H_ */
-
-
 

@@ -8,190 +8,165 @@
 #include <Application/RadioLink/NRF24L01_Basis.h>
 #include <System/OsHelpers.h>
 #include <main.h>
-#include "Messages.h"
 #include <System/serialPrintf.h>
 #include <Application/ThetaSensors/ThetaMeasurement.h>
-
+#include <string>
 
 NRF24L01_Basis::NRF24L01_Basis() :
-		lostPkgCount { 0 }, retransCount { 0 } {
+		_lostPkgCount { 0 }, _retransCount { 0 }, _rxBufIsLocked { false }, _lastTxResult {
+				NRF24L01::nRF24_NOP }, _nRFState { none } {
 }
 
 void NRF24L01_Basis::init() {
-	nRF24.CE_L(); // RX/TX disabled
+	_nRF24.CE_L(); // RX/TX disabled
 
 	msmnt::SensorIdTable::StationType stationType =
-			msmnt::ThetaMeasurement::instance().getNonVolatileData().getStatType();
+			msmnt::ThetaMeasurement::instance().getNonVolatileData()->getStatType();
 	tx_printf("Station Type is %u\n", static_cast<uint8_t>(stationType));
 
 	// Configure the nRF24L01+
 	tx_printf("nRF24L01+ checking... ");
-	while (!nRF24.Check()) {
+	while (!_nRF24.Check()) {
 		OsHelpers::delay(10);
 	}
+	_nRFState = checkOk;
 	tx_printf(" OK\n");
 
-	nRF24.Init(); // Initialize the nRF24L01 to its default state
+	_nRF24.Init(); // Initialize the nRF24L01 to its default state
 
-	nRF24.SetRFChannel(nRF24_CHANNEL);
-	nRF24.SetDataRate(nRF24_DR_250kbps); //  2Mbps);
-	nRF24.SetCRCScheme(nRF24_CRC_2byte);
-	nRF24.SetAddrWidth(5);
+	_nRF24.SetRFChannel(nRF24_CHANNEL);
+	_nRF24.SetDataRate(nRF24_DR_250kbps); //  2Mbps);
+	_nRF24.SetCRCScheme(nRF24_CRC_2byte);
+	_nRF24.SetAddrWidth(5);
 
-	const uint8_t nRF24_AA = nRF24_AA_OFF; // advanced shockburst
+	const uint8_t nRF24_AA = nRF24_AA_ON; // advanced shockburst
 	if (stationType == msmnt::SensorIdTable::MASTER) {
-		nRF24.SetAddr(nRF24_PIPE1, &nRF24_RX_ADDR1[0]);
-		nRF24.SetRXPipe(nRF24_PIPE1, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.SetAddr(nRF24_PIPE2, &nRF24_RX_ADDR2[0]);
-		nRF24.SetRXPipe(nRF24_PIPE2, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.SetAddr(nRF24_PIPE3, &nRF24_RX_ADDR3[0]);
-		nRF24.SetRXPipe(nRF24_PIPE3, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.SetAddr(nRF24_PIPE4, &nRF24_RX_ADDR4[0]);
-		nRF24.SetRXPipe(nRF24_PIPE4, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.SetAddr(nRF24_PIPE5, &nRF24_RX_ADDR5[0]);
-		nRF24.SetRXPipe(nRF24_PIPE5, nRF24_AA, nRF_PAYLOAD_LEN);
+		_nRF24.SetAddr(nRF24_PIPE1, &nRF24_RX_ADDR1[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE1, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.SetAddr(nRF24_PIPE2, &nRF24_RX_ADDR2[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE2, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.SetAddr(nRF24_PIPE3, &nRF24_RX_ADDR3[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE3, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.SetAddr(nRF24_PIPE4, &nRF24_RX_ADDR4[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE4, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.SetAddr(nRF24_PIPE5, &nRF24_RX_ADDR5[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE5, nRF24_AA, RADIO_MESSAGE_LEN);
+
+		_nRF24.SetRXPipe(nRF24_PIPE0, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.EnableAA(0);
+		_nRF24.EnableAA(1);
+		_nRF24.EnableAA(2);
+		_nRF24.EnableAA(3);
+		_nRF24.EnableAA(4);
+		_nRF24.EnableAA(5);
+
 	} else if (stationType == msmnt::SensorIdTable::SLAVE_01) {
-		nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR1[0]); // program TX address
-		nRF24.SetAddr(nRF24_PIPE0, &nRF24_TX_ADDR1[0]);
-		nRF24.SetRXPipe(nRF24_PIPE1, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.EnableAA(1);
+		_nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR1[0]); // program TX address
+		_nRF24.SetAddr(nRF24_PIPE0, &nRF24_RX_ADDR1[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE1, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.EnableAA(1);
 	} else if (stationType == msmnt::SensorIdTable::SLAVE_02) {
-		nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR2[0]); // program TX address
-		nRF24.SetAddr(nRF24_PIPE0, &nRF24_TX_ADDR2[0]);
-		nRF24.SetRXPipe(nRF24_PIPE2, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.EnableAA(2);
+		_nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR2[0]); // program TX address
+		_nRF24.SetAddr(nRF24_PIPE0, &nRF24_RX_ADDR2[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE2, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.EnableAA(2);
 	} else if (stationType == msmnt::SensorIdTable::SLAVE_03) {
-		nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR3[0]); // program TX address
-		nRF24.SetAddr(nRF24_PIPE0, &nRF24_TX_ADDR3[0]);
-		nRF24.SetRXPipe(nRF24_PIPE3, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.EnableAA(3);
+		_nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR3[0]); // program TX address
+		_nRF24.SetAddr(nRF24_PIPE0, &nRF24_RX_ADDR3[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE3, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.EnableAA(3);
 	} else if (stationType == msmnt::SensorIdTable::SLAVE_04) {
-		nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR4[0]); // program TX address
-		nRF24.SetAddr(nRF24_PIPE0, &nRF24_TX_ADDR4[0]);
-		nRF24.SetRXPipe(nRF24_PIPE4, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.EnableAA(4);
+		_nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR4[0]); // program TX address
+		_nRF24.SetAddr(nRF24_PIPE0, &nRF24_RX_ADDR4[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE4, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.EnableAA(4);
 	} else if (stationType == msmnt::SensorIdTable::SLAVE_05) {
-		nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR5[0]); // program TX address
-		nRF24.SetAddr(nRF24_PIPE0, &nRF24_TX_ADDR5[0]);
-		nRF24.SetRXPipe(nRF24_PIPE5, nRF24_AA, nRF_PAYLOAD_LEN);
-		nRF24.EnableAA(5);
+		_nRF24.SetAddr(nRF24_PIPETX, &nRF24_TX_ADDR5[0]); // program TX address
+		_nRF24.SetAddr(nRF24_PIPE0, &nRF24_RX_ADDR5[0]);
+		_nRF24.SetRXPipe(nRF24_PIPE5, nRF24_AA, RADIO_MESSAGE_LEN);
+		_nRF24.EnableAA(5);
 	}
 
-	//nRF24.DisableAA(0xFF); // Disable ShockBurst for all RX pipes
-	nRF24.SetTXPower(nRF24_TXPWR_0dBm);
-	nRF24.ClearIRQFlags();
-	nRF24.SetPowerMode(nRF24_PWR_UP); // Wake the transceiver
+	_nRF24.SetAutoRetr(nRF24_ARD_500us, 8); // auto-retransmission
+	_nRF24.SetTXPower(nRF24_TXPWR_18dBm); // TODO power up, when deploy
+	_nRF24.ClearIRQFlags();
+	_nRF24.SetPowerMode(nRF24_PWR_UP); // Wake the transceiver
+	_nRF24.SetOperationalMode(nRF24_MODE_RX);
+	_nRF24.CE_H();
 
-	// if (stationType != msmnt::ID_Table::MASTER) {
-	// 	nRF24.SetOperationalMode(nRF24_MODE_TX);
-	// }
-	// if (stationType == msmnt::ID_Table::MASTER) {
-	// 	nRF24.SetOperationalMode(nRF24_MODE_RX);
-	// 	nRF24.SetAddr(nRF24_PIPE1, &nRF24_RX_ADDR1[0]);
-	// 	nRF24.SetRXPipe(nRF24_PIPE1, nRF24_AA_OFF, nRF_PAYLOAD_LEN);
-	// 	nRF24.SetAddr(nRF24_PIPE2, &nRF24_RX_ADDR2[0]);
-	// 	nRF24.SetRXPipe(nRF24_PIPE2, nRF24_AA_OFF, nRF_PAYLOAD_LEN);
-	// 	nRF24.SetAddr(nRF24_PIPE3, &nRF24_RX_ADDR3[0]);
-	// 	nRF24.SetRXPipe(nRF24_PIPE3, nRF24_AA_OFF, nRF_PAYLOAD_LEN);
-	// 	nRF24.CE_H(); // enable Transmission
-	// }
-
+	_nRFState = initDone;
 	tx_printf("Radio init done.\n");
 }
 
-NRF24L01::nRF24_TXResult NRF24L01_Basis::transmitPacket(uint8_t *pBuf,
-		uint8_t length) {
-	volatile int32_t wait = nRF24_WAIT_TIMEOUT;
-	uint8_t otx;
-	uint8_t otx_plos_cnt; // lost packet count
-	uint8_t otx_arc_cnt;  // retransmit count
-	uint8_t status;
+std::string NRF24L01_Basis::getNRFStateStr(void) {
+	if(_nRFState == none) {
+		return std::string("none");
+	} else if (_nRFState == checkOk) {
+		return std::string("checkOk");
+	}else if (_nRFState == initDone) {
+		return std::string("initDone");
+	}
+	return std::string("none");
+}
 
-	// Deassert the CE pin (in case if it still high)
-	nRF24.CE_L();
+void NRF24L01_Basis::transmitPacket(uint8_t *pBuf, uint8_t length) {
+// in Case of no success, we have to flush the fifos
+	if (_lastTxResult != NRF24L01::nRF24_TX_SUCCESS) {
+		_nRF24.FlushRX();
+		_nRF24.FlushTX();
+	}
+	_nRF24.ClearIRQFlags(); // Clear any pending interrupt flags
+	_nRF24.CE_L(); // Deassert the CE pin (in case if it still high)
 
-	// Transfer data from the specified buffer to the TX FIFO
-	nRF24.WritePayload(pBuf, length);
+	_nRF24.SetOperationalMode(nRF24_MODE_TX);
+	_nRF24.WritePayload(pBuf, length); // Transfer data to the TX FIFO
 
-	// Start a transmission by asserting CE pin (must be held at least 10us)
-	nRF24.CE_H();
+	_nRF24.CE_H(); // Start transmission. CE pin must be held at least 10us
+	_lastTxResult = NRF24L01::nRF24_TX_IS_ONGOING;
+}
 
-	// Poll the transceiver status register until one of the following flags will be set:
-	//   TX_DS  - means the packet has been transmitted
-	//   MAX_RT - means the maximum number of TX retransmits happened
-	// note: this solution is far from perfect, better to use IRQ instead of polling the status
-	do {
-		status = nRF24.GetStatus();
-		if (status & (nRF24_FLAG_TX_DS | nRF24_FLAG_MAX_RT )) {
-			break;
+void NRF24L01_Basis::addStats(uint8_t lostPkgCount, uint8_t retransCount) {
+	this->_lostPkgCount += lostPkgCount;
+	this->_retransCount += retransCount;
+}
+
+void NRF24L01_Basis::IrqPinRxCallback(void) {
+	if (_lastTxResult == NRF24L01::nRF24_TX_IS_ONGOING) {
+		// we are in TX-IRQ, because we started a transmission
+		uint8_t status = _nRF24.GetStatus();
+		_nRF24.CE_L();	// Deassert the CE pin (Standby-II --> Standby-I)
+		_nRF24.ClearIRQFlags();
+		_nRF24.SetOperationalMode(nRF24_MODE_RX);
+
+		// statistics
+		uint8_t otx = _nRF24.GetRetransmitCounters();
+		uint8_t otx_plos_cnt = (otx & nRF24_MASK_PLOS_CNT ) >> 4; // packets lost counter
+		uint8_t otx_arc_cnt = (otx & nRF24_MASK_ARC_CNT ); // auto retransmissions counter
+		addStats(otx_plos_cnt, otx_arc_cnt);
+
+		if (status & nRF24_FLAG_MAX_RT) {
+			// Auto retransmit counter exceeds the programmed maximum limit (FIFO is not removed)
+			_lastTxResult = NRF24L01::nRF24_TX_MAXRT;
+		} else if (status & nRF24_FLAG_TX_DS) {
+			_lastTxResult = NRF24L01::nRF24_TX_SUCCESS;
 		}
-	} while (wait--);
+	} else {
+		uint8_t payload_length;
+		uint8_t nRF24_payload[RADIO_MESSAGE_LEN];
 
-	// Deassert the CE pin (Standby-II --> Standby-I)
-	nRF24.CE_L();
+		if (_nRF24.GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY) {
+			_nRF24.ReadPayload(nRF24_payload, &payload_length);
+			_nRF24.ClearIRQFlags();
 
-	// Do statistics
-	otx = nRF24.GetRetransmitCounters();
-	otx_plos_cnt = (otx & nRF24_MASK_PLOS_CNT ) >> 4; // packets lost counter
-	otx_arc_cnt = (otx & nRF24_MASK_ARC_CNT ); // auto retransmissions counter
-	add_stats(otx_plos_cnt, otx_arc_cnt);
-
-	if (wait <= 0) {
-		return NRF24L01::nRF24_TX_TIMEOUT;
-	}
-
-	nRF24.ClearIRQFlags();
-
-	if (status & nRF24_FLAG_MAX_RT) {
-		// Auto retransmit counter exceeds the programmed maximum limit (FIFO is not removed)
-		return NRF24L01::nRF24_TX_MAXRT;
-	}
-
-	if (status & nRF24_FLAG_TX_DS) {
-		return NRF24L01::nRF24_TX_SUCCESS;
-	}
-
-	// Some banana happend, payload remaining in the TX FIFO, flush it
-	nRF24.FlushTX();
-
-	return NRF24L01::nRF24_TX_ERROR;
-}
-
-void NRF24L01_Basis::add_stats(uint8_t lostPkgCount, uint8_t retransCount) {
-	this->lostPkgCount += lostPkgCount;
-	this->retransCount += retransCount;
-}
-
-void NRF24L01_Basis::IRQ_Pin_callback(void) {
-	// TODO if we want to receive statistics, we need the pipe-info
-	//nRF24_RXResult pipe;
-	//uint8_t payload_length;
-	//uint8_t nRF24_payload[nRF_PAYLOAD_LEN];
-
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-
-	if (nRF24.GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY) {
-		// nRF24_RXResult pipe =
-		//nRF24.ReadPayload(nRF24_payload, &payload_length);
-		nRF24.ClearIRQFlags();
-
-		// TODO
-		// if (Common::nRF24_basis->get_stationType() == ID_Table::MASTER) {
-		// 	osPoolId *msg_pool = get_msg_pool();
-		// 	osMessageQId *queue = get_queue();
-		//
-		// 	if (payload_length != nRF_PAYLOAD_LEN)
-		// 		return;
-		//
-		// 	Messages::nRF_dummy_struct *msg =
-		// 			(Messages::nRF_dummy_struct*) osPoolAlloc(*msg_pool);
-		//
-		// 	for (uint8_t i = 0; i < sizeof(Messages::nRF_dummy_struct); i++) {
-		// 		msg->byte[i] = nRF24_payload[i];
-		// 	}
-		//
-		// 	osMessagePut(*queue, (uint32_t) msg, 0);
-		// }
-
+			_rxBufIsLocked = true;
+			for (uint8_t i = 0; i < RADIO_MESSAGE_LEN; i++) {
+				if (_rxBuffer.isFull()) {
+					_rxBufferOverflows++;
+					break;
+				}
+				_rxBuffer.enqueue(nRF24_payload[i]);
+			}
+			_rxBufIsLocked = false;
+		} // measured: 190us
 	}
 }

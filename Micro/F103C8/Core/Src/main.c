@@ -56,10 +56,11 @@ TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart1_tx;
 
 /* Definitions for measureTask */
 osThreadId_t measureTaskHandle;
-uint32_t measureTaskBuffer[ 512 ];
+uint32_t measureTaskBuffer[ 160 ];
 osStaticThreadDef_t measureTaskControlBlock;
 const osThreadAttr_t measureTask_attributes = {
   .name = "measureTask",
@@ -71,7 +72,7 @@ const osThreadAttr_t measureTask_attributes = {
 };
 /* Definitions for nRF24Tsk */
 osThreadId_t nRF24TskHandle;
-uint32_t nRF24TaskBuffer[ 128 ];
+uint32_t nRF24TaskBuffer[ 164 ];
 osStaticThreadDef_t nRF24TaskControlBlock;
 const osThreadAttr_t nRF24Tsk_attributes = {
   .name = "nRF24Tsk",
@@ -83,7 +84,7 @@ const osThreadAttr_t nRF24Tsk_attributes = {
 };
 /* Definitions for displayTask */
 osThreadId_t displayTaskHandle;
-uint32_t displayTaskBuffer[ 128 ];
+uint32_t displayTaskBuffer[ 164 ];
 osStaticThreadDef_t displayTaskControlBlock;
 const osThreadAttr_t displayTask_attributes = {
   .name = "displayTask",
@@ -95,7 +96,7 @@ const osThreadAttr_t displayTask_attributes = {
 };
 /* Definitions for masterSerialTas */
 osThreadId_t masterSerialTasHandle;
-uint32_t masterSerialTasBuffer[ 512 ];
+uint32_t masterSerialTasBuffer[ 160 ];
 osStaticThreadDef_t masterSerialTasControlBlock;
 const osThreadAttr_t masterSerialTas_attributes = {
   .name = "masterSerialTas",
@@ -620,6 +621,9 @@ static void MX_DMA_Init(void)
   __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Channel4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
   /* DMA1_Channel5_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);

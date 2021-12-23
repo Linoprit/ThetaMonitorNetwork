@@ -11,10 +11,8 @@
 #ifndef __x86_64
 // FIXME make it working on X86
 
-#include "PCD8544_socket.h"
 #include <stdlib.h>
-
-
+#include <stdint.h>
 
 #define USE_FONT_5x8 // default!
 //#define USE_FONT_4x6
@@ -23,7 +21,6 @@
 //#define USE_FONT_8x8
 //#define USE_FONT_16x8
 #define USE_GRAPHICS
-
 
 #ifdef USE_FONT_BIG
 #include "fonts/font_big.h"
@@ -57,53 +54,46 @@
 #define PCD8544_SETYADDR 0x40
 #define PCD8544_SETXADDR 0x80
 
-
 #ifdef __cplusplus
 
-class PCD8544_basis
-{
+namespace lcd {
+
+class PCD8544_basis {
 
 public:
 
-  PCD8544_basis(PCD8544_socket *socket);
+	PCD8544_basis();
+	virtual ~PCD8544_basis() {
+	}
+	void initHardware(void);
 
-  void draw_bitmap(uint8_t column,
-					uint8_t line,
-					const uint8_t *ptr_to_bitmap,
-					uint8_t size_in_pixels_x,
-					uint8_t size_in_pixels_y);
+	void draw_bitmap(uint8_t column, uint8_t line, const uint8_t *ptr_to_bitmap,
+			uint8_t size_in_pixels_x, uint8_t size_in_pixels_y);
 
-  void write_string(uint8_t column,
-					 uint8_t line,
-					 char 	 *ptr_to_text,
-					 uint8_t mode = MENU_NORMAL);
+	void write_string(uint8_t column, uint8_t line, char *ptr_to_text,
+			uint8_t mode = MENU_NORMAL);
 
-  void write_string (uint8_t 	  column,
-					 uint8_t 	  line,
-					 const char *const_ptr_to_text,
-					 uint8_t 	  mode = MENU_NORMAL);
+	void write_string(uint8_t column, uint8_t line,
+			const char *const_ptr_to_text, uint8_t mode = MENU_NORMAL);
 
-  //TODO Vereinheitlichung der write_string methoden mit graphics
-  //TODO replace mode with color
+	//TODO Vereinheitlichung der write_string methoden mit graphics
+	//TODO replace mode with color
 
-  void write_char(uint8_t character,
-				   uint8_t mode = MENU_NORMAL);
+	void write_char(uint8_t character, uint8_t mode = MENU_NORMAL);
 
-  void set_line_n_column(uint8_t column,
-						  uint8_t line);
+	void set_line_n_column(uint8_t column, uint8_t line);
 
-  void clear(void);
+	void clear(void);
 
-  void 		switch_font(uint8_t font_id);
-  uint8_t 	get_actual_fontwidth(void);
-  uint8_t 	get_actual_fontheight(void);
-  void 		backlight_on(void);
-  void 		backlight_off(void);
+	void switch_font(uint8_t font_id);
+	uint8_t get_actual_fontwidth(void);
+	uint8_t get_actual_fontheight(void);
+	void backlight_on(void);
+	void backlight_off(void);
 
-  inline uint8_t* get_font_ptr(void)
-  {
-    return font_ptr;
-  }
+	inline uint8_t* get_font_ptr(void) {
+		return font_ptr;
+	}
 
 #ifdef USE_FONT_BIG
   void write_string_big (uint8_t column,
@@ -116,13 +106,13 @@ public:
 					   uint8_t mode = MENU_NORMAL);
 #endif
 
-protected:
-  PCD8544_socket 	*socket;
-
 private:
-  uint8_t 			*font_ptr;
-  uint8_t 			actual_fontwidth, actual_fontheight;
+	uint8_t *font_ptr;
+	uint8_t actual_fontwidth;
+	uint8_t actual_fontheight;
 };
+
+} //namespace lcd
 
 #endif
 #endif

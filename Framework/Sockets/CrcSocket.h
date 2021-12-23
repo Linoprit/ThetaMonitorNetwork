@@ -31,7 +31,7 @@ public:
 	 * data: pointer to array
 	 * dataLen: size of the Array in bytes
 	 */
-	static uint8_t calc_chksum(uint8_t *data, uint8_t dataByteLen) {
+	static uint8_t calcChksum(uint8_t *data, uint8_t dataByteLen) {
 		if ((dataByteLen % 4) != 0) {
 			return 0;
 		}
@@ -66,13 +66,13 @@ public:
 		for (uint_fast8_t i = 0; i < dataByteLen; i++) {
 			uint8Data[i] = data[i];
 		}
-		return CrcSocket::calc_chksum32(data32, uint32len);
+		return CrcSocket::calcChksum32(data32, uint32len);
 	}
 	;
 	/**
 	 * MainFunction, passes the data to the crc-engine
 	 */
-	static uint32_t calc_chksum32(uint32_t *data, uint32_t dataLen32) {
+	static uint32_t calcChksum32(uint32_t *data, uint32_t dataLen32) {
 		uint32_t crc = HAL_CRC_Calculate(&hcrc, data, dataLen32);
 		return crc;
 	}

@@ -14,6 +14,7 @@
 #endif
 #include <System/OsHelpers.h>
 #include "tasksDef.h"
+#include <Application/Nokia_LCD/LCDFunctions.h>
 
 //#include "../Instances/Common.h"
 // #include "../Tasks/nRF24Task.h"
@@ -33,21 +34,31 @@ void clrTmpLine(char* tmpline, uint8_t len)
 void startDisplayTask(void * argument)
 {
 	UNUSED(argument);
+	OsHelpers::delay(2500); //older LCDs need time to settle
+	lcd::LCDFunctions::instance().init();
+	lcd::LCDFunctions::instance().initHardware();
+
 
 	/* original Code
-	osDelay(2000); //older LCDs need time to settle
+	osDelay(2000);
 	lcd = new LCDFunctions();
 	lcd->ISR_callback_fcn(); // Backlight on
 */
+	// Backlight off
+	//HAL_GPIO_WritePin(LCD_BCKLT_GPIO_Port, LCD_BCKLT_Pin, GPIO_PIN_SET);
 
 	for(;;) {
-		OsHelpers::delay(500);
+		lcd::LCDFunctions::instance().cycle();
+		lcd::LCDFunctions::instance().incPage();
+		OsHelpers::delay(2000);
+
+		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
 		/* original Code
 		lcd->update();
 		lcd->incPage();
 
-		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
 		osDelay(DISPLAY_TASK_DELAY);
 		*/
 	}

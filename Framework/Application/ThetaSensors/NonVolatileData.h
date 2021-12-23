@@ -24,6 +24,8 @@ constexpr ConvLimits convPress { 1.0F, 846.0F, 846.0F, 1100.0F };
 
 class NonVolatileData {
 public:
+	static constexpr uint32_t EMPTY_SENSOR_HASH = UINT32_MAX;
+
 	NonVolatileData();
 	virtual ~NonVolatileData() {
 	}
@@ -40,30 +42,29 @@ public:
 
 	void startIter(void);
 	SensorTypeE2 iter(void);
-	SensorIdTable::SensorConfigType getIdTableData(uint32_t sensorIdHash);
+	SensorIdTable::SensorIdType getIdTableData(uint32_t sensorIdHash);
 	ErrorCode clrIdTableData(void);
-	ErrorCode writeIdTableData(SensorIdTable::SensorConfigType sensVals);
+	ErrorCode writeIdTableData(SensorIdTable::SensorIdType sensVals);
 	ErrorCode writeStatId(uint32_t stationId);
 	uint32_t getStatId(void);
 	SensorIdTable::StationType getStatType(void);
 	static uint8_t calcChkSum(SensorTypeE2 idTableDatum);
 	bool compareIdTableDatum(SensorTypeE2 tableIDLeft,
 			SensorTypeE2 tableIDRight);
-	static SensorTypeE2 physToE2(SensorIdTable::SensorConfigType idSensValue);
-	static SensorIdTable::SensorConfigType e2ToPhys(SensorTypeE2 e2Data);
+	static SensorTypeE2 physToE2(SensorIdTable::SensorIdType idSensValue);
+	static SensorIdTable::SensorIdType e2ToPhys(SensorTypeE2 e2Data);
 	static Convert getConversion(SensorIdTable::SensorType sensType);
 	void findSensIdHashOrEmpty(uint32_t sensorIdHash);
 	void printIdTableRaw(void);
 	bool dataIsEmpty(SensorTypeE2 idE2Data);
 
-	static constexpr uint32_t EMPTY_SENSOR_HASH = UINT32_MAX;
 private:
 	// EEPROM-Addresses
 	static constexpr uint16_t STAT_ID_START = 12U;
 	static constexpr uint16_t ID_TABLE_START = 64U;
 	static constexpr uint16_t NUM_OF_ID_ENTRIES = 100U;
 	static constexpr uint16_t ID_TABLE_LEN = NUM_OF_ID_ENTRIES
-			* sizeof(SensorIdTable::SensorConfigType);
+			* sizeof(SensorIdTable::SensorIdType);
 
 	uint16_t _currAddress;
 	uint16_t _oldAddress;

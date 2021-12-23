@@ -58,25 +58,25 @@ public:
 		SensorType sensType;
 		uint8_t relayNr; // 0 = no relay
 		char shortname[SensorIdTable::SHORTNAME_LEN];
-	} SensorConfigType; // to be used in application
+	} SensorIdType; // to be used in application
+	typedef std::array<SensorIdType, MAX_MEASUREMENTS> SensorIdArray;
 
 	SensorIdTable();
 	virtual ~SensorIdTable() {
 	}
-	;
-	void initTable(NonVolatileData* nvData,
-			std::array<uint32_t, MAX_SENSORS> allSensorIds);
-	uint8_t copyItemToTable(NonVolatileData* nvData, uint32_t sensorIdHash,
-			uint8_t index);
-	SensorIdTable::SensorConfigType getSensorData(uint32_t hashId);
+
+	SensorIdTable::SensorIdType getSensorId(NonVolatileData *nvData,
+			uint32_t hashId);
 
 	static std::string sensorType2Str(SensorType sensorType);
 	static std::string sensorType2Str(uint8_t sensorType);
+	static std::string getUnit(SensorType sensorType);
+	// Takes in the DS1820 address-pattern and returns it hash-value
 	static uint32_t sensorID2Hash(uint8_t *address); // len = 8!
 
 #ifdef __x86_64
 
-	static void dump (SensorConfigType sens){
+	static void dump (SensorIdType sens){
 		cout << to_string(sens.sensorIdHash) << " ";
 		cout << boost::format("%3.2f") % sens.minVal << " ";
 		cout << boost::format("%3.2f") % sens.maxVal << " ";
@@ -90,7 +90,7 @@ public:
 
 private:
 	// information about the sensors, ram-mirror of what is in E2
-	std::array<SensorConfigType, MAX_SENSORS> sensorConfigTable;
+	SensorIdArray sensorIdArray;
 };
 
 } // namespace msmnt

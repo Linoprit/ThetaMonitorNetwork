@@ -80,7 +80,8 @@ int tx_cycle(SerialIO* serialIO) {
 			result = serialIO->transmit(txBuff, tx_act_pos);
 #else
 			//result = CDC_Transmit_FS(txBuff, tx_act_pos);
-			result = HAL_UART_Transmit_IT(&SERIAL_UART, &txBuff[0], tx_act_pos);
+			//result = HAL_UART_Transmit_IT(&SERIAL_UART, &txBuff[0], tx_act_pos);
+			result = HAL_UART_Transmit_DMA(&SERIAL_UART, &txBuff[0], tx_act_pos);
 			//result = HAL_UART_Transmit(&SERIAL_UART, &txBuff[0], tx_act_pos, 100);
 #endif
 			// @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY

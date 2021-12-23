@@ -210,8 +210,12 @@ static const uint8_t nRF24_ADDR_REGS[7] = {
 class NRF24L01
 {
 public:
+	// Hm. We mix the current state of the nRF with operation results.
 	typedef enum {
 		nRF24_TX_ERROR  = (uint8_t)0x00, // Unknown error
+		nRF24_NOP,						 // no operation, device is not used
+		nRF24_TX_IS_ONGOING,			 // Transmision is still in progress
+		nRF24_CHANNEL_SCAN_ACTIVE,		 // Carrier detection is active
 		nRF24_TX_SUCCESS,                // Packet has been transmitted successfully
 		nRF24_TX_TIMEOUT,                // It was timeout during packet transmit
 		nRF24_TX_MAXRT                   // Transmit failed with maximum auto retransmit count

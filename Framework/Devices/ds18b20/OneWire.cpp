@@ -76,7 +76,7 @@ bool OneWire::readBit(void) {
 	bool bit = false;
 
 	lineLow();
-	owDelay(3); // critical! 3 - 4
+	owDelay(4); // critical! 3 - 4
 
 	lineHigh();
 	owDelay(5); // was 5

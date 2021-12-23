@@ -11,13 +11,15 @@
 // FIXME make it working on X86
 
 #include "PCD8544_graphics.h"
-
+#include <Devices/PCD8544_LCD/PCD8544_socket.h>
 
 #ifdef USE_GRAPHICS
 
-PCD8544_graphics::PCD8544_graphics(PCD8544_socket* socket):
-PCD8544_basis(socket)
-{
+namespace lcd {
+
+PCD8544_graphics::PCD8544_graphics() :
+		PCD8544_basis() {
+
 	textcolor = BLACK;
 
 #ifdef enablePartialUpdate
@@ -27,98 +29,70 @@ PCD8544_basis(socket)
 	yUpdateMax = 0;
 #endif
 
-	cursor_x   = 0;
-	cursor_y   = 0;
+	cursor_x = 0;
+	cursor_y = 0;
 
 	// clear();
 }
 
-
-void PCD8544_graphics::updateBoundingBox(uint8_t xmin,
-		uint8_t ymin,
-		uint8_t xmax,
-		uint8_t ymax)
-{
+void PCD8544_graphics::updateBoundingBox(uint8_t xmin, uint8_t ymin,
+		uint8_t xmax, uint8_t ymax) {
 #ifdef enablePartialUpdate
-	if (xmin < xUpdateMin) xUpdateMin = xmin;
-	if (xmax > xUpdateMax) xUpdateMax = xmax;
-	if (ymin < yUpdateMin) yUpdateMin = ymin;
-	if (ymax > yUpdateMax) yUpdateMax = ymax;
+	if (xmin < xUpdateMin)
+		xUpdateMin = xmin;
+	if (xmax > xUpdateMax)
+		xUpdateMax = xmax;
+	if (ymin < yUpdateMin)
+		yUpdateMin = ymin;
+	if (ymax > yUpdateMax)
+		yUpdateMax = ymax;
 #endif
 }
 
-
-void PCD8544_graphics::setCursor(uint8_t x_px,
-		uint8_t y_px)
-{
+void PCD8544_graphics::setCursor(uint8_t x_px, uint8_t y_px) {
 	cursor_x = x_px;
 	cursor_y = y_px;
 }
 
-
-uint8_t PCD8544_graphics::line_2_y_pix(uint8_t line)
-{
+uint8_t PCD8544_graphics::line_2_y_pix(uint8_t line) {
 	line++;
-
-	return
-			line * get_actual_fontheight() - get_actual_fontheight();
+	return line * get_actual_fontheight() - get_actual_fontheight();
 }
 
-
-void PCD8544_graphics::write_string(char *str)
-{
-	while (*str != '\0')
-	{
+void PCD8544_graphics::write_string(char *str) {
+	while (*str != '\0') {
 		write_char(*str);
 		str++;
 	}
 }
 
-void PCD8544_graphics::write_string(const char *str)
-{
+void PCD8544_graphics::write_string(const char *str) {
 	write_string((char*) str);
 }
 
-
-void PCD8544_graphics::write_string(uint8_t x_px,
-		uint8_t y_px,
-		char *str)
-{
+void PCD8544_graphics::write_string(uint8_t x_px, uint8_t y_px, char *str) {
 	cursor_x = x_px;
 	cursor_y = y_px;
 	write_string(str);
 }
 
-
-void PCD8544_graphics::write_string(uint8_t x_px,
-		uint8_t y_px,
-		const char *str)
-{
+void PCD8544_graphics::write_string(uint8_t x_px, uint8_t y_px,
+		const char *str) {
 	write_string(x_px, y_px, (char*) str);
 }
 
-
-
-
-void PCD8544_graphics::write_char(char character)
-{
-	if (character == '\n')
-	{
+void PCD8544_graphics::write_char(char character) {
+	if (character == '\n') {
 		cursor_y += get_actual_fontheight();
 		cursor_x = 0;
-	}
-	else if (character == '\r')
-	{
+	} else if (character == '\r') {
 		// skip em
-	}
-	else
-	{
+	} else {
 		draw_char(cursor_x, cursor_y, character);
 		cursor_x += get_actual_fontwidth();
 
-		if (cursor_x >= (DISPLAY_WIDTH_px - get_actual_fontwidth()))
-		{
-			cursor_x =  0;
+		if (cursor_x >= (DISPLAY_WIDTH_px - get_actual_fontwidth())) {
+			cursor_x = 0;
 			cursor_y += get_actual_fontheight();
 		}
 		if (cursor_y >= DISPLAY_HEIGHT_px)
@@ -126,11 +100,7 @@ void PCD8544_graphics::write_char(char character)
 	}
 }
 
-
-void PCD8544_graphics::draw_char(uint8_t x_px,
-		uint8_t y_px,
-		char ch)
-{
+void PCD8544_graphics::draw_char(uint8_t x_px, uint8_t y_px, char ch) {
 	uint8_t pattern, i, j;
 
 	if (y_px >= DISPLAY_HEIGHT_px)
@@ -139,74 +109,56 @@ void PCD8544_graphics::draw_char(uint8_t x_px,
 	if ((x_px + get_actual_fontwidth()) >= DISPLAY_WIDTH_px)
 		return;
 
-	for (i =0; i < get_actual_fontwidth(); i++ )
-	{
-		pattern =
-				*(get_font_ptr()+(ch * get_actual_fontwidth())+i);
+	for (i = 0; i < get_actual_fontwidth(); i++) {
+		pattern = *(get_font_ptr() + (ch * get_actual_fontwidth()) + i);
 
 		// Workaround for 4x6 font
 		// The font contains two empty pixel at the upper side
 		if (get_actual_fontheight() == 6)
 			pattern = (pattern >> 2);
 
-		for (j = 0; j < get_actual_fontheight(); j++)
-		{
+		for (j = 0; j < get_actual_fontheight(); j++) {
 			if (pattern & _BV(j))
 				set_pixel(x_px + i, y_px + j, textcolor);
 			else
 				set_pixel(x_px + i, y_px + j, !textcolor);
 		}
 	}
-	updateBoundingBox(x_px, y_px,
-			x_px + get_actual_fontwidth(),
+	updateBoundingBox(x_px, y_px, x_px + get_actual_fontwidth(),
 			y_px + get_actual_fontheight());
 }
 
-
 // filled rectangle
-void PCD8544_graphics::draw_filled_rectangle(uint8_t x,
-		uint8_t y,
-		uint8_t width,
-		uint8_t height,
-		uint8_t color)
-{
+void PCD8544_graphics::draw_filled_rectangle(uint8_t x, uint8_t y,
+		uint8_t width, uint8_t height, uint8_t color) {
 	// stupidest version - just pixels - but fast with internal buffer!
-	for (uint8_t i=x; i < x+width; i++) {
-		for (uint8_t j=y; j < y+height; j++) {
+	for (uint8_t i = x; i < x + width; i++) {
+		for (uint8_t j = y; j < y + height; j++) {
 			set_pixel(i, j, color);
 		}
 	}
-	updateBoundingBox(x, y, x+width, y+height);
+	updateBoundingBox(x, y, x + width, y + height);
 }
 
-
 // draw a rectangle
-void PCD8544_graphics::draw_rectangle(uint8_t x,
-		uint8_t y,
-		uint8_t width,
-		uint8_t height,
-		uint8_t color)
-{
+void PCD8544_graphics::draw_rectangle(uint8_t x, uint8_t y, uint8_t width,
+		uint8_t height, uint8_t color) {
 	// stupidest version - just pixels - but fast with internal buffer!
-	for (uint8_t i=x; i < x + width; i++) {
+	for (uint8_t i = x; i < x + width; i++) {
 		set_pixel(i, y, color);
 		set_pixel(i, y + height - 1, color);
 	}
-	for (uint8_t i=y; i < y + height; i++) {
+	for (uint8_t i = y; i < y + height; i++) {
 		set_pixel(x, i, color);
 		set_pixel(x + width - 1, i, color);
 	}
-	updateBoundingBox(x, y, x+width, y+height);
+	updateBoundingBox(x, y, x + width, y + height);
 }
 
-
 // draw a circle outline
-void PCD8544_graphics::draw_circle(uint8_t x0,
-		uint8_t y0,
-		uint8_t r,
-		uint8_t color)
-{
-	updateBoundingBox(x0-r, y0-r, x0+r, y0+r);
+void PCD8544_graphics::draw_circle(uint8_t x0, uint8_t y0, uint8_t r,
+		uint8_t color) {
+	updateBoundingBox(x0 - r, y0 - r, x0 + r, y0 + r);
 
 	int8_t f = 1 - r;
 	int8_t ddF_x = 1;
@@ -214,15 +166,13 @@ void PCD8544_graphics::draw_circle(uint8_t x0,
 	int8_t x = 0;
 	int8_t y = r;
 
-	set_pixel(x0, y0+r, color);
-	set_pixel(x0, y0-r, color);
-	set_pixel(x0+r, y0, color);
-	set_pixel(x0-r, y0, color);
+	set_pixel(x0, y0 + r, color);
+	set_pixel(x0, y0 - r, color);
+	set_pixel(x0 + r, y0, color);
+	set_pixel(x0 - r, y0, color);
 
-	while (x<y)
-	{
-		if (f >= 0)
-		{
+	while (x < y) {
+		if (f >= 0) {
 			y--;
 			ddF_y += 2;
 			f += ddF_y;
@@ -243,13 +193,9 @@ void PCD8544_graphics::draw_circle(uint8_t x0,
 	}
 }
 
-
-void PCD8544_graphics::draw_filled_circle(uint8_t x0,
-		uint8_t y0,
-		uint8_t r,
-		uint8_t color)
-{
-	updateBoundingBox(x0-r, y0-r, x0+r, y0+r);
+void PCD8544_graphics::draw_filled_circle(uint8_t x0, uint8_t y0, uint8_t r,
+		uint8_t color) {
+	updateBoundingBox(x0 - r, y0 - r, x0 + r, y0 + r);
 
 	int8_t f = 1 - r;
 	int8_t ddF_x = 1;
@@ -257,15 +203,12 @@ void PCD8544_graphics::draw_filled_circle(uint8_t x0,
 	int8_t x = 0;
 	int8_t y = r;
 
-	for (uint8_t i=y0-r; i<=y0+r; i++)
-	{
+	for (uint8_t i = y0 - r; i <= y0 + r; i++) {
 		set_pixel(x0, i, color);
 	}
 
-	while (x<y)
-	{
-		if (f >= 0)
-		{
+	while (x < y) {
+		if (f >= 0) {
 			y--;
 			ddF_y += 2;
 			f += ddF_y;
@@ -274,27 +217,20 @@ void PCD8544_graphics::draw_filled_circle(uint8_t x0,
 		ddF_x += 2;
 		f += ddF_x;
 
-		for (uint8_t i=y0-y; i<=y0+y; i++)
-		{
-			set_pixel(x0+x, i, color);
-			set_pixel(x0-x, i, color);
+		for (uint8_t i = y0 - y; i <= y0 + y; i++) {
+			set_pixel(x0 + x, i, color);
+			set_pixel(x0 - x, i, color);
 		}
-		for (uint8_t i=y0-x; i<=y0+x; i++)
-		{
-			set_pixel(x0+y, i, color);
-			set_pixel(x0-y, i, color);
+		for (uint8_t i = y0 - x; i <= y0 + x; i++) {
+			set_pixel(x0 + y, i, color);
+			set_pixel(x0 - y, i, color);
 		}
 	}
 }
 
-
 // bresenham's algorithm - thx wikpedia
-void PCD8544_graphics::draw_line(uint8_t x0,
-		uint8_t y0,
-		uint8_t x1,
-		uint8_t y1,
-		uint8_t color)
-{
+void PCD8544_graphics::draw_line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+		uint8_t color) {
 	uint8_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
 		swap(x0, y0);
@@ -320,9 +256,10 @@ void PCD8544_graphics::draw_line(uint8_t x0,
 	if (y0 < y1) {
 		ystep = 1;
 	} else {
-		ystep = -1;}
+		ystep = -1;
+	}
 
-	for (; x0<=x1; x0++) {
+	for (; x0 <= x1; x0++) {
 		if (steep) {
 			set_pixel(y0, x0, color);
 		} else {
@@ -336,78 +273,59 @@ void PCD8544_graphics::draw_line(uint8_t x0,
 	}
 }
 
-
-void PCD8544_graphics::draw_bitmap(uint8_t x,
-		uint8_t y,
-		const uint8_t *bitmap,
-		uint8_t width,
-		uint8_t height,
-		uint8_t color)
-{
-	for (uint8_t j=0; j<height; j++)
-	{
-		for (uint8_t i=0; i<width; i++ )
-		{
-			if (*(bitmap + i + (j/8)*width) & _BV(j%8))
-			{
-				set_pixel( x+i, y+j, color);
+void PCD8544_graphics::draw_bitmap(uint8_t x, uint8_t y, const uint8_t *bitmap,
+		uint8_t width, uint8_t height, uint8_t color) {
+	for (uint8_t j = 0; j < height; j++) {
+		for (uint8_t i = 0; i < width; i++) {
+			if (*(bitmap + i + (j / 8) * width) & _BV(j % 8)) {
+				set_pixel(x + i, y + j, color);
 			}
 		}
 	}
 
-	updateBoundingBox(x, y, x+width, y+height);
+	updateBoundingBox(x, y, x + width, y + height);
 }
 
-
 // clear everything
-void PCD8544_graphics::clear(void)
-{
+void PCD8544_graphics::clear(void) {
 	PCD8544_basis::clear();
 
 	memset(graphics_buffer, 0, DISPLAY_WIDTH_px * DISPLAY_HEIGHT_px / 8);
-	updateBoundingBox(0, 0, DISPLAY_WIDTH_px-1, DISPLAY_HEIGHT_px-1);
+	updateBoundingBox(0, 0, DISPLAY_WIDTH_px - 1, DISPLAY_HEIGHT_px - 1);
 	cursor_y = cursor_x = 0;
 }
 
-
 // the most basic function, set a single pixel
-void PCD8544_graphics::set_pixel(uint8_t x,
-		uint8_t y,
-		uint8_t color)
-{
+void PCD8544_graphics::set_pixel(uint8_t x, uint8_t y, uint8_t color) {
 	if ((x >= DISPLAY_WIDTH_px) || (y >= DISPLAY_HEIGHT_px))
 		return;
 
 	// x is which column
 	if (color)
-		graphics_buffer[x+ (y/8)*DISPLAY_WIDTH_px] |= (uint8_t) _BV(y%8);
+		graphics_buffer[x + (y / 8) * DISPLAY_WIDTH_px] |= (uint8_t) _BV(y % 8);
 	else
-		graphics_buffer[x+ (y/8)*DISPLAY_WIDTH_px] &= (uint8_t) ~_BV(y%8);
+		graphics_buffer[x + (y / 8) * DISPLAY_WIDTH_px] &= (uint8_t) ~_BV(
+				y % 8);
 
-	updateBoundingBox(x,y,x,y);
+	updateBoundingBox(x, y, x, y);
 }
 
-
-void PCD8544_graphics::display(void)
-{
+void PCD8544_graphics::display(void) {
 	uint8_t col, maxcol, line;
 
-	for(line = 0; line < (DISPLAY_HEIGHT_px / 8); line++)
-	{
+	for (line = 0; line < (DISPLAY_HEIGHT_px / 8); line++) {
 #ifdef enablePartialUpdate
 		// check if this line is part of update
-		if ( yUpdateMin >= ((line+1)*8) )
-		{
+		if (yUpdateMin >= ((line + 1) * 8)) {
 			continue;   // nope, skip it!
 		}
-		if (yUpdateMax < line*8)
-		{
+		if (yUpdateMax < line * 8) {
 			break;
 		}
 #endif
 
 #ifdef enablePartialUpdate
-		col 	 = xUpdateMin;
+		col = xUpdateMin;
 		maxcol = xUpdateMax;
 #else
 		// start at the beginning of the row
@@ -417,17 +335,15 @@ void PCD8544_graphics::display(void)
 
 		set_line_n_column(col, line);
 
-		for(; col <= maxcol; col++)
-		{
-			socket->write_byte
-			(graphics_buffer[(DISPLAY_WIDTH_px * line) + col],
+		for (; col <= maxcol; col++) {
+			PCD8544_socket::write_byte(graphics_buffer[(DISPLAY_WIDTH_px * line) + col],
 					PCD8544_DATA);
 		}
 
 	}
 
 	// no idea why this is necessary but it is to finish the last byte?
-	socket->write_byte(PCD8544_SETYADDR, PCD8544_COMMAND);
+	PCD8544_socket::write_byte(PCD8544_SETYADDR, PCD8544_COMMAND);
 
 #ifdef enablePartialUpdate
 	xUpdateMin = DISPLAY_WIDTH_px - 1;
@@ -438,29 +354,20 @@ void PCD8544_graphics::display(void)
 
 }
 
-uint8_t* PCD8544_graphics::get_graphics_buffer(void)
-{
+uint8_t* PCD8544_graphics::get_graphics_buffer(void) {
 	return graphics_buffer;
 }
 
-uint8_t PCD8544_graphics::get_chars_per_line(void)
-{
-	return (DISPLAY_WIDTH_px-1) / get_actual_fontwidth();
+uint8_t PCD8544_graphics::get_chars_per_line(void) {
+	return (DISPLAY_WIDTH_px - 1) / get_actual_fontwidth();
 }
 
-uint8_t PCD8544_graphics::get_dispLines(void)
-{
+uint8_t PCD8544_graphics::get_dispLines(void) {
 	return DISPLAY_HEIGHT_px / get_actual_fontheight();
 }
 
+} // namespace lcd
 
 #endif
 #endif
-
-
-
-
-
-
-
 

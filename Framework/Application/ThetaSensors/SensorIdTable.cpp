@@ -14,46 +14,27 @@
 namespace msmnt {
 
 SensorIdTable::SensorIdTable() {
-	// NOP
+	SensorIdType sensorId;
+	sensorId.sensorIdHash = NonVolatileData::EMPTY_SENSOR_HASH;
+	sensorIdArray.fill(sensorId);
 }
 
-void SensorIdTable::initTable(NonVolatileData *nvData,
-		std::array<uint32_t, MAX_SENSORS> allSensorIds) {
-	uint8_t index = 0;
-	for (const uint32_t &sensorIdHash : allSensorIds) {
-		index = copyItemToTable(nvData, sensorIdHash, index);
-	}
-	// for (SensorConfigType sensorConfig : sensorConfigTable) {
-	// 	std::string shortname = std::string(sensorConfig.shortname, 8);
-	// 	tx_printf("%lu %s\n", sensorConfig.sensorIdHash, shortname.c_str());
-	// }
-}
-
-uint8_t SensorIdTable::copyItemToTable(NonVolatileData *nvData,
-		uint32_t sensorIdHash, uint8_t index) {
-	uint8_t lastIndex = index;
-
-	SensorIdTable::SensorConfigType sensorIdE2 = nvData->getIdTableData(
-			sensorIdHash);
-	sensorConfigTable.at(lastIndex) = sensorIdE2;
-	lastIndex++;
-
-	return lastIndex;
-}
-
-SensorIdTable::SensorConfigType SensorIdTable::getSensorData(uint32_t hashId) {
-	SensorConfigType sensorConfigResult;
-	sensorConfigResult.sensorIdHash = NonVolatileData::EMPTY_SENSOR_HASH;
-	for (SensorConfigType sensorConfig : sensorConfigTable) {
-		if(sensorConfig.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH){
+SensorIdTable::SensorIdType SensorIdTable::getSensorId(NonVolatileData *nvData,
+		uint32_t hashId) {
+	SensorIdType *sensorId;
+	for (uint8_t i = 0; i < sensorIdArray.size(); i++) {
+		sensorId = &sensorIdArray.at(i);
+		if (sensorId->sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH) {
 			break;
-		}
-		if (sensorConfig.sensorIdHash == hashId) {
-			sensorConfigResult = sensorConfig;
-			break;
+		} else if (sensorId->sensorIdHash == hashId) {
+			return *sensorId;
 		}
 	}
-	return sensorConfigResult;
+
+	SensorIdTable::SensorIdType sensorIdE2 =
+			nvData->getIdTableData(hashId);
+	*sensorId = sensorIdE2;
+	return *sensorId;
 }
 
 std::string SensorIdTable::sensorType2Str(uint8_t sensorType) {
@@ -71,8 +52,20 @@ std::string SensorIdTable::sensorType2Str(SensorType sensorType) {
 	return sensTypeStr;
 }
 
+std::string SensorIdTable::getUnit(SensorType sensorType) {
+	std::string sensTypeStr;
+	if (sensorType == SensorIdTable::SensorType::TEMP) {
+		sensTypeStr = "°C";
+	} else if (sensorType == SensorIdTable::SensorType::HUMIDITY) {
+		sensTypeStr = "%";
+	} else if (sensorType == SensorIdTable::SensorType::PRESS) {
+		sensTypeStr = "hPa";
+	}
+	return sensTypeStr;
+}
+
 uint32_t SensorIdTable::sensorID2Hash(uint8_t *address) {
-	return CrcSocket::calc_chksum32(reinterpret_cast<uint32_t*>(address), 2);
+	return CrcSocket::calcChksum32(reinterpret_cast<uint32_t*>(address), 2);
 }
 
 } // namespace msmnt

@@ -12,18 +12,8 @@
 #include "tasksDef.h"
 #include <Config/config.h>
 #include <Application/ThetaSensors/ThetaMeasurement.h>
-
-
-// #include <Devices/ds18b20/OneWire.h>
-// #include <Devices/ds18b20/DS18B20.h>
-// #include <Devices/BME280/BME280.h>
-// #include <Devices/BME280/delays.h>
-#endif
-
 #include <System/OsHelpers.h>
-//#include <System/serialPrintf.h>
-//#include <Libraries/HelpersLib.h>
-//#include <string>
+#endif
 
 #ifdef __x86_64
 void startMeasureTask(void *argument) {
@@ -32,6 +22,44 @@ void startMeasureTask(void *argument) {
 		OsHelpers::delay(1000);
 	}
 #else
+
+void startMeasureTask(void *argument) {
+	UNUSED(argument);
+
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+
+	 msmnt::ThetaMeasurement::instance().init();
+	 msmnt::ThetaMeasurement::instance().initHardware();
+
+	for (;;) {
+		 msmnt::ThetaMeasurement::instance().cycle();
+		OsHelpers::delay(3000);
+	}
+}
+
+// just to keep it, if I need it later...
+
+// in the task
+// initTwoChannelTestOwnOw();
+// initBme280Test();
+// OsHelpers::delay(3000);
+//
+// for (;;) {
+//
+// 	cycleTwoChannelTestOwnOw();
+// 	OsHelpers::delay(1000);
+//
+// 	cycleBme280Test();
+// 	OsHelpers::delay(1000);
+// }
+
+// #include <Devices/ds18b20/OneWire.h>
+// #include <Devices/ds18b20/DS18B20.h>
+// #include <Devices/BME280/BME280.h>
+// #include <Devices/BME280/delays.h>
+//#include <System/serialPrintf.h>
+//#include <Libraries/HelpersLib.h>
+//#include <string>
 
 // using namespace oneWire;
 // oneWire::OneWire owCh1 = OneWire(OW_CH1_TX_PORT, OW_CH1_TX_PIN, OW_CH1_RX_PORT,
@@ -148,34 +176,4 @@ void startMeasureTask(void *argument) {
 // 	tx_printf("\n");
 // }
 
-void startMeasureTask(void *argument) {
-	UNUSED(argument);
-
-	msmnt::ThetaMeasurement::instance().init();
-	msmnt::ThetaMeasurement::instance().initSensors();
-
-	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-
-	for (;;) {
-		msmnt::ThetaMeasurement::instance().cycle();
-		OsHelpers::delay(3000);
-	}
-
-
-	// initTwoChannelTestOwnOw();
-	// initBme280Test();
-	// OsHelpers::delay(3000);
-    //
-	// for (;;) {
-    //
-	// 	cycleTwoChannelTestOwnOw();
-	// 	OsHelpers::delay(1000);
-    //
-	// 	cycleBme280Test();
-	// 	OsHelpers::delay(1000);
-	// }
-
-
-
-}
 #endif // ifdef __x86_64

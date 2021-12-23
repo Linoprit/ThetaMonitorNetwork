@@ -22,7 +22,7 @@ extern UART_HandleTypeDef huart1; // see main.c
 
 // ******* OneWire and DS18B20 definitions *******
 extern TIM_HandleTypeDef htim1;
-constexpr TIM_HandleTypeDef* OW_TIMER = &htim1;
+constexpr TIM_HandleTypeDef *OW_TIMER = &htim1;
 constexpr bool OW_LINE_INVERTED = true;
 
 #define OW_CH2_RX_PIN  CH2_RX_Pin
@@ -37,9 +37,9 @@ constexpr bool OW_LINE_INVERTED = true;
 
 // ******* DS18B20 device *******
 constexpr uint8_t DS18B20_SEARCH_RETRIES = 6;
-constexpr uint8_t DS18B20_MAX_DEVICES = 6; // in one channel
+constexpr uint8_t DS18B20_MAX_DEVICES = 4; // in one channel
 // [ms] doAllMeasure(): how long to wait until all devices finished conversion
-constexpr uint32_t	DS18B20_CONVERSION_TIMEOUT_MS = 5000;
+constexpr uint32_t DS18B20_CONVERSION_TIMEOUT_MS = 5000;
 
 // ******* I2C for AT24Cxx EEPROM *******
 extern I2C_HandleTypeDef hi2c1; // see main.c
@@ -52,7 +52,7 @@ extern I2C_HandleTypeDef hi2c2; // see main.c
 //#define BME280_I2CADDR	0xEC		// 0x76<<1	SDO -> GND
 #define BME280_I2CADDR	0xEE			// 0x77<<1	SDO -> VCC
 extern TIM_HandleTypeDef htim2;
-constexpr TIM_HandleTypeDef* BME280_TIMER = &htim2;
+constexpr TIM_HandleTypeDef *BME280_TIMER = &htim2;
 
 // ******* SPI for nRF24L01 *******
 extern SPI_HandleTypeDef hspi1;
@@ -63,13 +63,42 @@ extern SPI_HandleTypeDef hspi1;
 // NRF_CSN_GPIO_Port,  NRF_CSN_Pin
 // Enable IRQ on IRQ-Pin, i.E. EXTI0
 
-// TODO must be altered
-#define nRF_PAYLOAD_LEN	13 // nRF24 payload length for RX and TX
+// nRF24 payload length for RX. Must be set to the longest possible message.
+#define nRF_PAYLOAD_LEN	8 // currently: sizeof(SensorMeasureType)
+// The size of the rx-buffer in NRF24L01_Basis.
+// We must run the nRFs at 250kbps, to get the maximum range. 250kbps = 31.25 bytes/ms
+// So the task, that reads the buffer must run in 1ms-cycles. We could now reduce
+// the RX-Buffer-Size. Since the complete telegram is 14 bytes wide (without
+// nRF-overhead), we can get a maximum of three messages/cycle.
+// The data that we must hold is for SensorMeasureType and for StatisticType
+// sizeof(SensorMeasureType) = 8, we assume StatisticType has the same size.
+// [SensorMeasureType: 3 * 8] + [StatisticType: 3 * 8] = 48 bytes
+constexpr uint16_t nRF24_RX_BUFFER_SIZE = 48;
+
+
+// ******* SPI for LCD PCD8544 *******
+extern SPI_HandleTypeDef hspi2;
+#define lcd_SPI hspi2
+// Pins must be named like this, to get them defined in main.h
+// LCD_CE_GPIO_Port, LCD_CE_Pin
+// LCD_SCK_GPIO_Port, LCD_SCK_Pin
+// LCD_DC_GPIO_Port, LCD_DC_Pin
+// LCD_MOSI_GPIO_Port, LCD_MOSI_Pin
+// LCD_Reset_GPIO_Port, LCD_Reset_Pin
+// LCD_BCKLT_GPIO_Port, LCD_BCKLT_Pin
+// BUTTON_1_GPIO_Port, BUTTON_1_Pin
+
+
 
 
 // ******* Common  *******
-// DS1820 Sensors * Channels + BME280 Temp/Humi/Press
-constexpr uint8_t MAX_SENSORS = DS18B20_MAX_DEVICES * 2 + 3;
+// how many slaves can connect to the master
+constexpr uint8_t MAX_SLAVES = 2;
+// how many sensors can be present on a device. Should be the same in the whole network.
+// (DS1820 Sensors * Channels + BME280 Temp/Humi/Press)
+constexpr uint8_t MAX_SENSORS = (DS18B20_MAX_DEVICES * 2 + 3);
+// determines the size of the arrays for SensorIDs and Measurements
+constexpr uint8_t MAX_MEASUREMENTS = MAX_SENSORS * (MAX_SLAVES + 1);
 
 #endif // __x86_64
 #endif /* INSTANCES_CONFIG_H_ */

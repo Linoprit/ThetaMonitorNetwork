@@ -13,18 +13,20 @@
 #include <Config/config.h>
 #include <System/CommandLine/CommandLine.h>
 #include <Application/RadioLink/RadioLink.h>
+#include <Application/ThetaSensors/ThetaMeasurement.h>
 #include <Sockets/GPIOSocket_nRF24.h>
+#include <Application/Nokia_LCD/LCDFunctions.h>
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	//UNUSED(GPIO_Pin);
 
 	if (GPIO_Pin == GPIOSocket_nRF24::get_IRQ_Pin()) {
-		radioLink::RadioLink::instance().getNRF24L01_Basis().IRQ_Pin_callback();
+		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		//radioLink::RadioLink::instance().getNRF24L01_Basis()->IrqPinRxCallback();
+
+	} else if (GPIO_Pin == BUTTON_1_Pin) {
+		lcd::LCDFunctions::instance().buttonPinCallback();
 	}
-	// TODDO connect to ISR
-	// else if (GPIO_Pin == BUTTON_1_Pin) {
-	// 	button_callback->ISR_callback_fcn();
-	// }
 }
 
 uint8_t uart1Rx = 0;
@@ -35,8 +37,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 			cLine::CommandLine::instance().putChar(uart1Rx);
 		}
 		HAL_UART_Receive_IT(&SERIAL_UART, &uart1Rx, 1);
-	}
-	else if (huart->Instance == USART2) {
+	} else if (huart->Instance == USART2) {
 		// NOP
 	} else if (huart->Instance == USART3) {
 		// NOP
