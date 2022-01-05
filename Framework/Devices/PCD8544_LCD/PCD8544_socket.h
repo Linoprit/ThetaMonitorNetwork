@@ -11,11 +11,15 @@
 #ifndef __x86_64
 // FIXME make it working on X86
 
+#ifdef __x86_64
+#include "stm32f1xx_hal.h"
+#elif defined STM32F401xE
+#include "stm32f4xx_hal.h"
+#elif defined STM32F103xB
+#include "stm32f1xx_hal.h"
+#endif
 #include <Sockets/GPIOSocket_PCD8544.h>
 #include <System/OsHelpers.h>
-
-#include "stm32f1xx_hal.h"
-#include "stm32f1xx_hal_spi.h"
 
 // dat_type in function write_byte
 #define PCD8544_COMMAND 0
@@ -60,7 +64,8 @@ public:
 		send_byte(data, 1);
 		GPIOSocket_PCD8544::deactivate_CS();
 	}
-	static void write_many_bytes(uint8_t *data, uint8_t len, uint8_t command_or_data) {
+	static void write_many_bytes(uint8_t *data, uint8_t len,
+			uint8_t command_or_data) {
 		activate_CS();
 		if (command_or_data == PCD8544_COMMAND) {
 			GPIOSocket_PCD8544::command_active();
@@ -82,7 +87,8 @@ public:
 		HAL_SPI_Transmit_DMA(&lcd_SPI, &byte, 1);
 		return true;
 	}
-	static bool send_many_bytes(uint8_t *ptr_to_data, uint8_t len, uint16_t timeout) {
+	static bool send_many_bytes(uint8_t *ptr_to_data, uint8_t len,
+			uint16_t timeout) {
 		while (HAL_SPI_GetState(&lcd_SPI) != HAL_SPI_STATE_READY) {
 			OsHelpers::delay(1);
 			timeout--;

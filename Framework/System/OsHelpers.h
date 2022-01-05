@@ -20,6 +20,9 @@
 #ifdef STM32F407xx
 #include "stm32f4xx.h"
 #endif
+#if defined STM32F401xE  || defined STM32F401xC
+#include "stm32f4xx_hal.h"
+#endif
 
 #ifdef __x86_64
 #include <boost/date_time/posix_time/posix_time.hpp>

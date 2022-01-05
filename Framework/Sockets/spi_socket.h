@@ -9,8 +9,11 @@
 #define SOCKETS_SPI_SOCKET_H_
 
 #ifdef __x86_64
-#include <stm32f1xx.h>
-#else
+#include "stm32f1xx_hal.h"
+#elif defined STM32F401xE  || defined STM32F401xC
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_spi.h"
+#elif defined STM32F103xB
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_spi.h"
 #endif

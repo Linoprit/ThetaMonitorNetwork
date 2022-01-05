@@ -6,7 +6,11 @@
  */
 #ifdef __x86_64
 #include <stm32f1xx.h>
-#else
+#elif defined STM32F401xE
+#include "stm32f4xx_hal.h"
+#include "cmsis_os.h"
+#include <main.h>
+#elif defined STM32F103xB
 #include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
 #include <main.h>
@@ -19,8 +23,8 @@
 
 void startnRF24Task(void *argument) {
 	UNUSED(argument);
-	 // radioLink::RadioLink::instance().init();
-	 // radioLink::RadioLink::instance().initHardware();
+	 //radioLink::RadioLink::instance().init();
+	 //radioLink::RadioLink::instance().initHardware();
 
 	for (;;) {
 //	 	msmnt::SensorIdTable::StationType stationType =

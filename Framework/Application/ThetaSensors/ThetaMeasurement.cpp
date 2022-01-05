@@ -126,6 +126,9 @@ void ThetaMeasurement::storeDS1820ToMeasureArray(DS18B20 ds18Channel) {
 
 void ThetaMeasurement::updateMeasurementArray(uint32_t sensorIdHash,
 		float value) {
+
+	//osStatus_t osStatus =
+	osSemaphoreAcquire(measureArraySemHandle, 0);
 	for (uint8_t i = 0; i < measurementArray.size(); i++) {
 		MeasurementType *storedMeasurement = &measurementArray.at(i);
 		if ((storedMeasurement->sensorIdHash == sensorIdHash)
@@ -137,10 +140,12 @@ void ThetaMeasurement::updateMeasurementArray(uint32_t sensorIdHash,
 			return;
 		}
 	}
+	//osStatus =
+	osSemaphoreRelease(measureArraySemHandle);
 
-	for (MeasurementType storedMeasurement : measurementArray) {
-		tx_printf("%ul\n", storedMeasurement.sensorIdHash);
-	}
+	// for (MeasurementType storedMeasurement : measurementArray) {
+	// 	tx_printf("%ul\n", storedMeasurement.sensorIdHash);
+	// }
 }
 
 void ThetaMeasurement::cycleTwoChannelsDS1820(void) {
@@ -158,21 +163,21 @@ void ThetaMeasurement::cycle(void) {
 	cycleBme280();
 
 	// TODO remove after testing
-	for (uint8_t i = 0; i < MAX_SENSORS; i++) {
-		MeasurementType actSensor = measurementArray.at(i);
-		std::string valueStr = HelpersLib::floatToStr(actSensor.value, 2u);
-
-		SensorIdTable::SensorIdType sensorConfig = _sensorIdTable.getSensorId(
-				&_nonVolatileData, actSensor.sensorIdHash);
-		std::string shortname = std::string(sensorConfig.shortname, 8);
-		std::string sensorTypeStr = SensorIdTable::sensorType2Str(
-				sensorConfig.sensType);
-
-		tx_printf("%s / %lu: %s '%s'\n", shortname.c_str(),
-				actSensor.sensorIdHash, valueStr.c_str(),
-				sensorTypeStr.c_str());
-	}
-	tx_printf("\n");
+	//	 for (uint8_t i = 0; i < MAX_SENSORS; i++) {
+	//	 	MeasurementType actSensor = measurementArray.at(i);
+	//	 	std::string valueStr = HelpersLib::floatToStr(actSensor.value, 2u);
+	//
+	//	 	SensorIdTable::SensorIdType sensorConfig = _sensorIdTable.getSensorId(
+	//	 			&_nonVolatileData, actSensor.sensorIdHash);
+	//	 	std::string shortname = std::string(sensorConfig.shortname, 8);
+	//	 	std::string sensorTypeStr = SensorIdTable::sensorType2Str(
+	//	 			sensorConfig.sensType);
+	//
+	//	 	tx_printf("%s / %lu: %s '%s'\n", shortname.c_str(),
+	//	 			actSensor.sensorIdHash, valueStr.c_str(),
+	//	 			sensorTypeStr.c_str());
+	//	 }
+	//	 tx_printf("\n");
 }
 
 uint8_t ThetaMeasurement::getValidMeasurementCount(void) {

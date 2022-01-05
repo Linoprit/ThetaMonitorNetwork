@@ -8,8 +8,14 @@
 #ifndef SOCKETS_CRCSOCKET_H_
 #define SOCKETS_CRCSOCKET_H_
 
-#include <Config/Types/AppTypes.h>
+#ifdef __x86_64
+#include "stm32f1xx_hal.h"
+#elif defined STM32F401xE  || defined STM32F401xC
+#include "stm32f4xx.h"
+#elif defined STM32F103xB
 #include <stm32f1xx.h>
+#endif
+#include <Config/Types/AppTypes.h>
 
 extern CRC_HandleTypeDef hcrc;
 

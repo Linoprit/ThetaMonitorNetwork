@@ -5,10 +5,16 @@
  *      Author: harald
  */
 
-#include "stm32f1xx_hal.h"
+
 #ifdef __x86_64
+#include "stm32f1xx_hal.h"
 #include <X86Tasks/SimulationTask.h>
-#else
+#elif defined STM32F401xE
+#include "stm32f4xx_hal.h"
+#include "cmsis_os.h"
+#include <main.h>
+#elif defined STM32F103xB
+#include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
 #include <main.h>
 #endif
@@ -50,7 +56,7 @@ void startMasterSerialTask(void *argument) {
 
 	initCommandLine();
 
-	HAL_UART_RxCpltCallback (&SERIAL_UART); // init serial reception mechanism
+	HAL_UART_RxCpltCallback(&SERIAL_UART); // init serial reception mechanism
 
 	//
 	// uint8_t addressTbl[][8] = {
@@ -68,7 +74,7 @@ void startMasterSerialTask(void *argument) {
 
 	for (;;) {
 		osDelay(20);
-		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
 		//tx_printf("Message from hell\n");
 

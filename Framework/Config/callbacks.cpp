@@ -25,6 +25,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		//radioLink::RadioLink::instance().getNRF24L01_Basis()->IrqPinRxCallback();
 
 	} else if (GPIO_Pin == BUTTON_1_Pin) {
+		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		lcd::LCDFunctions::instance().buttonPinCallback();
 	}
 }
@@ -39,9 +40,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		HAL_UART_Receive_IT(&SERIAL_UART, &uart1Rx, 1);
 	} else if (huart->Instance == USART2) {
 		// NOP
-	} else if (huart->Instance == USART3) {
-		// NOP
 	}
+	//else if (huart->Instance == USART3) {
+		// NOP
+	//}
 }
 
 // needed for dma-receive (extra stm32f1xx_hal_uart.* needed

@@ -1,0 +1,5 @@
+r
+h
+loadbin /home/harald/eclipse_workspaces/ThetaMonitorNetwork/Micro/F401CEU6/Debug/F401CEU6.bin,0x08000000
+r
+exit

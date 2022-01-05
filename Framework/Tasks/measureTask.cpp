@@ -5,15 +5,19 @@
  */
 #ifdef __x86_64
 #include <stm32f1xx.h>
-#else
+#elif defined STM32F401xE
+#include "stm32f4xx_hal.h"
+#include "cmsis_os.h"
+#include <main.h>
+#elif defined STM32F103xB
 #include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
 #include <main.h>
+#endif
 #include "tasksDef.h"
 #include <Config/config.h>
 #include <Application/ThetaSensors/ThetaMeasurement.h>
 #include <System/OsHelpers.h>
-#endif
 
 #ifdef __x86_64
 void startMeasureTask(void *argument) {
@@ -32,7 +36,7 @@ void startMeasureTask(void *argument) {
 	 msmnt::ThetaMeasurement::instance().initHardware();
 
 	for (;;) {
-		 msmnt::ThetaMeasurement::instance().cycle();
+		msmnt::ThetaMeasurement::instance().cycle();
 		OsHelpers::delay(3000);
 	}
 }

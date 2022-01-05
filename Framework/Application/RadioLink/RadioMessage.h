@@ -12,8 +12,12 @@
 #include <cstddef>
 #include <Config/config.h>
 #include <Sockets/CrcSocket.h>
+#include <Application/ThetaSensors/ThetaMeasurement.h>
 
 #define	 PACKED	__attribute__ ((packed))
+
+// nRF24 payload length for RX. Must be set to the longest possible message.
+constexpr size_t nRF_PAYLOAD_LEN =  sizeof(msmnt::ThetaMeasurement::MeasurementType);
 
 // The structs, that are associated with this class MUST have the size of
 // nRF_PAYLOAD_LEN! And they have to be PACKED.
@@ -29,7 +33,7 @@ public:
 		MsgClass msgClass :8;
 		uint8_t payload[nRF_PAYLOAD_LEN];
 		uint8_t checksum;
-	} RadioMessageType; // 14 bytes
+	} RadioMessageType; //  6 bytes + payload
 
 	virtual ~RadioMessage() {
 	}

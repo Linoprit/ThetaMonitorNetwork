@@ -7,7 +7,11 @@
 
 #ifdef __x86_64
 #include <stm32f1xx.h>
-#else
+#elif defined STM32F401xE
+#include "stm32f4xx_hal.h"
+#include "cmsis_os.h"
+#include <main.h>
+#elif defined STM32F103xB
 #include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
 #include <main.h>
@@ -34,33 +38,15 @@ void clrTmpLine(char* tmpline, uint8_t len)
 void startDisplayTask(void * argument)
 {
 	UNUSED(argument);
-	OsHelpers::delay(2500); //older LCDs need time to settle
+	OsHelpers::delay(500); //older LCDs need more time to settle (2500)
 	lcd::LCDFunctions::instance().init();
 	lcd::LCDFunctions::instance().initHardware();
 
-
-	/* original Code
-	osDelay(2000);
-	lcd = new LCDFunctions();
-	lcd->ISR_callback_fcn(); // Backlight on
-*/
-	// Backlight off
-	//HAL_GPIO_WritePin(LCD_BCKLT_GPIO_Port, LCD_BCKLT_Pin, GPIO_PIN_SET);
-
 	for(;;) {
+		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		lcd::LCDFunctions::instance().cycle();
 		lcd::LCDFunctions::instance().incPage();
 		OsHelpers::delay(2000);
-
-		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-
-		/* original Code
-		lcd->update();
-		lcd->incPage();
-
-
-		osDelay(DISPLAY_TASK_DELAY);
-		*/
 	}
 
 }

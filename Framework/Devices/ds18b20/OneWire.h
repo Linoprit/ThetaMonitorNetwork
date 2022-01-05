@@ -7,7 +7,14 @@
 #ifndef ONEWIRE_H_
 #define ONEWIRE_H_
 
-#include "stm32f1xx.h"
+
+#ifdef __x86_64
+#include "stm32f1xx_hal.h"
+#elif defined STM32F401xE
+#include "stm32f4xx.h"
+#elif defined STM32F103xB
+#include <stm32f1xx.h>
+#endif
 #include <Config/config.h>
 
 namespace oneWire {

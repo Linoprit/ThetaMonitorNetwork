@@ -5,6 +5,17 @@
  *      Author: harald
  */
 
+
+
+#ifdef __x86_64
+#include "stm32f1xx_hal.h"
+#include <X86Tasks/SimulationTask.h>
+#elif defined STM32F401xE
+#include "stm32f4xx_hal.h"
+#elif defined STM32F103xB
+#include "stm32f1xx_hal.h"
+#endif
+
 #include <Application/Nokia_LCD/LCDFunctions.h>
 #include <Application/ThetaSensors/SensorIdTable.h>
 #include <Application/ThetaSensors/ThetaMeasurement.h>
@@ -12,7 +23,6 @@
 #include <Config/config.h>
 #include <Devices/PCD8544_LCD/PCD8544_basis.h>
 #include <Libraries/HelpersLib.h>
-#include <stm32f1xx_hal.h>
 #include <System/serialPrintf.h>
 #include <array>
 #include <string>

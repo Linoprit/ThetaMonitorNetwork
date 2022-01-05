@@ -17,12 +17,16 @@
 #include <sys/_stdint.h>
 #include <array>
 
+// RTOS definition done in main.c
+extern osSemaphoreId_t measureArraySemHandle;
+
 #define	 PACKED	__attribute__ ((packed))
 
 namespace msmnt {
 
 class ThetaMeasurement {
 public:
+	// must be packed, so we can put it into a RadioMessageType
 	typedef struct PACKED {
 		uint32_t sensorIdHash;
 		float value;

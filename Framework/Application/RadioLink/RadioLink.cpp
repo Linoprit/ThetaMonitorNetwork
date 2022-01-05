@@ -13,6 +13,8 @@
 
 namespace radioLink {
 
+using namespace msmnt;
+
 void RadioLink::init(void) {
 	new (&instance()) RadioLink();
 }
@@ -28,13 +30,48 @@ RadioLink& RadioLink::instance(void) {
 }
 
 void RadioLink::cycle() {
+	// we use this memory with placement-new
+	static char RadioMsgBuff[sizeof(RadioMessage<
+			ThetaMeasurement::MeasurementType> )];
 
+	RadioMessage<msmnt::ThetaMeasurement::MeasurementType> *radioMessage = new (
+			RadioMsgBuff) RadioMessage<msmnt::ThetaMeasurement::MeasurementType>;
+
+	uint8_t sensorCount =
+			ThetaMeasurement::instance().getValidMeasurementCount();
+	ThetaMeasurement::MeasurementArray *measurementArray =
+			msmnt::ThetaMeasurement::instance().getsensorMeasureTable();
+
+	// we send all found sensors, even if they timed out
+	for (uint8_t i = 0; i < sensorCount; i++) {
+		osSemaphoreAcquire(measureArraySemHandle, 0);
+		ThetaMeasurement::MeasurementType payload = radioMessage->getPayload();
+		payload = measurementArray->at(i);
+		osSemaphoreRelease(measureArraySemHandle);
+
+		nRF24L01_Basis.transmitPacket(radioMessage->getMessagePtr(),
+				RADIO_MESSAGE_LEN);
+		while (nRF24L01_Basis.getLastTxResult() == NRF24L01::nRF24_TX_IS_ONGOING) {
+			OsHelpers::delay(1);
+		} // measured: 1.64ms
+
+		NRF24L01::nRF24_TXResult result = nRF24L01_Basis.getLastTxResult();
+		if(result != NRF24L01::nRF24_TX_SUCCESS){
+		// TODO auswerten result, wenn maxRt, dann jede Minute senden
+		}
+	}
+
+	// TODO send statistics
+	//RadioMessage<RadioStatisticType> *radioStatistic =
+	//		new (RadioMsgBuff) RadioMessage<RadioStatisticType>;
+
+	// TODO  testcode, delete later
 	static uint32_t count = 0;
-	static RadioMessage<msmnt::ThetaMeasurement::MeasurementType> radioMessage;
-	radioMessage.getPayload().sensorIdHash = count++;
-	radioMessage.prepare();
 
-	nRF24L01_Basis.transmitPacket(radioMessage.getMessagePtr(),
+	radioMessage->getPayload().sensorIdHash = count++;
+	radioMessage->prepare();
+
+	nRF24L01_Basis.transmitPacket(radioMessage->getMessagePtr(),
 			RADIO_MESSAGE_LEN);
 	while (nRF24L01_Basis.getLastTxResult() == NRF24L01::nRF24_TX_IS_ONGOING) {
 		OsHelpers::delay(1);

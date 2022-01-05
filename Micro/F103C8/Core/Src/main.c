@@ -28,6 +28,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 typedef StaticTask_t osStaticThreadDef_t;
+typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -105,6 +106,14 @@ const osThreadAttr_t masterSerialTas_attributes = {
   .stack_mem = &masterSerialTasBuffer[0],
   .stack_size = sizeof(masterSerialTasBuffer),
   .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for measureArraySem */
+osSemaphoreId_t measureArraySemHandle;
+osStaticSemaphoreDef_t measureArraySemControlBlock;
+const osSemaphoreAttr_t measureArraySem_attributes = {
+  .name = "measureArraySem",
+  .cb_mem = &measureArraySemControlBlock,
+  .cb_size = sizeof(measureArraySemControlBlock),
 };
 /* USER CODE BEGIN PV */
 
@@ -197,6 +206,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of measureArraySem */
+  measureArraySemHandle = osSemaphoreNew(3, 3, &measureArraySem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */

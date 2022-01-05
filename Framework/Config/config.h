@@ -12,9 +12,15 @@
 #include <stm32f1xx.h>
 //#include <stm32f1xx_hal_def.h>
 
-#else
-#include "stm32f1xx_hal.h"
+#elif defined STM32F401xE  || defined STM32F401xC
+#include "stm32f4xx_hal.h"
+#include "cmsis_os.h"
 #include <main.h>
+#elif defined STM32F103xB
+#include "stm32f1xx_hal.h"
+#include "cmsis_os.h"
+#include <main.h>
+#endif
 
 // ******* UART for debugging output and commandline input *******
 extern UART_HandleTypeDef huart1; // see main.c
@@ -63,8 +69,6 @@ extern SPI_HandleTypeDef hspi1;
 // NRF_CSN_GPIO_Port,  NRF_CSN_Pin
 // Enable IRQ on IRQ-Pin, i.E. EXTI0
 
-// nRF24 payload length for RX. Must be set to the longest possible message.
-#define nRF_PAYLOAD_LEN	8 // currently: sizeof(SensorMeasureType)
 // The size of the rx-buffer in NRF24L01_Basis.
 // We must run the nRFs at 250kbps, to get the maximum range. 250kbps = 31.25 bytes/ms
 // So the task, that reads the buffer must run in 1ms-cycles. We could now reduce
@@ -100,5 +104,4 @@ constexpr uint8_t MAX_SENSORS = (DS18B20_MAX_DEVICES * 2 + 3);
 // determines the size of the arrays for SensorIDs and Measurements
 constexpr uint8_t MAX_MEASUREMENTS = MAX_SENSORS * (MAX_SLAVES + 1);
 
-#endif // __x86_64
 #endif /* INSTANCES_CONFIG_H_ */
