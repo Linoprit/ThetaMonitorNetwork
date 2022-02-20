@@ -1,0 +1,70 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace snsrs {
+	class ThetaSensors {
+		+ThetaSensors()
+		+~ThetaSensors()
+		-_measurementArray : ThetaMsmnt
+		+getMeasurements() : ThetaMsmnt*
+		+getMeasurementArray() : ThetaMsmnt::MeasurementArray*
+		-_initIsDone : bool
+		+isInitDone() : bool
+		-bme280 : boschBme280::Bme280
+		-ds18B20Ch1 : oneWire::DS18B20
+		-ds18B20Ch2 : oneWire::DS18B20
+		-owCh1 : oneWire::OneWire
+		-owCh2 : oneWire::OneWire
+		-_bme280IdHumid : uint32_t
+		-_bme280IdPress : uint32_t
+		-_bme280IdTheta : uint32_t
+		-_lastUpdateTick : uint32_t
+		+getLastUpdateTick() : uint32_t
+		-makeBmeId(uint32_t stationId, SensorIdTable::SensorType sensorType) : uint32_t
+		-_foundDS1820Count : uint8_t
+		-fillSensorIdTable(oneWire::DS18B20 ds18Channel) : uint8_t
+		+getFoundDS1820() : uint8_t
+		-checkRelays() : void
+		+cycle() : void
+		-cycleBme280() : void
+		-cycleTwoChannelsDS1820() : void
+		+init(uint32_t stationId) : void
+		-initBme280() : void
+		+initHardware() : void
+		-initTwoChannelDS1820() : void
+		-printDS1820Channel(oneWire::DS18B20 ds18Channel) : void
+		-storeDS1820ToMeasureArray(oneWire::DS18B20 ds18Channel) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

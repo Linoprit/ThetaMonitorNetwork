@@ -1,0 +1,71 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace lcd {
+	class PCD8544_graphics {
+		+PCD8544_graphics()
+		+~PCD8544_graphics()
+		-cursor_x : uint8_t
+		-cursor_y : uint8_t
+		+get_chars_per_line() : uint8_t
+		+get_dispLines() : uint8_t
+		-graphics_buffer : uint8_t
+		+line_2_y_pix(uint8_t line) : uint8_t
+		-textcolor : uint8_t
+		-xUpdateMax : uint8_t
+		-xUpdateMin : uint8_t
+		-yUpdateMax : uint8_t
+		-yUpdateMin : uint8_t
+		+get_graphics_buffer() : uint8_t*
+		+clear() : void
+		+display() : void
+		+draw_bitmap(uint8_t x_px, uint8_t y_px, const uint8_t* bitmap, uint8_t width, uint8_t height, uint8_t color) : void
+		-draw_char(uint8_t x_px, uint8_t y_px, char character) : void
+		+draw_circle(uint8_t x0_px, uint8_t y0_px, uint8_t r_px, uint8_t color) : void
+		+draw_filled_circle(uint8_t x0_px, uint8_t y0_px, uint8_t r, uint8_t color) : void
+		+draw_filled_rectangle(uint8_t x_px, uint8_t y_px, uint8_t width, uint8_t height, uint8_t color) : void
+		+draw_line(uint8_t x0_px, uint8_t y0_px, uint8_t x1_px, uint8_t y1_px, uint8_t color) : void
+		+draw_rectangle(uint8_t x_px, uint8_t y_px, uint8_t width, uint8_t height, uint8_t color) : void
+		+initHardware() : void
+		+setCursor(uint8_t x_px, uint8_t y_px) : void
+		+set_pixel(uint8_t x_px, uint8_t y_px, uint8_t color) : void
+		+updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t ymax) : void
+		+write_char(char character) : void
+		+write_string(char* str) : void
+		+write_string(const char* str) : void
+		+write_string(uint8_t x, uint8_t y, char* character) : void
+		+write_string(uint8_t x_px, uint8_t y_px, const char* str) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

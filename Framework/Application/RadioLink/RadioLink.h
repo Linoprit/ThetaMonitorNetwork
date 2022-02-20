@@ -9,43 +9,45 @@
 #define APPLICATION_RADIOLINK_RADIOLINK_H_
 
 #include <Application/RadioLink/NRF24L01_Basis.h>
-#include <Application/ThetaSensors/ThetaMeasurement.h>
+#include <Application/Sensors/ThetaSensors.h>
+#include <Application/RadioGateway/RadioGateway.h>
 #include <Libraries/SimpleQueue.h>
 #include <array>
 //#include <Application/RadioLink/Messages.h>
 
 #define	 PACKED	__attribute__ ((packed))
 
-namespace radioLink {
+namespace radio {
+
+using namespace snsrs;
+using namespace gate;
 
 class RadioLink {
 public:
-	// The types, defined here, must fit into the payload.
-	// Refer to RadioMessage::PAYLOAD_LEN.
-	typedef struct PACKED {
-		uint32_t stationId;
-		uint8_t relayStates; // bitfield
-		uint8_t lostPkgs; // per hour
-		uint8_t validSensors;
-		uint8_t rxBufferOverflows; // in 24h
-	} RadioStatisticType;
+	typedef RadioMessage<gate::RadioStatisticsType> RadioStatMsgType;
+	typedef RadioMessage<MeasurementType> RadioMsmntType;
 
 	void init(void);
 	static RadioLink& instance(void);
 	void initHardware(void);
 	void cycle(void);
 
+	uint32_t getTransmitCycleTime(void) {
+		return _transmitCycleTime;
+	}
 	NRF24L01_Basis* getNRF24L01_Basis(void) {
-		return &nRF24L01_Basis;
+		return &_nRF24L01_Basis;
 	}
 
 private:
-	RadioLink() {
-	}
+	RadioLink();
 	virtual ~RadioLink() {
 	}
-	NRF24L01_Basis nRF24L01_Basis;
+	uint32_t _transmitCycleTime;
+	NRF24L01_Basis _nRF24L01_Basis;
 
+	void sendMeasurements(void);
+	void sendStatistics(void);
 };
 
 } /* namespace radioLink */

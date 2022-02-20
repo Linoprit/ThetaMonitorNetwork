@@ -10,6 +10,8 @@
 #include <Devices/nRF24L01/NRF24L01.h>
 #include <Config/config.h>
 
+using namespace std;
+
 NRF24L01::NRF24L01() {
 	spi_socket.setSpi(&nRF24_SPI);
 }
@@ -454,10 +456,22 @@ nRF24_RXResult NRF24L01::ReadPayload(uint8_t *pBuf, uint8_t *length) {
 	return nRF24_RX_EMPTY;
 }
 
+std::string NRF24L01::txResultToStr(nRF24_TXResult errorCode)
+{
+	if (errorCode == NRF24L01::nRF24_TX_ERROR) {
+		return string("nRF24_TX_ERROR");
+	} else if (errorCode == NRF24L01::nRF24_TX_SUCCESS) {
+		return string("nRF24_TX_SUCCESS");
+	} else if (errorCode == NRF24L01::nRF24_TX_TIMEOUT) {
+		return string("nRF24_TX_TIMEOUT");
+	} else if (errorCode == NRF24L01::nRF24_TX_MAXRT) {
+		return string("nRF24_TX_MAXRT");
+	}
+	return string("nRF24_TX_UNKNOWN");
+}
+
 // Print nRF24L01+ current configuration (for debug purposes)
 void NRF24L01::DumpConfig(void) {
-	// FIXME USART_printf doesn't exist
-
 	/*	uint8_t i,j;
 	 uint8_t aw;
 	 uint8_t buf[5];

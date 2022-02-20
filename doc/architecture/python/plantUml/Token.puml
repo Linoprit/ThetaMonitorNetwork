@@ -1,0 +1,70 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace cLine {
+	class TToken <template<class TOKEN_CLASS, Token::TokenType type>> {
+		+TToken()
+		+TToken(TOKEN_CLASS value)
+		+~TToken()
+		-_value : TOKEN_CLASS
+		+getVal() : TOKEN_CLASS
+	}
+
+	class Token {
+		+Token()
+		+Token(TokenType type)
+		+~Token()
+		#_type : TokenType
+		+getType() : int
+	}
+
+	enum Token::TokenType {
+		Command
+		Float
+		Integer
+		None
+		SignInt
+		String
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+cLine.Token <|-- cLine.TToken
+
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+cLine.Token <.. cLine.Token
+
+
+
+
+
+
+/' Nested objects '/
+
+cLine.Token +-- cLine.Token::TokenType
+
+
+
+
+@enduml

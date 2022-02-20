@@ -29,4 +29,12 @@ void error_handler(const char* file, uint32_t line);
 // put cpp includes here!!
 
 #endif // C interface
+/*
+ for plantUml we declare this file as a class
+@startuml Error_Handler_man.png
+class Error_Handler {
+ 	 void error_handler(const char* file, uint32_t line)
+}
+@enduml
+*/
 #endif /* SYSTEM_ERROR_HANDLER_H_ */

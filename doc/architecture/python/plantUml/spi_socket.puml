@@ -1,0 +1,44 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class Spi_socket {
+	+Spi_socket()
+	+Spi_socket(SPI_HandleTypeDef* hspi)
+	+~Spi_socket()
+	-hspi : SPI_HandleTypeDef*
+	+readwrite(uint8_t data) : uint8_t
+	-rx_buffer : uint8_t
+	+setSpi(SPI_HandleTypeDef* hspi) : void
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

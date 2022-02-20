@@ -8,17 +8,17 @@
 #ifndef NOKIA_LCD_LCDFUNCTIONS_H_
 #define NOKIA_LCD_LCDFUNCTIONS_H_
 
+#include <Application/Sensors/SensorIdTable.h>
+#include <Application/Sensors/ThetaSensors.h>
 #include <Config/config.h>
 #include <Devices/PCD8544_LCD/PCD8544_graphics.h>
 #include <sys/_stdint.h>
 #include <array>
-#include <Application/ThetaSensors/ThetaMeasurement.h>
-#include <Application/ThetaSensors/SensorIdTable.h>
 
 namespace lcd {
 
 using namespace std;
-using namespace msmnt;
+using namespace snsrs;
 
 class LCDFunctions {
 public:
@@ -35,7 +35,7 @@ public:
 
 private:
 	PCD8544_graphics _LCD_handle;
-	ThetaMeasurement::MeasurementArray *_sensorMeasureTable;
+	ThetaMsmnt::MeasurementArray *_sensorMeasureArray;
 	SensorIdTable *_sensorIdTable;
 
 	uint32_t _tickLEDoff;

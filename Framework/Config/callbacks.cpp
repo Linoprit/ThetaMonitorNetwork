@@ -13,7 +13,7 @@
 #include <Config/config.h>
 #include <System/CommandLine/CommandLine.h>
 #include <Application/RadioLink/RadioLink.h>
-#include <Application/ThetaSensors/ThetaMeasurement.h>
+#include <Application/Sensors/ThetaSensors.h>
 #include <Sockets/GPIOSocket_nRF24.h>
 #include <Application/Nokia_LCD/LCDFunctions.h>
 
@@ -53,6 +53,7 @@ void HAL_UART_RxIdleCallback(UART_HandleTypeDef *huart) {
 }
 
 // Workaround hanging usart-dma
+// todo look, if this can be removed
 void USART1_IRQHandler(void) {
 	//HAL_GPIO_TogglePin(LED_03_GPIO_Port, LED_03_Pin);
 	HAL_UART_IRQHandler(&huart1);

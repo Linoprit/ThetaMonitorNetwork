@@ -46,6 +46,10 @@ constexpr uint8_t DS18B20_SEARCH_RETRIES = 6;
 constexpr uint8_t DS18B20_MAX_DEVICES = 4; // in one channel
 // [ms] doAllMeasure(): how long to wait until all devices finished conversion
 constexpr uint32_t DS18B20_CONVERSION_TIMEOUT_MS = 5000;
+// time in [ms] the measureTask delays
+constexpr uint32_t MEASURETASK_CYCLE = 5000;
+// after which time [ms] getting no result from a sensor, it is invalid
+constexpr uint32_t SENSOR_TIMEOUT = MEASURETASK_CYCLE * 3;
 
 // ******* I2C for AT24Cxx EEPROM *******
 extern I2C_HandleTypeDef hi2c1; // see main.c
@@ -77,8 +81,7 @@ extern SPI_HandleTypeDef hspi1;
 // The data that we must hold is for SensorMeasureType and for StatisticType
 // sizeof(SensorMeasureType) = 8, we assume StatisticType has the same size.
 // [SensorMeasureType: 3 * 8] + [StatisticType: 3 * 8] = 48 bytes
-constexpr uint16_t nRF24_RX_BUFFER_SIZE = 48;
-
+#define nRF24_RX_QUEUE_SIZE (RADIO_MESSAGE_LEN * 3)
 
 // ******* SPI for LCD PCD8544 *******
 extern SPI_HandleTypeDef hspi2;
@@ -92,16 +95,26 @@ extern SPI_HandleTypeDef hspi2;
 // LCD_BCKLT_GPIO_Port, LCD_BCKLT_Pin
 // BUTTON_1_GPIO_Port, BUTTON_1_Pin
 
-
-
+// ******* Gateway / RadioLink defs  *******
+// standard cycleTime, for nRF-sendcycles
+constexpr uint32_t STD_TX_CYCLE_TIME = 300000u; // 5min
+// if data could not be provided, nRF-cycleTime will be this
+constexpr uint32_t MAXRT_TX_CYCLE_TIME = 60000u; // 1min
+// Statistics of a remote station is timed out after this [ms]
+constexpr uint32_t STATION_TIMEOUT = 2 * STD_TX_CYCLE_TIME;
 
 // ******* Common  *******
 // how many slaves can connect to the master
-constexpr uint8_t MAX_SLAVES = 2;
+constexpr uint8_t MAX_SLAVES = 3;
 // how many sensors can be present on a device. Should be the same in the whole network.
 // (DS1820 Sensors * Channels + BME280 Temp/Humi/Press)
 constexpr uint8_t MAX_SENSORS = (DS18B20_MAX_DEVICES * 2 + 3);
-// determines the size of the arrays for SensorIDs and Measurements
-constexpr uint8_t MAX_MEASUREMENTS = MAX_SENSORS * (MAX_SLAVES + 1);
+// determines the size of the arrays for received measurements
+constexpr uint8_t MAX_REMOTE_MEASUREMENTS = MAX_SENSORS * MAX_SLAVES;
+
+// ******* RTOS-Semaphores  *******
+extern osSemaphoreId_t localMsmntSemHandle;
+extern osSemaphoreId_t nRF_RxBuffSemHandle;
+extern osSemaphoreId_t remoteMsmntSemHandle;
 
 #endif /* INSTANCES_CONFIG_H_ */

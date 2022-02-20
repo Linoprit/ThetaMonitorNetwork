@@ -1,0 +1,59 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace lcd {
+	class PCD8544_basis {
+		+PCD8544_basis()
+		+~PCD8544_basis()
+		-actual_fontheight : uint8_t
+		-actual_fontwidth : uint8_t
+		+get_actual_fontheight() : uint8_t
+		+get_actual_fontwidth() : uint8_t
+		-font_ptr : uint8_t*
+		+get_font_ptr() : uint8_t*
+		+backlight_off() : void
+		+backlight_on() : void
+		+clear() : void
+		+draw_bitmap(uint8_t column, uint8_t line, const uint8_t* ptr_to_bitmap, uint8_t size_in_pixels_x, uint8_t size_in_pixels_y) : void
+		+initHardware() : void
+		+set_line_n_column(uint8_t column, uint8_t line) : void
+		+switch_font(uint8_t font_id) : void
+		+write_char(uint8_t character, uint8_t mode) : void
+		+write_char_big(uint8_t column, uint8_t line, uint8_t character, uint8_t mode) : void
+		+write_string(uint8_t column, uint8_t line, char* ptr_to_text, uint8_t mode) : void
+		+write_string(uint8_t column, uint8_t line, const char* const_ptr_to_text, uint8_t mode) : void
+		+write_string_big(uint8_t column, uint8_t line, char* ptr_to_text, uint8_t mode) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace boschBme280 {
+	class Bme280 {
+		+readAltitude(float sea_level_pa) : float
+		+readHuminidity() : float
+		+readTemperature() : float
+		+readPressure() : int32_t
+		+readTemperaturePressureHuminidity(float* temperature, int32_t* pressure, float* huminidity) : int8_t
+		-read16(uint8_t addr) : uint16_t
+		-read16LE(uint8_t addr) : uint16_t
+		-read24(uint8_t addr) : uint32_t
+		-isReadingCalibration() : uint8_t
+		-read8(uint8_t addr) : uint8_t
+		-delay_us(uint16_t us) : void
+		+init(I2C_HandleTypeDef* i2c_handler, uint8_t temperature_resolution, uint8_t pressure_oversampling, uint8_t huminidity_oversampling, uint8_t mode) : void
+		+setConfig(uint8_t standby_time, uint8_t filter) : void
+		-write8(uint8_t address, uint8_t data) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

@@ -8,29 +8,30 @@
 #ifndef RADIOLINK_MESSAGES_H_
 #define RADIOLINK_MESSAGES_H_
 
+#include <Application/Sensors/Sensors.h>
 #include <stdint.h>
 #include <cstddef>
 #include <Config/config.h>
 #include <Sockets/CrcSocket.h>
-#include <Application/ThetaSensors/ThetaMeasurement.h>
 
 #define	 PACKED	__attribute__ ((packed))
 
 // nRF24 payload length for RX. Must be set to the longest possible message.
-constexpr size_t nRF_PAYLOAD_LEN =  sizeof(msmnt::ThetaMeasurement::MeasurementType);
+constexpr size_t nRF_PAYLOAD_LEN = sizeof(snsrs::MeasurementType);
+
+enum MsgClass {
+	MEASUREMENT, STATISTICS, COMMAND, REQUEST
+};
 
 // The structs, that are associated with this class MUST have the size of
 // nRF_PAYLOAD_LEN! And they have to be PACKED.
 template<typename T>
 class RadioMessage {
 public:
-	enum MsgClass {
-		MEASUREMENT, STATS, COMMAND, REQUEST
-	};
 
 	typedef struct PACKED {
-		uint32_t stationId;
 		MsgClass msgClass :8;
+		uint32_t stationId;
 		uint8_t payload[nRF_PAYLOAD_LEN];
 		uint8_t checksum;
 	} RadioMessageType; //  6 bytes + payload
@@ -44,7 +45,10 @@ public:
 	uint8_t* getMessagePtr(void) {
 		return reinterpret_cast<uint8_t*>(&_radioMessage);
 	}
-	void prepare() {
+	void prepare(MsgClass msgClass) {
+		_radioMessage.stationId =
+				snsrs::Sensors::instance().getNonVolatileData()->getStationId();
+		_radioMessage.msgClass = msgClass;
 		_radioMessage.checksum = calcChkSum(_radioMessage);
 	}
 	bool isChkSumOk() {

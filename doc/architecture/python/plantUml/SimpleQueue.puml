@@ -1,0 +1,56 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class SimpleQueue <template<class T, std::size_t _Nm=1>> {
+	+SimpleQueue()
+	+SimpleQueue(std::size_t maxSize)
+	+~SimpleQueue()
+	+dequeue() : T
+	+front() : T
+	-_data : T*
+	+isEmpty() : bool
+	+isFull() : bool
+	-_front : int16_t
+	-_rear : int16_t
+	-_size : int16_t
+	+getFront() : int16_t
+	+getRear() : int16_t
+	+size() : int16_t
+	-_maxSize : std::size_t
+	+asArray(T* data) : void
+	+enqueue(T element) : void
+	-increment(int16_t& x) : void
+	+reset() : void
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

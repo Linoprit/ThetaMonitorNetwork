@@ -1,0 +1,52 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace cLine {
+	class Lexer {
+		+Lexer(CmdBufferType* comLine)
+		+~Lexer()
+		-_comLine : CmdBufferType*
+		+getNextToken() : Token*
+		-makeNum() : Token*
+		+{static} STRING_BUFF_LEN : static constexpr uint8_t
+		-makeStr() : std::string
+		-makeCmd() : uint32_t
+		-_actPos : uint_fast8_t
+		-_currentChar : unsigned char
+		-advance() : void
+		+setComLine(CmdBufferType* comLine) : void
+		-skipWhitespace() : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

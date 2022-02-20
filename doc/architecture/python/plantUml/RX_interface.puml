@@ -1,0 +1,40 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+abstract class RX_interface {
+	+RX_interface()
+	+~RX_interface()
+	+{abstract} get_rx_ringbuffer() : SimpleQueue<uint8_t>*
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

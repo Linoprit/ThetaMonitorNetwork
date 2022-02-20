@@ -1,0 +1,43 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class CrcSocket {
+	+CrcSocket()
+	+~CrcSocket()
+	+{static} calcBufferedChkSum32(uint8_t* data, uint32_t dataByteLen) : uint32_t
+	+{static} calcChksum32(uint32_t* data, uint32_t dataLen32) : uint32_t
+	+{static} calcUint32Len(uint32_t sizeInBytes) : uint32_t
+	+{static} calcChksum(uint8_t* data, uint8_t dataByteLen) : uint8_t
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

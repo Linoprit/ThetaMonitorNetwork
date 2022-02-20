@@ -112,3 +112,11 @@ void tx_buff_clear(void) {
 	memset(txBuff, '\0', TX_BUFF_LEN);
 	tx_act_pos = 0;
 }
+
+// test memory consumption
+// #include <stdio.h>
+//int fputc(int ch, FILE *f)
+//{
+//  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
+//  return ch;
+//}

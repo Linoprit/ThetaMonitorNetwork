@@ -1,0 +1,44 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class GPIOSocket_nRF24 {
+	+GPIOSocket_nRF24()
+	+~GPIOSocket_nRF24()
+	+{static} get_IRQ_Pin() : uint16_t
+	+nRF24_CE_H() : void
+	+nRF24_CE_L() : void
+	+nRF24_CSN_H() : void
+	+nRF24_CSN_L() : void
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

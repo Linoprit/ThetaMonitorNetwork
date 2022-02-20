@@ -1,0 +1,46 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace gate {
+	class RadioGateway {
+		+RadioGateway()
+		+~RadioGateway()
+		-_remoteMsmnt : RemoteMsmnt
+		-_remoteStats : RemoteRadioStatistics
+		+checkRadioBuffer() : void
+		+cycle() : void
+		+storeRxMessage(uint8_t* nRF24_payload) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

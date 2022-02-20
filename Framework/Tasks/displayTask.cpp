@@ -20,20 +20,6 @@
 #include "tasksDef.h"
 #include <Application/Nokia_LCD/LCDFunctions.h>
 
-//#include "../Instances/Common.h"
-// #include "../Tasks/nRF24Task.h"
-// #include "../Tasks/measureTask.h"
-//#include "../Application/Nokia_LCD/LCDFunctions.h"
-
-
-	/* original Code
-LCDFunctions* lcd;
-
-void clrTmpLine(char* tmpline, uint8_t len)
-{
-	for (uint8_t i=0; i < len; i++)
-		tmpline[i] = ' ';
-}*/
 
 void startDisplayTask(void * argument)
 {
@@ -48,7 +34,8 @@ void startDisplayTask(void * argument)
 		lcd::LCDFunctions::instance().incPage();
 		OsHelpers::delay(2000);
 	}
-
 }
+
+
 
 

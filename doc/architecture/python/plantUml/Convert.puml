@@ -1,0 +1,63 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class Convert {
+	+Convert()
+	+Convert(float scale, float offset, float minVal, float maxVal)
+	+Convert(ConvLimits lim)
+	-_maxVal : float
+	-_minVal : float
+	-_offset : float
+	-_scale : float
+	+int2Phys(uint32_t intVal) : float
+	+saturatePhys(float physVal) : float
+	+phys2Int(float physVal) : uint32_t
+	+setLimits(ConvLimits lim) : void
+	+setLimits(float scale, float offset, float minVal, float maxVal) : void
+}
+
+
+class ConvLimits {
+	+maxVal : float
+	+minVal : float
+	+offset : float
+	+scale : float
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+.ConvLimits <.. .Convert
+
+
+.ConvLimits <.. .Convert
+
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

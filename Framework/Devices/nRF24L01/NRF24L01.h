@@ -14,7 +14,7 @@
 
 #include <Sockets/spi_socket.h>
 #include <Sockets/GPIOSocket_nRF24.h>
-
+#include <string>
 
 // nRF24L0 instruction definitions
 #define nRF24_CMD_R_REGISTER       (uint8_t)0x00 // Register read
@@ -81,149 +81,141 @@
 // Fake address to test transceiver presence (5 bytes long)
 #define nRF24_TEST_ADDR            "nRF24"
 
-
 // Retransmit delay
 enum {
-	nRF24_ARD_NONE   = (uint8_t)0x00, // Dummy value for case when retransmission is not used
-	nRF24_ARD_250us  = (uint8_t)0x00,
-	nRF24_ARD_500us  = (uint8_t)0x01,
-	nRF24_ARD_750us  = (uint8_t)0x02,
-	nRF24_ARD_1000us = (uint8_t)0x03,
-	nRF24_ARD_1250us = (uint8_t)0x04,
-	nRF24_ARD_1500us = (uint8_t)0x05,
-	nRF24_ARD_1750us = (uint8_t)0x06,
-	nRF24_ARD_2000us = (uint8_t)0x07,
-	nRF24_ARD_2250us = (uint8_t)0x08,
-	nRF24_ARD_2500us = (uint8_t)0x09,
-	nRF24_ARD_2750us = (uint8_t)0x0A,
-	nRF24_ARD_3000us = (uint8_t)0x0B,
-	nRF24_ARD_3250us = (uint8_t)0x0C,
-	nRF24_ARD_3500us = (uint8_t)0x0D,
-	nRF24_ARD_3750us = (uint8_t)0x0E,
-	nRF24_ARD_4000us = (uint8_t)0x0F
+	nRF24_ARD_NONE = (uint8_t) 0x00, // Dummy value for case when retransmission is not used
+	nRF24_ARD_250us = (uint8_t) 0x00,
+	nRF24_ARD_500us = (uint8_t) 0x01,
+	nRF24_ARD_750us = (uint8_t) 0x02,
+	nRF24_ARD_1000us = (uint8_t) 0x03,
+	nRF24_ARD_1250us = (uint8_t) 0x04,
+	nRF24_ARD_1500us = (uint8_t) 0x05,
+	nRF24_ARD_1750us = (uint8_t) 0x06,
+	nRF24_ARD_2000us = (uint8_t) 0x07,
+	nRF24_ARD_2250us = (uint8_t) 0x08,
+	nRF24_ARD_2500us = (uint8_t) 0x09,
+	nRF24_ARD_2750us = (uint8_t) 0x0A,
+	nRF24_ARD_3000us = (uint8_t) 0x0B,
+	nRF24_ARD_3250us = (uint8_t) 0x0C,
+	nRF24_ARD_3500us = (uint8_t) 0x0D,
+	nRF24_ARD_3750us = (uint8_t) 0x0E,
+	nRF24_ARD_4000us = (uint8_t) 0x0F
 };
 
 // Data rate
 enum {
-	nRF24_DR_250kbps = (uint8_t)0x20, // 250kbps data rate
-	nRF24_DR_1Mbps   = (uint8_t)0x00, // 1Mbps data rate
-	nRF24_DR_2Mbps   = (uint8_t)0x08  // 2Mbps data rate
+	nRF24_DR_250kbps = (uint8_t) 0x20, // 250kbps data rate
+	nRF24_DR_1Mbps = (uint8_t) 0x00, // 1Mbps data rate
+	nRF24_DR_2Mbps = (uint8_t) 0x08  // 2Mbps data rate
 };
 
 // RF output power in TX mode
 enum {
-	nRF24_TXPWR_18dBm = (uint8_t)0x00, // -18dBm
-	nRF24_TXPWR_12dBm = (uint8_t)0x02, // -12dBm
-	nRF24_TXPWR_6dBm  = (uint8_t)0x04, //  -6dBm
-	nRF24_TXPWR_0dBm  = (uint8_t)0x06  //   0dBm
+	nRF24_TXPWR_18dBm = (uint8_t) 0x00, // -18dBm
+	nRF24_TXPWR_12dBm = (uint8_t) 0x02, // -12dBm
+	nRF24_TXPWR_6dBm = (uint8_t) 0x04, //  -6dBm
+	nRF24_TXPWR_0dBm = (uint8_t) 0x06  //   0dBm
 };
 
 // CRC encoding scheme
 enum {
-	nRF24_CRC_off   = (uint8_t)0x00, // CRC disabled
-	nRF24_CRC_1byte = (uint8_t)0x08, // 1-byte CRC
-	nRF24_CRC_2byte = (uint8_t)0x0c  // 2-byte CRC
+	nRF24_CRC_off = (uint8_t) 0x00, // CRC disabled
+	nRF24_CRC_1byte = (uint8_t) 0x08, // 1-byte CRC
+	nRF24_CRC_2byte = (uint8_t) 0x0c  // 2-byte CRC
 };
 
 // nRF24L01 power control
 enum {
-	nRF24_PWR_UP   = (uint8_t)0x02, // Power up
-	nRF24_PWR_DOWN = (uint8_t)0x00  // Power down
+	nRF24_PWR_UP = (uint8_t) 0x02, // Power up
+	nRF24_PWR_DOWN = (uint8_t) 0x00  // Power down
 };
 
 // Transceiver mode
 enum {
-	nRF24_MODE_RX = (uint8_t)0x01, // PRX
-	nRF24_MODE_TX = (uint8_t)0x00  // PTX
+	nRF24_MODE_RX = (uint8_t) 0x01, // PRX
+	nRF24_MODE_TX = (uint8_t) 0x00  // PTX
 };
 
 // Enumeration of RX pipe addresses and TX address
 enum {
-	nRF24_PIPE0  = (uint8_t)0x00, // pipe0
-	nRF24_PIPE1  = (uint8_t)0x01, // pipe1
-	nRF24_PIPE2  = (uint8_t)0x02, // pipe2
-	nRF24_PIPE3  = (uint8_t)0x03, // pipe3
-	nRF24_PIPE4  = (uint8_t)0x04, // pipe4
-	nRF24_PIPE5  = (uint8_t)0x05, // pipe5
-	nRF24_PIPETX = (uint8_t)0x06  // TX address (not a pipe in fact)
+	nRF24_PIPE0 = (uint8_t) 0x00, // pipe0
+	nRF24_PIPE1 = (uint8_t) 0x01, // pipe1
+	nRF24_PIPE2 = (uint8_t) 0x02, // pipe2
+	nRF24_PIPE3 = (uint8_t) 0x03, // pipe3
+	nRF24_PIPE4 = (uint8_t) 0x04, // pipe4
+	nRF24_PIPE5 = (uint8_t) 0x05, // pipe5
+	nRF24_PIPETX = (uint8_t) 0x06  // TX address (not a pipe in fact)
 };
 
 // State of auto acknowledgment for specified pipe
 enum {
-	nRF24_AA_OFF = (uint8_t)0x00,
-	nRF24_AA_ON  = (uint8_t)0x01
+	nRF24_AA_OFF = (uint8_t) 0x00, nRF24_AA_ON = (uint8_t) 0x01
 };
 
 // Status of the RX FIFO
 enum {
-	nRF24_STATUS_RXFIFO_DATA  = (uint8_t)0x00, // The RX FIFO contains data and available locations
-	nRF24_STATUS_RXFIFO_EMPTY = (uint8_t)0x01, // The RX FIFO is empty
-	nRF24_STATUS_RXFIFO_FULL  = (uint8_t)0x02, // The RX FIFO is full
-	nRF24_STATUS_RXFIFO_ERROR = (uint8_t)0x03  // Impossible state: RX FIFO cannot be empty and full at the same time
+	nRF24_STATUS_RXFIFO_DATA = (uint8_t) 0x00, // The RX FIFO contains data and available locations
+	nRF24_STATUS_RXFIFO_EMPTY = (uint8_t) 0x01, // The RX FIFO is empty
+	nRF24_STATUS_RXFIFO_FULL = (uint8_t) 0x02, // The RX FIFO is full
+	nRF24_STATUS_RXFIFO_ERROR = (uint8_t) 0x03 // Impossible state: RX FIFO cannot be empty and full at the same time
 };
 
 // Status of the TX FIFO
 enum {
-	nRF24_STATUS_TXFIFO_DATA  = (uint8_t)0x00, // The TX FIFO contains data and available locations
-	nRF24_STATUS_TXFIFO_EMPTY = (uint8_t)0x01, // The TX FIFO is empty
-	nRF24_STATUS_TXFIFO_FULL  = (uint8_t)0x02, // The TX FIFO is full
-	nRF24_STATUS_TXFIFO_ERROR = (uint8_t)0x03  // Impossible state: TX FIFO cannot be empty and full at the same time
+	nRF24_STATUS_TXFIFO_DATA = (uint8_t) 0x00, // The TX FIFO contains data and available locations
+	nRF24_STATUS_TXFIFO_EMPTY = (uint8_t) 0x01, // The TX FIFO is empty
+	nRF24_STATUS_TXFIFO_FULL = (uint8_t) 0x02, // The TX FIFO is full
+	nRF24_STATUS_TXFIFO_ERROR = (uint8_t) 0x03 // Impossible state: TX FIFO cannot be empty and full at the same time
 };
 
 // Result of RX FIFO reading
 typedef enum {
-	nRF24_RX_PIPE0  = (uint8_t)0x00, // Packet received from the PIPE#0
-	nRF24_RX_PIPE1  = (uint8_t)0x01, // Packet received from the PIPE#1
-	nRF24_RX_PIPE2  = (uint8_t)0x02, // Packet received from the PIPE#2
-	nRF24_RX_PIPE3  = (uint8_t)0x03, // Packet received from the PIPE#3
-	nRF24_RX_PIPE4  = (uint8_t)0x04, // Packet received from the PIPE#4
-	nRF24_RX_PIPE5  = (uint8_t)0x05, // Packet received from the PIPE#5
-	nRF24_RX_EMPTY  = (uint8_t)0xff  // The RX FIFO is empty
+	nRF24_RX_PIPE0 = (uint8_t) 0x00, // Packet received from the PIPE#0
+	nRF24_RX_PIPE1 = (uint8_t) 0x01, // Packet received from the PIPE#1
+	nRF24_RX_PIPE2 = (uint8_t) 0x02, // Packet received from the PIPE#2
+	nRF24_RX_PIPE3 = (uint8_t) 0x03, // Packet received from the PIPE#3
+	nRF24_RX_PIPE4 = (uint8_t) 0x04, // Packet received from the PIPE#4
+	nRF24_RX_PIPE5 = (uint8_t) 0x05, // Packet received from the PIPE#5
+	nRF24_RX_EMPTY = (uint8_t) 0xff  // The RX FIFO is empty
 } nRF24_RXResult;
-
 
 // Addresses of the RX_PW_P# registers
 static const uint8_t nRF24_RX_PW_PIPE[6] = {
-		nRF24_REG_RX_PW_P0,
-		nRF24_REG_RX_PW_P1,
-		nRF24_REG_RX_PW_P2,
-		nRF24_REG_RX_PW_P3,
-		nRF24_REG_RX_PW_P4,
-		nRF24_REG_RX_PW_P5
-};
+nRF24_REG_RX_PW_P0,
+nRF24_REG_RX_PW_P1,
+nRF24_REG_RX_PW_P2,
+nRF24_REG_RX_PW_P3,
+nRF24_REG_RX_PW_P4,
+nRF24_REG_RX_PW_P5 };
 
 // Addresses of the address registers
 static const uint8_t nRF24_ADDR_REGS[7] = {
-		nRF24_REG_RX_ADDR_P0,
-		nRF24_REG_RX_ADDR_P1,
-		nRF24_REG_RX_ADDR_P2,
-		nRF24_REG_RX_ADDR_P3,
-		nRF24_REG_RX_ADDR_P4,
-		nRF24_REG_RX_ADDR_P5,
-		nRF24_REG_TX_ADDR
-};
+nRF24_REG_RX_ADDR_P0,
+nRF24_REG_RX_ADDR_P1,
+nRF24_REG_RX_ADDR_P2,
+nRF24_REG_RX_ADDR_P3,
+nRF24_REG_RX_ADDR_P4,
+nRF24_REG_RX_ADDR_P5,
+nRF24_REG_TX_ADDR };
 
-
-
-
-
-class NRF24L01
-{
+class NRF24L01 {
 public:
 	// Hm. We mix the current state of the nRF with operation results.
 	typedef enum {
-		nRF24_TX_ERROR  = (uint8_t)0x00, // Unknown error
+		nRF24_TX_ERROR = (uint8_t) 0x00, // Unknown error
 		nRF24_NOP,						 // no operation, device is not used
 		nRF24_TX_IS_ONGOING,			 // Transmision is still in progress
 		nRF24_CHANNEL_SCAN_ACTIVE,		 // Carrier detection is active
-		nRF24_TX_SUCCESS,                // Packet has been transmitted successfully
-		nRF24_TX_TIMEOUT,                // It was timeout during packet transmit
-		nRF24_TX_MAXRT                   // Transmit failed with maximum auto retransmit count
+		nRF24_TX_SUCCESS,            // Packet has been transmitted successfully
+		nRF24_TX_TIMEOUT,               // It was timeout during packet transmit
+		nRF24_TX_MAXRT     // Transmit failed with maximum auto retransmit count
 	} nRF24_TXResult;
 
 	NRF24L01();
-	NRF24L01(Spi_socket* spi_socket, GPIOSocket_nRF24* gpio_socket);
-	virtual ~NRF24L01() {};
+	NRF24L01(Spi_socket *spi_socket, GPIOSocket_nRF24 *gpio_socket);
+	virtual ~NRF24L01() {
+	}
+	;
 
 	uint8_t LL_RW(uint8_t data);
 	uint8_t ReadReg(uint8_t reg);
@@ -255,21 +247,29 @@ public:
 	void FlushTX(void);
 	void FlushRX(void);
 	void ClearIRQFlags(void);
+
 	void WritePayload(uint8_t *pBuf, uint8_t length);
 	nRF24_RXResult ReadPayload(uint8_t *pBuf, uint8_t *length);
-
 	nRF24_TXResult TransmitPacket(uint8_t *pBuf, uint8_t length);
+	std::string txResultToStr(nRF24_TXResult ErrorCode);
 
 	void DumpConfig(void);
 
-	inline void CE_L(void) { gpio_socket.nRF24_CE_L(); }
-	inline void CE_H(void) { gpio_socket.nRF24_CE_H(); }
-	inline void CSN_L(void) { gpio_socket.nRF24_CSN_L(); }
-	inline void CSN_H(void) { gpio_socket.nRF24_CSN_H(); }
-
+	inline void CE_L(void) {
+		gpio_socket.nRF24_CE_L();
+	}
+	inline void CE_H(void) {
+		gpio_socket.nRF24_CE_H();
+	}
+	inline void CSN_L(void) {
+		gpio_socket.nRF24_CSN_L();
+	}
+	inline void CSN_H(void) {
+		gpio_socket.nRF24_CSN_H();
+	}
 
 private:
-	Spi_socket 	spi_socket;
+	Spi_socket spi_socket;
 	GPIOSocket_nRF24 gpio_socket;
 };
 #endif

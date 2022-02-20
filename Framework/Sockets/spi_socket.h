@@ -40,7 +40,7 @@ public:
 	}
 	;
 	uint8_t readwrite(uint8_t data) {
-		// TODO blocking...
+		// TODO blocking... use DMA?
 		while (HAL_SPI_GetState(this->hspi) != HAL_SPI_STATE_READY) {
 		}
 

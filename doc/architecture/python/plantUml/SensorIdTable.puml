@@ -1,0 +1,87 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace snsrs {
+	class SensorIdTable {
+		+SensorIdTable()
+		+~SensorIdTable()
+		-sensorIdArray : SensorIdArray
+		+getSensorId(NonVolatileData* nvData, uint32_t hashId) : SensorIdTable::SensorIdType
+		+{static} INVLD_TEMPERATURE : static constexpr uint16_t
+		+{static} MIN_TEMP_HYSTERESIS : static constexpr uint16_t
+		+{static} SENSOR_ID_LEN : static constexpr uint16_t
+		+{static} SENSOR_TABLE_LEN : static constexpr uint16_t
+		+{static} SHORTNAME_LEN : static constexpr uint16_t
+		+{static} getUnit(SensorType sensorType) : std::string
+		+{static} sensorType2Str(SensorType sensorType) : std::string
+		+{static} sensorType2Str(uint8_t sensorType) : std::string
+		+{static} sensorID2Hash(uint8_t* address) : uint32_t
+		+{static} dump(SensorIdType sens) : void
+	}
+
+	enum SensorIdTable::SensorType {
+		HUMIDITY
+		PRESS
+		TEMP
+	}
+
+	enum SensorIdTable::StationType {
+		MASTER
+		NONE
+		SLAVE_01
+		SLAVE_02
+		SLAVE_03
+		SLAVE_04
+		SLAVE_05
+	}
+
+	class SensorIdType {
+		+sensType : SensorType
+		+shortname : char
+		+maxVal : float
+		+minVal : float
+		+sensorIdHash : uint32_t
+		+relayNr : uint8_t
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+snsrs.SensorIdType <.. snsrs.SensorIdTable
+
+
+
+
+
+
+/' Nested objects '/
+
+snsrs.SensorIdTable +-- snsrs.SensorIdTable::SensorType
+
+
+snsrs.SensorIdTable +-- snsrs.SensorIdTable::StationType
+
+
+
+
+@enduml

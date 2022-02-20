@@ -1,0 +1,60 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace cLine {
+	class History {
+		+History()
+		+~History()
+		+showDown() : CmdBufferType
+		+showUp() : CmdBufferType
+		+add(CmdBufferType comLine) : bool
+		+comLineIsEqual(CmdBufferType left, CmdBufferType right) : bool
+		+comlineIsEmpty(CmdBufferType comLine) : bool
+		-_histArray : std::array<CmdBufferType, HISTORY_DEPTH>
+		-_insertPos : uint8_t
+		-_showPos : uint8_t
+		+getInsertPos() : uint8_t {query}
+		+getShowPos() : uint8_t {query}
+		-decInsertPos() : void
+		-decPos(uint8_t& pos) : void
+		+decShowPos() : void
+		-incInsertPos() : void
+		-incPos(uint8_t& pos) : void
+		+incShowPos() : void
+		-resPos(uint8_t& pos) : void
+		+resShowPos() : void
+		+reset() : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

@@ -1,0 +1,82 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace oneWire {
+	class OneWire {
+		+OneWire()
+		+OneWire(GPIO_TypeDef* GPIO_TX_PORT, uint16_t GPIO_TX_Pin, GPIO_TypeDef* GPIO_RX_PORT, uint16_t GPIO_RX_Pin)
+		+~OneWire()
+		-_GPIO_RX_PORT : GPIO_TypeDef*
+		-_GPIO_TX_PORT : GPIO_TypeDef*
+		+first() : bool
+		+next() : bool
+		+readBit() : bool
+		+readLine() : bool
+		+search(uint8_t command) : bool
+		+verify() : int
+		+{static} CMD_CPYSCRATCHPAD : static constexpr uint8_t
+		+{static} CMD_MATCHROM : static constexpr uint8_t
+		+{static} CMD_READROM : static constexpr uint8_t
+		+{static} CMD_RECEEPROM : static constexpr uint8_t
+		+{static} CMD_RPWRSUPPLY : static constexpr uint8_t
+		+{static} CMD_RSCRATCHPAD : static constexpr uint8_t
+		+{static} CMD_SEARCHROM : static constexpr uint8_t
+		+{static} CMD_SKIPROM : static constexpr uint8_t
+		+{static} CMD_WSCRATCHPAD : static constexpr uint8_t
+		-_GPIO_RX_Pin : uint16_t
+		-_GPIO_TX_Pin : uint16_t
+		+CRC8(uint8_t* addr, uint8_t len) : uint8_t
+		-ROM_NO : uint8_t
+		-_lastDeviceFlag : uint8_t
+		-_lastDiscrepancy : uint8_t
+		-_lastFamilyDiscrepancy : uint8_t
+		+getROM(uint8_t index) : uint8_t
+		+readByte() : uint8_t
+		+reset() : uint8_t
+		+InitLine() : void
+		+familySkipSetup() : void
+		+getFullROM(uint8_t* firstIndex) : void
+		+initTimer() : void
+		+lineHigh() : void
+		+lineLow() : void
+		+owDelay(uint16_t time_us) : void
+		+resetSearch() : void
+		+select(uint8_t* addr) : void
+		+selectWithPointer(uint8_t* ROM) : void
+		+targetSetup(uint8_t family_code) : void
+		+writeBit(uint8_t bit) : void
+		+writeByte(uint8_t byte) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class GPIOSocket_PCD8544 {
+	+{static} get_IRQ_Pin() : uint16_t
+	+{static} activate_CS() : void
+	+{static} backlight_off() : void
+	+{static} backlight_on() : void
+	+{static} command_active() : void
+	+{static} data_active() : void
+	+{static} deactivate_CS() : void
+	+{static} pull_reset() : void
+	+{static} release_reset() : void
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

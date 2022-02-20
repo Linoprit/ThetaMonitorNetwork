@@ -1,0 +1,54 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace snsrs {
+	class Measurements <template<int N>> {
+		+Measurements(osSemaphoreId_t semaphore)
+		+~Measurements()
+		-_measurementArray : MeasurementArray
+		+getArray() : MeasurementArray*
+		+getMsmnt(uint32_t sensorId) : MeasurementType
+		+isTimedOut(uint32_t sensorId) : bool
+		-_semaphore : osSemaphoreId_t
+		+getValidCount() : uint8_t
+		+update(uint32_t sensorIdHash, float value) : void
+	}
+
+	class MeasurementType {
+		+value : float
+		+lastUpdateTick : uint32_t
+		+sensorIdHash : uint32_t
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

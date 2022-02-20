@@ -50,6 +50,19 @@ extern char* ultoa( unsigned long value, char *string, int radix ) ;
 } // extern "C"
 #endif // __cplusplus
 
+/*
+ for plantUml we declare this file as a class
+@startuml itoa_man.png
+class itoa {
+	extern char* itoa( int value, char *string, int radix ) ;
+	extern char* ltoa( long value, char *string, int radix ) ;
+	extern char* ultoa( unsigned long value, char *string, int radix ) ;
+}
+@enduml
+*/
+
+
+
 #endif // _ITOA_
 
 

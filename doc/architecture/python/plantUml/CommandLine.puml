@@ -1,0 +1,96 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace cLine {
+	class CommandLine {
+		+CommandLine()
+		+~CommandLine()
+		#_cmdBuffer : CmdBufferType
+		+{static} instance() : CommandLine&
+		#_history : History
+		#_interpret : Interpreter
+		#_keyBuffer : SimpleQueue<uint8_t>
+		#readNextChar(uint8_t& chr) : int
+		#_cmdPos : uint8_t
+		#accumulateChar(uint8_t chr) : void
+		+cycle() : void
+		#decCmdPos() : void
+		#incCmdPos() : void
+		+init() : void
+		#moveCmdLeft(uint8_t startPos) : void
+		#moveCmdRight(uint8_t startPos) : void
+		#procArrowDown() : void
+		#procArrowLeft() : void
+		#procArrowRight() : void
+		#procArrowUp() : void
+		#procBackspace() : void
+		#procDel() : void
+		#procEnd() : void
+		#procEnter() : void
+		#procEscape() : void
+		#procFourByteEscKeys(uint8_t actChar) : void
+		#procPGDN() : void
+		#procPGUP() : void
+		#procPos1() : void
+		#procSqrEscKeys() : void
+		+putChar(uint8_t chr) : void
+		#resCmdPos() : void
+		+splash() : void
+		#syncCmdPos() : void
+		+termDelLines(uint8_t n) : void
+		+termDelete(uint8_t n) : void
+		+termDisplayClear() : void
+		+termEraseChars(uint8_t n) : void
+		+termEraseDisplay(uint8_t n) : void
+		+termEraseLine(uint8_t n) : void
+		+termHideCursor() : void
+		+termHighLight() : void
+		+termInsLines(uint8_t n) : void
+		+termInsert(uint8_t n) : void
+		+termMoveDown(uint8_t n) : void
+		+termMoveDownRows(uint8_t n) : void
+		+termMoveLeft(uint8_t n) : void
+		+termMoveRight(uint8_t n) : void
+		+termMoveTo(uint8_t x, uint8_t y) : void
+		+termMoveToCol(uint8_t n) : void
+		+termMoveUp(uint8_t n) : void
+		+termMoveUpRows(uint8_t n) : void
+		+termPos1() : void
+		+termPrompt() : void
+		+termResetCursor() : void
+		+termShowCursor() : void
+		+termUnHighLight() : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

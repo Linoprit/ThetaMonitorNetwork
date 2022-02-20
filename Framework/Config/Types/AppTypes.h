@@ -28,4 +28,23 @@ constexpr int _FAIL_ = -1;
 # define UINT64_WIDTH 64
 #endif
 
+/*
+ for plantUml we declare this file as a class
+@startuml AppTypes_man.png
+class AppTypes {
+  int _SUCCESS_ = 0
+  int _FAIL_ = -1
+  ==
+  define INT8_WIDTH 8
+  define UINT8_WIDTH 8
+  define INT16_WIDTH 16
+  define UINT16_WIDTH 16
+  define INT32_WIDTH 32
+  define UINT32_WIDTH 32
+  define INT64_WIDTH 64
+  define UINT64_WIDTH 64
+}
+@enduml
+*/
+
 #endif /* FRAMEWORK_TYPES_APPTYPES_H_ */

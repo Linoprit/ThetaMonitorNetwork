@@ -5,16 +5,16 @@
  *      Author: harald
  */
 
-#include <Application/ThetaSensors/SensorIdTable.h>
+#include <Application/Sensors/SensorIdTable.h>
+#include <Application/Sensors/Sensors.h>
 #include <System/CommandLine/Interpreter.h>
 #include <Sockets/CrcSocket.h>
 #include <System/serialPrintf.h>
 #include <cstring>
-#include <Application/ThetaSensors/ThetaMeasurement.h>
 #include <System/OsHelpers.h>
 
 namespace cLine {
-using namespace msmnt;
+using namespace snsrs;
 
 Interpreter::Interpreter() {
 }
@@ -44,7 +44,7 @@ bool Interpreter::doit(CmdBufferType comLine) {
 }
 
 bool Interpreter::clrSensIdTable(Lexer *lex) {
-	msmnt::ThetaMeasurement::instance().getNonVolatileData()->clrIdTableData();
+	snsrs::Sensors::instance().getNonVolatileData()->clrIdTableData();
 	tx_printf("\nID-Table cleared.\n");
 	return true;
 }
@@ -66,20 +66,20 @@ bool Interpreter::setStationId(Lexer *lex) {
 	if (intToken->getType() != Token::Integer) {
 		return false;
 	}
-	msmnt::ThetaMeasurement::instance().getNonVolatileData()->writeStatId(
+	snsrs::Sensors::instance().getNonVolatileData()->writeStatId(
 			intToken->getVal());
 	return true;
 }
 
 bool Interpreter::getSensIdTable(Lexer *lex) {
 	tx_printf("\nPrinting sensor-table from E2:\n");
-	msmnt::ThetaMeasurement::instance().getNonVolatileData()->printIdTableRaw();
+	snsrs::Sensors::instance().getNonVolatileData()->printIdTableRaw();
 	return true;
 }
 
 bool Interpreter::getStationId(Lexer *lex) {
 	uint32_t stationId =
-			msmnt::ThetaMeasurement::instance().getNonVolatileData()->getStatId();
+			snsrs::Sensors::instance().getNonVolatileData()->getStationId();
 	tx_printf("\nStation ID = %u\n", stationId);
 	return true;
 }
@@ -125,7 +125,7 @@ bool Interpreter::setSensId(Lexer *lex) {
 	memcpy(sens.shortname, chrToken->getVal(), SensorIdTable::SHORTNAME_LEN);
 
 	//ErrorCode result =
-	msmnt::ThetaMeasurement::instance().getNonVolatileData()->writeIdTableData(
+	snsrs::Sensors::instance().getNonVolatileData()->writeIdTableData(
 			sens);
 
 	return true;

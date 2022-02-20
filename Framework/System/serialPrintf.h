@@ -42,4 +42,15 @@ int tx_cycle(void);
 #endif
 
 #endif // C interface
+/*
+ for plantUml we declare this file as a class
+@startuml serialPrintf_man.png
+class serialPrintf {
+	int tx_printBuff(uint8_t* buffer, uint8_t len)
+	void _putchar(char character);
+	uint16_t tx_free_bytes(void)
+	int tx_cycle(void)
+}
+@enduml
+*/
 #endif /* UART_PRINTF_H_ */

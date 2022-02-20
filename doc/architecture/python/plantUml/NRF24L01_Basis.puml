@@ -1,0 +1,68 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class NRF24L01_Basis {
+	+NRF24L01_Basis()
+	+~NRF24L01_Basis()
+	-_nRF24 : NRF24L01
+	-_lastTxResult : NRF24L01::nRF24_TXResult
+	+getLastTxResult() : NRF24L01::nRF24_TXResult
+	-_rxBuffer : RxBufferQueue
+	+getRxBuffer() : RxBufferQueue*
+	+getNRFState() : int
+	-_nRFState : nRFState
+	+getNRFStateStr() : std::string
+	-_lostPkgCount : uint8_t
+	-_retransCount : uint8_t
+	-_rxBufferOverflows : uint8_t
+	+get_lostPkgCount() : uint8_t
+	+get_retransCount() : uint8_t
+	+get_rxBufferOverflows() : uint8_t
+	+IrqPinRxCallback() : void
+	+addStatistics(uint8_t lostPkgCount, uint8_t retransCount) : void
+	+init() : void
+	+resetStatistics() : void
+	+transmitPacket(uint8_t* pBuf, uint8_t length) : void
+}
+
+
+enum NRF24L01_Basis::nRFState {
+	checkOk
+	initDone
+	none
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+.NRF24L01_Basis +-- .NRF24L01_Basis::nRFState
+
+
+
+
+@enduml

@@ -66,6 +66,12 @@ void Error_Handler(void);
 #define NRF_CE_GPIO_Port GPIOA
 #define NRF_CSN_Pin GPIO_PIN_4
 #define NRF_CSN_GPIO_Port GPIOA
+#define NRF_SCK_Pin GPIO_PIN_5
+#define NRF_SCK_GPIO_Port GPIOA
+#define NRF_MISO_Pin GPIO_PIN_6
+#define NRF_MISO_GPIO_Port GPIOA
+#define NRF_MOSI_Pin GPIO_PIN_7
+#define NRF_MOSI_GPIO_Port GPIOA
 #define CH2_TX_Pin GPIO_PIN_1
 #define CH2_TX_GPIO_Port GPIOB
 #define CH2_RX_Pin GPIO_PIN_2

@@ -1,0 +1,51 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class AT24Cxxx {
+	+AT24Cxxx()
+	+~AT24Cxxx()
+	+{static} I2C_HANDLE : constexpr static I2C_HandleTypeDef*
+	+{static} E2PAGESIZE : constexpr static uint16_t
+	+{static} MAX_ADDRESS : constexpr static uint16_t
+	+{static} DEVICE_ADDRESS : constexpr static uint8_t
+	+{static} lowerAddressFromPageNr(uint16_t pageNr) : uint16_t
+	+{static} lowerPageAddress(uint16_t address) : uint16_t
+	+{static} pageAtAddress(uint16_t address) : uint16_t
+	+{static} upperAddressFromPageNr(uint16_t pageNr) : uint16_t
+	+{static} upperPageAddress(uint16_t address) : uint16_t
+	+{static} erase(uint16_t startAddr, uint32_t len) : void
+	+{static} read(uint16_t startAddr, uint8_t* data, uint32_t len) : void
+	+{static} write(uint16_t startAddr, uint8_t* data, uint32_t len) : void
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

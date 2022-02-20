@@ -1,0 +1,48 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace cLine {
+	class Interpreter {
+		+Interpreter()
+		+~Interpreter()
+		-calcHash(Lexer* lex) : bool
+		-clrSensIdTable(Lexer* lex) : bool
+		+doit(CmdBufferType comLine) : bool
+		-getSensIdTable(Lexer* lex) : bool
+		-getStationId(Lexer* lex) : bool
+		-setSensId(Lexer* lex) : bool
+		-setStationId(Lexer* lex) : bool
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

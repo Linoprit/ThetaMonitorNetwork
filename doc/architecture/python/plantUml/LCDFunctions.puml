@@ -1,0 +1,63 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace lcd {
+	class LCDFunctions {
+		-LCDFunctions()
+		-~LCDFunctions()
+		+{static} instance() : LCDFunctions&
+		-_LCD_handle : PCD8544_graphics
+		-_sensorIdTable : SensorIdTable*
+		-_sensorMeasureArray : ThetaMsmnt::MeasurementArray*
+		-cycleInitScreen() : bool
+		-_tmpLine : char*
+		-_holdStateTicks : uint32_t
+		-_tickLEDoff : uint32_t
+		-_act_page : uint8_t
+		-_pages : uint8_t
+		-_sensorCount : uint8_t
+		-_tmpLineLen : uint8_t
+		+buttonPinCallback() : void
+		-checkBackgroundLight() : void
+		+clrTmpLine() : void
+		+copyString(char* tgt, const char* src, uint8_t len) : void
+		+cycle() : void
+		+incPage() : void
+		+init() : void
+		+initHardware() : void
+		-printStates() : void
+		-pushTheta(float theta) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

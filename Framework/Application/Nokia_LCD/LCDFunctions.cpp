@@ -5,8 +5,6 @@
  *      Author: harald
  */
 
-
-
 #ifdef __x86_64
 #include "stm32f1xx_hal.h"
 #include <X86Tasks/SimulationTask.h>
@@ -17,8 +15,8 @@
 #endif
 
 #include <Application/Nokia_LCD/LCDFunctions.h>
-#include <Application/ThetaSensors/SensorIdTable.h>
-#include <Application/ThetaSensors/ThetaMeasurement.h>
+#include <Application/Sensors/SensorIdTable.h>
+#include <Application/Sensors/ThetaSensors.h>
 #include <Application/RadioLink/RadioLink.h>
 #include <Config/config.h>
 #include <Devices/PCD8544_LCD/PCD8544_basis.h>
@@ -31,7 +29,7 @@
 namespace lcd {
 
 using namespace std;
-using namespace msmnt;
+using namespace snsrs;
 
 // how long to keep the backlight on, after button-press
 constexpr uint32_t TICKS_BCKLT_ON = 60000; // [ms]
@@ -64,7 +62,7 @@ void LCDFunctions::printStates(void) {
 
 	std::string line = "nRFState: ";
 	line.append(
-			radioLink::RadioLink::instance().getNRF24L01_Basis()->getNRFStateStr());
+			radio::RadioLink::instance().getNRF24L01_Basis()->getNRFStateStr());
 	_LCD_handle.write_string(0, (_LCD_handle.line_2_y_pix(act_line)),
 			line.c_str());
 	act_line++;
@@ -73,7 +71,7 @@ void LCDFunctions::printStates(void) {
 	line = "found DS1820: ";
 	line.append(
 			std::to_string(
-					msmnt::ThetaMeasurement::instance().getFoundSensors()));
+					Sensors::instance().getThetaSensors()->getFoundDS1820()));
 	_LCD_handle.write_string(0, (_LCD_handle.line_2_y_pix(act_line)),
 			line.c_str());
 	act_line++;
@@ -82,7 +80,7 @@ void LCDFunctions::printStates(void) {
 }
 
 bool LCDFunctions::cycleInitScreen(void) {
-	if (!ThetaMeasurement::instance().isInitDone()) {
+	if (!Sensors::instance().getThetaSensors()->isInitDone()) {
 		_tickLEDoff = OsHelpers::get_tick() + TICKS_BCKLT_ON;
 		_holdStateTicks = OsHelpers::get_tick() + TICKS_KEEP_STATE_SCREEN;
 	}
@@ -113,7 +111,8 @@ void LCDFunctions::cycle(void) {
 	checkBackgroundLight();
 	_LCD_handle.clear(); // clear internal buffer
 
-	_sensorCount = ThetaMeasurement::instance().getValidMeasurementCount();
+	_sensorCount =
+			Sensors::instance().getThetaSensors()->getMeasurements()->getValidCount();
 	_pages = static_cast<uint8_t>(ceil(
 			((float) _sensorCount) / _LCD_handle.get_dispLines()));
 
@@ -123,10 +122,8 @@ void LCDFunctions::cycle(void) {
 		}
 		clrTmpLine();
 
-		ThetaMeasurement::MeasurementType actSensor = _sensorMeasureTable->at(
-				i);
-		NonVolatileData *nvData =
-				ThetaMeasurement::instance().getNonVolatileData();
+		MeasurementType actSensor = _sensorMeasureArray->at(i);
+		NonVolatileData *nvData = Sensors::instance().getNonVolatileData();
 		SensorIdTable::SensorIdType sensorConfig = _sensorIdTable->getSensorId(
 				nvData, actSensor.sensorIdHash);
 		std::string shortname = std::string(sensorConfig.shortname, 8);
@@ -153,8 +150,9 @@ void LCDFunctions::cycle(void) {
 
 LCDFunctions::LCDFunctions() :
 		_tickLEDoff { 0 }, _act_page { 0 }, _holdStateTicks { 0 } {
-	_sensorMeasureTable = ThetaMeasurement::instance().getsensorMeasureTable();
-	_sensorIdTable = ThetaMeasurement::instance().getSensorIdTable();
+	_sensorMeasureArray =
+			Sensors::instance().getThetaSensors()->getMeasurementArray();
+	_sensorIdTable = Sensors::instance().getSensorIdTable();
 }
 
 void LCDFunctions::pushTheta(float theta) {

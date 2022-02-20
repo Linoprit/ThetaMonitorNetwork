@@ -106,13 +106,29 @@ const osThreadAttr_t masterSerialTas_attributes = {
   .stack_size = sizeof(masterSerialTasBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for measureArraySem */
-osSemaphoreId_t measureArraySemHandle;
-osStaticSemaphoreDef_t measureArraySemControlBlock;
-const osSemaphoreAttr_t measureArraySem_attributes = {
-  .name = "measureArraySem",
-  .cb_mem = &measureArraySemControlBlock,
-  .cb_size = sizeof(measureArraySemControlBlock),
+/* Definitions for localMsmntSem */
+osSemaphoreId_t localMsmntSemHandle;
+osStaticSemaphoreDef_t localMsmntSemControlBlock;
+const osSemaphoreAttr_t localMsmntSem_attributes = {
+  .name = "localMsmntSem",
+  .cb_mem = &localMsmntSemControlBlock,
+  .cb_size = sizeof(localMsmntSemControlBlock),
+};
+/* Definitions for nRF_RxBuffSem */
+osSemaphoreId_t nRF_RxBuffSemHandle;
+osStaticSemaphoreDef_t nRF_RxBuffSemControlBlock;
+const osSemaphoreAttr_t nRF_RxBuffSem_attributes = {
+  .name = "nRF_RxBuffSem",
+  .cb_mem = &nRF_RxBuffSemControlBlock,
+  .cb_size = sizeof(nRF_RxBuffSemControlBlock),
+};
+/* Definitions for remoteMsmntSem */
+osSemaphoreId_t remoteMsmntSemHandle;
+osStaticSemaphoreDef_t remoteMsmntSemControlBlock;
+const osSemaphoreAttr_t remoteMsmntSem_attributes = {
+  .name = "remoteMsmntSem",
+  .cb_mem = &remoteMsmntSemControlBlock,
+  .cb_size = sizeof(remoteMsmntSemControlBlock),
 };
 /* USER CODE BEGIN PV */
 
@@ -195,8 +211,14 @@ int main(void)
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
-  /* creation of measureArraySem */
-  measureArraySemHandle = osSemaphoreNew(3, 3, &measureArraySem_attributes);
+  /* creation of localMsmntSem */
+  localMsmntSemHandle = osSemaphoreNew(3, 3, &localMsmntSem_attributes);
+
+  /* creation of nRF_RxBuffSem */
+  nRF_RxBuffSemHandle = osSemaphoreNew(3, 3, &nRF_RxBuffSem_attributes);
+
+  /* creation of remoteMsmntSem */
+  remoteMsmntSemHandle = osSemaphoreNew(3, 3, &remoteMsmntSem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */

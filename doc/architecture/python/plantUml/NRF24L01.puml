@@ -1,0 +1,194 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class NRF24L01 {
+	+NRF24L01()
+	+NRF24L01(Spi_socket* spi_socket, GPIOSocket_nRF24* gpio_socket)
+	+~NRF24L01()
+	-gpio_socket : GPIOSocket_nRF24
+	-spi_socket : Spi_socket
+	+ReadPayload(uint8_t* pBuf, uint8_t* length) : int
+	+TransmitPacket(uint8_t* pBuf, uint8_t length) : int
+	+txResultToStr(nRF24_TXResult ErrorCode) : std::string
+	+Check() : uint8_t
+	+GetIRQFlags() : uint8_t
+	+GetRXSource() : uint8_t
+	+GetRetransmitCounters() : uint8_t
+	+GetStatus() : uint8_t
+	+GetStatus_RXFIFO() : uint8_t
+	+GetStatus_TXFIFO() : uint8_t
+	+LL_RW(uint8_t data) : uint8_t
+	+ReadReg(uint8_t reg) : uint8_t
+	+CE_H() : void
+	+CE_L() : void
+	+CSN_H() : void
+	+CSN_L() : void
+	+ClearIRQFlags() : void
+	+ClosePipe(uint8_t pipe) : void
+	+DisableAA(uint8_t pipe) : void
+	+DumpConfig() : void
+	+EnableAA(uint8_t pipe) : void
+	+FlushRX() : void
+	+FlushTX() : void
+	+Init() : void
+	+ReadMBReg(uint8_t reg, uint8_t* pBuf, uint8_t count) : void
+	+ResetPLOS() : void
+	+SetAddr(uint8_t pipe, const uint8_t* addr) : void
+	+SetAddrWidth(uint8_t addr_width) : void
+	+SetAutoRetr(uint8_t ard, uint8_t arc) : void
+	+SetCRCScheme(uint8_t scheme) : void
+	+SetDataRate(uint8_t data_rate) : void
+	+SetOperationalMode(uint8_t mode) : void
+	+SetPowerMode(uint8_t mode) : void
+	+SetRFChannel(uint8_t channel) : void
+	+SetRXPipe(uint8_t pipe, uint8_t aa_state, uint8_t payload_len) : void
+	+SetTXPower(uint8_t tx_pwr) : void
+	+WriteMBReg(uint8_t reg, uint8_t* pBuf, uint8_t count) : void
+	+WritePayload(uint8_t* pBuf, uint8_t length) : void
+	+WriteReg(uint8_t reg, uint8_t value) : void
+}
+
+
+enum NRF24L01::nRF24_TXResult {
+	nRF24_CHANNEL_SCAN_ACTIVE
+	nRF24_NOP
+	nRF24_TX_ERROR
+	nRF24_TX_IS_ONGOING
+	nRF24_TX_MAXRT
+	nRF24_TX_SUCCESS
+	nRF24_TX_TIMEOUT
+}
+
+
+enum empty {
+	nRF24_ARD_1000us
+	nRF24_ARD_1250us
+	nRF24_ARD_1500us
+	nRF24_ARD_1750us
+	nRF24_ARD_2000us
+	nRF24_ARD_2250us
+	nRF24_ARD_2500us
+	nRF24_ARD_250us
+	nRF24_ARD_2750us
+	nRF24_ARD_3000us
+	nRF24_ARD_3250us
+	nRF24_ARD_3500us
+	nRF24_ARD_3750us
+	nRF24_ARD_4000us
+	nRF24_ARD_500us
+	nRF24_ARD_750us
+	nRF24_ARD_NONE
+}
+
+
+enum empty {
+	nRF24_DR_1Mbps
+	nRF24_DR_250kbps
+	nRF24_DR_2Mbps
+}
+
+
+enum empty {
+	nRF24_TXPWR_0dBm
+	nRF24_TXPWR_12dBm
+	nRF24_TXPWR_18dBm
+	nRF24_TXPWR_6dBm
+}
+
+
+enum empty {
+	nRF24_CRC_1byte
+	nRF24_CRC_2byte
+	nRF24_CRC_off
+}
+
+
+enum empty {
+	nRF24_PWR_DOWN
+	nRF24_PWR_UP
+}
+
+
+enum empty {
+	nRF24_MODE_RX
+	nRF24_MODE_TX
+}
+
+
+enum empty {
+	nRF24_PIPE0
+	nRF24_PIPE1
+	nRF24_PIPE2
+	nRF24_PIPE3
+	nRF24_PIPE4
+	nRF24_PIPE5
+	nRF24_PIPETX
+}
+
+
+enum empty {
+	nRF24_AA_OFF
+	nRF24_AA_ON
+}
+
+
+enum empty {
+	nRF24_STATUS_RXFIFO_DATA
+	nRF24_STATUS_RXFIFO_EMPTY
+	nRF24_STATUS_RXFIFO_ERROR
+	nRF24_STATUS_RXFIFO_FULL
+}
+
+
+enum empty {
+	nRF24_STATUS_TXFIFO_DATA
+	nRF24_STATUS_TXFIFO_EMPTY
+	nRF24_STATUS_TXFIFO_ERROR
+	nRF24_STATUS_TXFIFO_FULL
+}
+
+
+enum nRF24_RXResult {
+	nRF24_RX_EMPTY
+	nRF24_RX_PIPE0
+	nRF24_RX_PIPE1
+	nRF24_RX_PIPE2
+	nRF24_RX_PIPE3
+	nRF24_RX_PIPE4
+	nRF24_RX_PIPE5
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+.NRF24L01 +-- .NRF24L01::nRF24_TXResult
+
+
+
+
+@enduml

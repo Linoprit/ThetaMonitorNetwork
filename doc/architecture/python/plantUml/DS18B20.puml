@@ -1,0 +1,92 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace oneWire {
+	class DS18B20 {
+		+DS18B20()
+		+DS18B20(OneWire* oneWire)
+		+~DS18B20()
+		-_sensors : DS1820SensorType
+		+getAllSensors() : DS1820SensorType*
+		-_ow : OneWire*
+		+doAllMeasure() : bool
+		+read(uint8_t* ROM, float* destination) : bool
+		+searchFirstWithRetry() : bool
+		+setAllResolution(Resolution_t resolution) : bool
+		+{static} DECIMAL_STEPS_10BIT : static constexpr float
+		+{static} DECIMAL_STEPS_11BIT : static constexpr float
+		+{static} DECIMAL_STEPS_12BIT : static constexpr float
+		+{static} DECIMAL_STEPS_9BIT : static constexpr float
+		+{static} CMD_ALARMSEARCH : static constexpr uint8_t
+		+{static} CMD_CONVERTTEMP : static constexpr uint8_t
+		+{static} DATA_LEN : static constexpr uint8_t
+		+{static} DATA_LEN : static constexpr uint8_t
+		+{static} FAMILY_CODE : static constexpr uint8_t
+		+{static} RESOLUTION_R0 : static constexpr uint8_t
+		+{static} RESOLUTION_R1 : static constexpr uint8_t
+		-_foundSensors : uint8_t
+		+alarmSearch() : uint8_t
+		+allDone() : uint8_t
+		+disableAlarmTemperature(uint8_t* ROM) : uint8_t
+		+findAllSensors() : uint8_t
+		+getFoundSensors() : uint8_t
+		+getResolution(uint8_t* ROM) : uint8_t
+		+isDs18b20(uint8_t* ROM) : uint8_t
+		+setAlarmHighTemperature(uint8_t* ROM, int8_t temp) : uint8_t
+		+setAlarmLowTemperature(uint8_t* ROM, int8_t temp) : uint8_t
+		+setResolution(uint8_t* ROM, Resolution_t resolution) : uint8_t
+		+start(uint8_t* ROM) : uint8_t
+		+startAll() : void
+	}
+
+	enum DS18B20::Resolution_t {
+		Resolution_10bits
+		Resolution_11bits
+		Resolution_12bits
+		Resolution_9bits
+	}
+
+	class DS1820SensorType {
+		+dataIsValid : bool
+		+temperature : float
+		+address : uint8_t
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+oneWire.DS18B20 *-- oneWire.DS1820SensorType
+
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+oneWire.DS18B20 +-- oneWire.DS18B20::Resolution_t
+
+
+
+
+@enduml

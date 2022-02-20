@@ -1,0 +1,57 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class OsHelpers {
+	-OsHelpers()
+	+OsHelpers()
+	-~OsHelpers()
+	+~OsHelpers()
+	-{static} systemTick : static uint32_t
+	-{static} get_tick() : uint32_t
+	+{static} get_tick() : uint32_t
+	-{static} NOP() : void
+	+{static} NOP() : void
+	-{static} SYSTEM_EXIT() : void
+	+{static} SYSTEM_EXIT() : void
+	-{static} SYSTEM_REBOOT() : void
+	+{static} SYSTEM_REBOOT() : void
+	-{static} delay(uint32_t delay) : void
+	-{static} delay(uint32_t delay) : void
+	+{static} delay(uint32_t delay) : void
+	+{static} setSystemTick(uint32_t currentTick) : void
+	-{static} yield() : void
+	-{static} yield() : void
+	+{static} yield() : void
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace snsrs {
+	class Sensors {
+		-Sensors()
+		-~Sensors()
+		-_nonVolatileData : NonVolatileData
+		+getNonVolatileData() : NonVolatileData*
+		-_sensorIdTable : SensorIdTable
+		+getSensorIdTable() : SensorIdTable*
+		+{static} instance() : Sensors&
+		-_thetaSensors : ThetaSensors
+		+getThetaSensors() : ThetaSensors*
+		-_relayStates : uint8_t
+		+getRelayStates() : uint8_t
+		+checkRelays() : void
+		+cycle() : void
+		+init() : void
+		+initHardware() : void
+		+printMsmntArray() : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

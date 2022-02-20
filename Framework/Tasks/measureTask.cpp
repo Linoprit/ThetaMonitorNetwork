@@ -1,3 +1,4 @@
+
 /*
  *
  *  Created on: 06.07.2018
@@ -16,7 +17,7 @@
 #endif
 #include "tasksDef.h"
 #include <Config/config.h>
-#include <Application/ThetaSensors/ThetaMeasurement.h>
+#include <Application/Sensors/Sensors.h>
 #include <System/OsHelpers.h>
 
 #ifdef __x86_64
@@ -27,17 +28,24 @@ void startMeasureTask(void *argument) {
 	}
 #else
 
+extern void initGatewayTask(void);
+
 void startMeasureTask(void *argument) {
 	UNUSED(argument);
 
 	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
-	 msmnt::ThetaMeasurement::instance().init();
-	 msmnt::ThetaMeasurement::instance().initHardware();
+	snsrs::Sensors::instance().init();
+	snsrs::Sensors::instance().initHardware();
+
+	if (snsrs::Sensors::instance().getNonVolatileData()->getStationType()
+			== snsrs::SensorIdTable::MASTER){
+		initGatewayTask();
+	}
 
 	for (;;) {
-		msmnt::ThetaMeasurement::instance().cycle();
-		OsHelpers::delay(3000);
+		snsrs::Sensors::instance().cycle();
+		OsHelpers::delay(MEASURETASK_CYCLE);
 	}
 }
 

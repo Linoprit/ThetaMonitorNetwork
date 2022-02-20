@@ -6,6 +6,7 @@
  */
 
 #include "OneWire.h"
+#include <System/OsHelpers.h>
 #include "cmsis_os.h" // for osDelay
 
 namespace oneWire {
@@ -33,11 +34,11 @@ void OneWire::initTimer(void) {
 
 void OneWire::InitLine(void) {
 	lineHigh();
-	osDelay(1000); // TODO replace with OsHelpers::delay
+	OsHelpers::delay(1000);
 	lineLow();
-	osDelay(1000);
+	OsHelpers::delay(1000);
 	lineHigh();
-	osDelay(2000);
+	OsHelpers::delay(2000);
 }
 
 uint8_t OneWire::reset(void) {

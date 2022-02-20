@@ -1,0 +1,45 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class HelpersLib {
+	+HelpersLib()
+	+{static} floatToStr(float value, uint8_t decimalPlace) : std::string
+	+{static} swapBytes(uint16_t value) : uint16_t
+	+{static} findFirstSetBitFromLeft(uint8_t inByte) : uint8_t
+	+{static} findFirstSetBitFromRight(uint8_t inByte) : uint8_t
+	+{static} hibyte(uint16_t value) : uint8_t
+	+{static} lobyte(uint16_t value) : uint8_t
+	+{static} value2char(char* result_buff, uint8_t result_buff_len, uint8_t exp, long int value) : void
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

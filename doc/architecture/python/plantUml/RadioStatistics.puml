@@ -1,0 +1,58 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace gate {
+	class RadioStatistics <template<int N>> {
+		+RadioStatistics()
+		+~RadioStatistics()
+		-_radioStatisticsArray : RadioStatisticsArray
+		+getArray() : RadioStatisticsArray*
+		+getStatistic(uint32_t stationId) : RadioStatisticsType
+		+isTimedOut(uint32_t stationId) : bool
+		+update(RadioStatisticsType statistic) : void
+	}
+
+	class RadioStatisticsType {
+		+lastUpdateTick : uint32_t
+		+stationId : uint32_t
+		+lostPkgs : uint8_t
+		+relayStates : uint8_t
+		+rxBufferOverflows : uint8_t
+		+validSensors : uint8_t
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+gate.RadioStatisticsType <.. gate.RadioStatistics
+
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

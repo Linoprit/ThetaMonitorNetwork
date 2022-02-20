@@ -1,0 +1,51 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace radio {
+	class RadioLink {
+		-RadioLink()
+		-~RadioLink()
+		-_nRF24L01_Basis : NRF24L01_Basis
+		+getNRF24L01_Basis() : NRF24L01_Basis*
+		+{static} instance() : RadioLink&
+		-_transmitCycleTime : uint32_t
+		+getTransmitCycleTime() : uint32_t
+		+cycle() : void
+		+init() : void
+		+initHardware() : void
+		-sendMeasurements() : void
+		-sendStatistics() : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

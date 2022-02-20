@@ -53,7 +53,7 @@ static constexpr uint8_t nRF24_RX_ADDR5[1] = { 'V' };                 // Slave 5
 
 class NRF24L01_Basis {
 public:
-	typedef SimpleQueue<uint8_t, nRF24_RX_BUFFER_SIZE> RxBufferQueue;
+	typedef SimpleQueue<uint8_t, nRF24_RX_QUEUE_SIZE> RxBufferQueue;
 	enum nRFState {
 		none, checkOk, initDone
 	};
@@ -74,19 +74,16 @@ public:
 	uint8_t get_retransCount(void) {
 		return _retransCount;
 	}
-	uint8_t get_rxBufferOverflowa(void) {
+	uint8_t get_rxBufferOverflows(void) {
 		return _rxBufferOverflows;
 	}
-	void reset_stats(void) {
+	void resetStatistics(void) {
 		_lostPkgCount = 0;
 		_retransCount = 0;
 		_rxBufferOverflows = 0;
 	}
-	void addStats(uint8_t lostPkgCount, uint8_t retransCount);
-	bool isRxBufLocked(void) {
-		return _rxBufIsLocked;
-	}
-	SimpleQueue<uint8_t, nRF24_RX_BUFFER_SIZE>* getRxBuffer(void) {
+	void addStatistics(uint8_t lostPkgCount, uint8_t retransCount);
+	RxBufferQueue* getRxBuffer(void) {
 		return &_rxBuffer;
 	}
 	NRF24L01::nRF24_TXResult getLastTxResult(void) {
@@ -99,7 +96,6 @@ private:
 	uint8_t _lostPkgCount;
 	uint8_t _retransCount;
 	uint8_t _rxBufferOverflows;
-	bool _rxBufIsLocked;
 	NRF24L01::nRF24_TXResult _lastTxResult;
 	nRFState _nRFState;
 	RxBufferQueue _rxBuffer;

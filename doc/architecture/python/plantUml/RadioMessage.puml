@@ -1,0 +1,72 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+class RadioMessage <template<typename T>> {
+	+~RadioMessage()
+	-_radioMessage : RadioMessageType
+	+getPayload() : T&
+	+isChkSumOk() : bool
+	-calcChkSum(RadioMessageType radioMessage) : uint8_t
+	+getMessagePtr() : uint8_t*
+	+prepare(MsgClass msgClass) : void
+}
+
+
+enum MsgClass {
+	COMMAND
+	MEASUREMENT
+	REQUEST
+	STATISTICS
+}
+
+
+class RadioMessageType {
+	+msgClass : MsgClass
+	+stationId : uint32_t
+	+checksum : uint8_t
+	+payload : uint8_t
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+.RadioMessage *-- .RadioMessageType
+
+
+.RadioMessageType *-- .MsgClass
+
+
+
+
+
+
+/' Dependency relationships '/
+
+.MsgClass <.. .RadioMessage
+
+
+.RadioMessage <.. .RadioMessage
+
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

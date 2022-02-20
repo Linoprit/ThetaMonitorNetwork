@@ -1,0 +1,54 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace lcd {
+	class PCD8544_socket {
+		-PCD8544_socket()
+		-~PCD8544_socket()
+		+{static} send_byte(uint8_t byte, uint16_t timeout) : bool
+		+{static} send_many_bytes(uint8_t* ptr_to_data, uint8_t len, uint16_t timeout) : bool
+		+{static} activate_CS() : void
+		+{static} backlight_off() : void
+		+{static} backlight_on() : void
+		+{static} command_active() : void
+		+{static} data_active() : void
+		+{static} deactivate_CS() : void
+		+{static} do_reset() : void
+		+{static} pull_reset() : void
+		+{static} release_reset() : void
+		+{static} write_byte(uint8_t data, uint8_t command_or_data) : void
+		+{static} write_many_bytes(uint8_t* data, uint8_t len, uint8_t command_or_data) : void
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

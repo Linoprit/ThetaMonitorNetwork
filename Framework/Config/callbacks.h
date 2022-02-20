@@ -35,4 +35,16 @@ EXTERNC void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 
 #endif // C interface
 
+/*
+ for plantUml we declare this file as a class
+@startuml callbacks_man.png
+class callbacks {
+	void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+	void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+	void HAL_UART_RxIdleCallback(UART_HandleTypeDef *huart)
+	void USART1_IRQHandler(void)
+}
+@enduml
+*/
+
 #endif /* CALLBACKS_H_ */

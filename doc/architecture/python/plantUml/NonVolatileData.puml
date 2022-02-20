@@ -1,0 +1,90 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+namespace snsrs {
+	class NonVolatileData {
+		+NonVolatileData()
+		+~NonVolatileData()
+		+{static} getConversion(SensorIdTable::SensorType sensType) : Convert
+		+clrIdTableData() : ErrorCode
+		+writeIdTableData(SensorIdTable::SensorIdType sensVals) : ErrorCode
+		+writeStatId(uint32_t stationId) : ErrorCode
+		+{static} e2ToPhys(SensorTypeE2 e2Data) : SensorIdTable::SensorIdType
+		+getIdTableData(uint32_t sensorIdHash) : SensorIdTable::SensorIdType
+		+getStationType() : SensorIdTable::StationType
+		+iter() : SensorTypeE2
+		+{static} physToE2(SensorIdTable::SensorIdType idSensValue) : SensorTypeE2
+		+compareIdTableDatum(SensorTypeE2 tableIDLeft, SensorTypeE2 tableIDRight) : bool
+		+dataIsEmpty(SensorTypeE2 idE2Data) : bool
+		-{static} ID_TABLE_LEN : static constexpr uint16_t
+		-{static} ID_TABLE_START : static constexpr uint16_t
+		-{static} NUM_OF_ID_ENTRIES : static constexpr uint16_t
+		-{static} STAT_ID_START : static constexpr uint16_t
+		+{static} EMPTY_SENSOR_HASH : static constexpr uint32_t
+		-_currAddress : uint16_t
+		-_oldAddress : uint16_t
+		-_statIdBuffered : uint32_t
+		+getStationId() : uint32_t
+		+{static} calcChkSum(SensorTypeE2 idTableDatum) : uint8_t
+		+findSensIdHashOrEmpty(uint32_t sensorIdHash) : void
+		+printIdTableRaw() : void
+		+startIter() : void
+	}
+
+	class SensorTypeE2 {
+		+shortname : char
+		+sensorIdHash : uint32_t
+		+checkSum : uint8_t
+		+maxVal : uint8_t
+		+minVal : uint8_t
+		+relayNr : uint8_t
+		+sensType : uint8_t
+	}
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+snsrs.SensorTypeE2 <.. snsrs.NonVolatileData
+
+
+snsrs.SensorTypeE2 <.. snsrs.NonVolatileData
+
+
+snsrs.SensorTypeE2 <.. snsrs.NonVolatileData
+
+
+snsrs.SensorTypeE2 <.. snsrs.NonVolatileData
+
+
+snsrs.SensorTypeE2 <.. snsrs.NonVolatileData
+
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+enum ErrorCode {
+	ERR_NOK
+	ERR_OK
+	ERR_OK_E2_NOT_WRITTEN
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

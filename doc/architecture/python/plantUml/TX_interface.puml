@@ -1,0 +1,42 @@
+@startuml
+
+
+
+
+
+/' Objects '/
+
+abstract class Tx_interface {
+	+Tx_interface()
+	+~Tx_interface()
+	+{abstract} is_TX_pending() : bool
+	+{abstract} send_byte(uint8_t byte) : bool
+	+{abstract} send_many_bytes(uint8_t* ptr_to_data, uint8_t len, uint16_t timeout) : bool
+}
+
+
+
+
+
+/' Inheritance relationships '/
+
+
+
+
+/' Aggregation relationships '/
+
+
+
+
+
+/' Dependency relationships '/
+
+
+
+
+
+/' Nested objects '/
+
+
+
+@enduml

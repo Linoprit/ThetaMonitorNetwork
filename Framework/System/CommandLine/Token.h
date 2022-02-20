@@ -27,17 +27,17 @@ protected:
 	TokenType _type;
 };
 
-template <class _Tp, Token::TokenType type>
+template <class TOKEN_CLASS, Token::TokenType type>
 class TToken: public Token {
 public:
 	TToken(): Token(None), _value { 0 } {};
-	TToken(_Tp value): Token(type), _value { value } {};
+	TToken(TOKEN_CLASS value): Token(type), _value { value } {};
 	virtual ~TToken() {};
 
-	_Tp getVal(void) { return _value; };
+	TOKEN_CLASS getVal(void) { return _value; };
 
 private:
-	_Tp _value;
+	TOKEN_CLASS _value;
 };
 
 typedef TToken<uint32_t, Token::TokenType::Command> CmdToken;
