@@ -28,8 +28,6 @@ void startMeasureTask(void *argument) {
 	}
 #else
 
-extern void initGatewayTask(void);
-
 void startMeasureTask(void *argument) {
 	UNUSED(argument);
 
@@ -37,11 +35,6 @@ void startMeasureTask(void *argument) {
 
 	snsrs::Sensors::instance().init();
 	snsrs::Sensors::instance().initHardware();
-
-	if (snsrs::Sensors::instance().getNonVolatileData()->getStationType()
-			== snsrs::SensorIdTable::MASTER){
-		initGatewayTask();
-	}
 
 	for (;;) {
 		snsrs::Sensors::instance().cycle();

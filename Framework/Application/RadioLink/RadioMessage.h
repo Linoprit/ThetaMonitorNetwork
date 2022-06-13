@@ -9,6 +9,7 @@
 #define RADIOLINK_MESSAGES_H_
 
 #include <Application/Sensors/Sensors.h>
+#include <Application/RadioGateway/RadioStatistics.h>
 #include <stdint.h>
 #include <cstddef>
 #include <Config/config.h>
@@ -16,7 +17,8 @@
 
 #define	 PACKED	__attribute__ ((packed))
 
-// nRF24 payload length for RX. Must be set to the longest possible message.
+// nRF24 payload length for RX. Must be set to the longest type, that will be sent.
+// Here MeasurementType is as long as RadioStatMsgType.
 constexpr size_t nRF_PAYLOAD_LEN = sizeof(snsrs::MeasurementType);
 
 enum MsgClass {
@@ -36,13 +38,26 @@ public:
 		uint8_t checksum;
 	} RadioMessageType; //  6 bytes + payload
 
+	// intended for received data
+	RadioMessage(RadioMessageType radioMessageReceived){
+		_radioMessage = radioMessageReceived;
+	}
+	// intended for sending
+	RadioMessage(MsgClass msgClass, T payloadToSend){
+		setPayload(payloadToSend);
+		prepare(msgClass);
+	}
 	virtual ~RadioMessage() {
 	}
 
+	void setPayload(T payloadToSend){
+		T* payloadTyped = reinterpret_cast<T*>(_radioMessage.payload);
+		*payloadTyped = payloadToSend;
+	}
 	T& getPayload(void) {
 		return reinterpret_cast<T&>(_radioMessage.payload);
 	}
-	uint8_t* getMessagePtr(void) {
+	uint8_t* asUint8Ptr(void) {
 		return reinterpret_cast<uint8_t*>(&_radioMessage);
 	}
 	void prepare(MsgClass msgClass) {
@@ -51,9 +66,16 @@ public:
 		_radioMessage.msgClass = msgClass;
 		_radioMessage.checksum = calcChkSum(_radioMessage);
 	}
+	uint32_t getStationId (void){
+		return _radioMessage.stationId;
+	}
+	MsgClass getMsgClass(void){
+		return _radioMessage.msgClass;
+	}
 	bool isChkSumOk() {
 		return calcChkSum(_radioMessage) == _radioMessage.checksum;
 	}
+
 
 private:
 	RadioMessageType _radioMessage;
@@ -68,5 +90,8 @@ private:
 
 constexpr size_t RADIO_MESSAGE_LEN =
 		sizeof(RadioMessage<uint8_t>::RadioMessageType);
+
+typedef RadioMessage<gate::RadioStatisticsType> RadioStatMsgType;
+typedef RadioMessage<snsrs::MeasurementType> RadioMsmntType;
 
 #endif /* RADIOLINK_MESSAGES_H_ */

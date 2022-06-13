@@ -22,10 +22,10 @@
 #endif
 
 // SERIAL_UART must be defined in config.h
-
+constexpr uint16_t TMP_BUFF_LEN = 128;
 constexpr uint16_t TX_BUFF_LEN = 512;
 constexpr uint8_t TX_DELAY = 10;
-constexpr uint8_t TX_RETRIES = 10;
+constexpr uint8_t TX_RETRIES = 3;
 
 uint8_t txBuff[TX_BUFF_LEN];
 uint16_t tx_act_pos = 0;
@@ -39,12 +39,19 @@ void tx_buff_clear(void);
  * - add -u _printf_float to your LDFLAGS.
  * or
  * - printf("Result is: %d.%d", i/10, i%10);
+ * CAREFUL: the message must not be longer than TMP_BUFF_LEN!!
  */
 int tx_printf(const char *format, ...) {
+	uint8_t tmpBuff[TMP_BUFF_LEN];
+
 	va_list arg;
 	va_start(arg, format);
-	tx_act_pos += vsnprintf((char*) &txBuff[tx_act_pos], tx_free_bytes(), format, arg);
+	uint16_t tmpLen = vsnprintf((char*) &tmpBuff, TX_BUFF_LEN, format, arg);
 	va_end(arg);
+	if (tx_free_bytes() >= tmpLen){
+		std::memcpy(&txBuff[tx_act_pos], tmpBuff, tmpLen);
+		tx_act_pos += tmpLen;
+	}
 	return _SUCCESS_;
 }
 
@@ -82,7 +89,7 @@ int tx_cycle(SerialIO* serialIO) {
 			//result = CDC_Transmit_FS(txBuff, tx_act_pos);
 			//result = HAL_UART_Transmit_IT(&SERIAL_UART, &txBuff[0], tx_act_pos);
 			//result = HAL_UART_Transmit_DMA(&SERIAL_UART, &txBuff[0], tx_act_pos);
-			result = HAL_UART_Transmit(&SERIAL_UART, &txBuff[0], tx_act_pos, 100);
+			result = HAL_UART_Transmit(&SERIAL_UART, &txBuff[0], tx_act_pos, 30);
 #endif
 			// @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
 			if (result == _SUCCESS_) {

@@ -26,6 +26,10 @@
 extern UART_HandleTypeDef huart1; // see main.c
 #define SERIAL_UART huart1
 
+// ******* UART for sending data to raspberry *******
+extern UART_HandleTypeDef huart2; // see main.c
+#define RASPY_UART huart2
+
 // ******* OneWire and DS18B20 definitions *******
 extern TIM_HandleTypeDef htim1;
 constexpr TIM_HandleTypeDef *OW_TIMER = &htim1;

@@ -32,6 +32,7 @@ void startGatewayTask(void *argument) {
 
 	for (;;) {
 		radioGateway->cycle();
+		// TODO RaspySerial.cycle();
 		OsHelpers::delay(500); // TODO must be '1'
 	}
 }
@@ -45,6 +46,7 @@ void initGatewayTask(void) {
 			&gatewayTask_attributes);
 
 	radioGateway = new gate::RadioGateway();
+	// TODO initRaspySerial()
 }
 
 

@@ -74,7 +74,7 @@ void RadioLink::cycle() {
 
 // TODO send only measurement, that are valid (not timed-out)
 void RadioLink::sendMeasurements(void) {
-	RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType;
+	//RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType;
 
 	uint8_t sensorCount =
 			Sensors::instance().getThetaSensors()->getMeasurements()->getValidCount();
@@ -84,53 +84,49 @@ void RadioLink::sendMeasurements(void) {
 	// we send all found sensors, even if they timed out
 	for (uint8_t i = 0; i < sensorCount; i++) {
 		osSemaphoreAcquire(localMsmntSemHandle, 0);
-		MeasurementType payload = radioMessage->getPayload();
-		payload = measurementArray->at(i);
+		// ToDo clean, if it works
+		// MeasurementType payload = radioMessage->getPayload();
+		// payload = measurementArray->at(i);
+		//radioMessage->prepare(MsgClass::MEASUREMENT);
+		RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType(
+				MsgClass::MEASUREMENT, measurementArray->at(i));
 		osSemaphoreRelease(localMsmntSemHandle);
 
-		radioMessage->prepare(MsgClass::MEASUREMENT);
-		_nRF24L01_Basis.transmitPacket(radioMessage->getMessagePtr(),
+		_nRF24L01_Basis.transmitPacket(radioMessage->asUint8Ptr(),
 				RADIO_MESSAGE_LEN);
-		while (_nRF24L01_Basis.getLastTxResult()
-				== NRF24L01::nRF24_TX_IS_ONGOING) {
+		while (_nRF24L01_Basis.isTxOngoing()) {
 			OsHelpers::delay(1);
 		} // measured: 1.64ms
 
-		NRF24L01::nRF24_TXResult result = _nRF24L01_Basis.getLastTxResult();
-		if (result != NRF24L01::nRF24_TX_SUCCESS) {
-			if ((result == NRF24L01::nRF24_TX_MAXRT)
-					|| (result == NRF24L01::nRF24_TX_TIMEOUT)
-					|| (result == NRF24L01::nRF24_TX_ERROR)) {
-				_transmitCycleTime = MAXRT_TX_CYCLE_TIME;
-			}
-		} else {
+		// adjust send-cycle-time
+		if (_nRF24L01_Basis.lastRxWasSuccess()) {
 			_transmitCycleTime = STD_TX_CYCLE_TIME;
+		} else {
+			_transmitCycleTime = MAXRT_TX_CYCLE_TIME;
 		}
 	}
 }
 
 void RadioLink::sendStatistics(void) {
-	RadioStatMsgType *radioStatistics = new (RadioMsgBuff) RadioStatMsgType;
-
-	radioStatistics->getPayload().lostPkgs = _nRF24L01_Basis.get_lostPkgCount();
-	radioStatistics->getPayload().relayStates =
-			Sensors::instance().getRelayStates();
-	radioStatistics->getPayload().rxBufferOverflows =
-			_nRF24L01_Basis.get_rxBufferOverflows();
-	radioStatistics->getPayload().stationId =
+	gate::RadioStatisticsType radiostats;
+	radiostats.lostPkgs = _nRF24L01_Basis.get_lostPkgCount();
+	radiostats.relayStates = Sensors::instance().getRelayStates();
+	radiostats.rxBufferOverflows = _nRF24L01_Basis.get_rxBufferOverflows();
+	radiostats.stationId =
 			Sensors::instance().getNonVolatileData()->getStationId();
-	radioStatistics->getPayload().validSensors =
+	radiostats.validSensors =
 			Sensors::instance().getThetaSensors()->getFoundDS1820();
 
-	radioStatistics->prepare(MsgClass::STATISTICS);
-	_nRF24L01_Basis.transmitPacket(radioStatistics->getMessagePtr(),
+	RadioStatMsgType *radioStatistics = new (RadioMsgBuff) RadioStatMsgType(
+			MsgClass::STATISTICS, radiostats);
+
+	_nRF24L01_Basis.transmitPacket(radioStatistics->asUint8Ptr(),
 			RADIO_MESSAGE_LEN);
-	while (_nRF24L01_Basis.getLastTxResult() == NRF24L01::nRF24_TX_IS_ONGOING) {
+	while (_nRF24L01_Basis.isTxOngoing()) {
 		OsHelpers::delay(1);
 	} // measured: 1.64ms
 
-	NRF24L01::nRF24_TXResult result = _nRF24L01_Basis.getLastTxResult();
-	if (result == NRF24L01::nRF24_TX_SUCCESS) {
+	if (_nRF24L01_Basis.lastRxWasSuccess()) {
 		_nRF24L01_Basis.resetStatistics();
 	}
 }

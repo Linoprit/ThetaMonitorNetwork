@@ -89,6 +89,27 @@ public:
 	NRF24L01::nRF24_TXResult getLastTxResult(void) {
 		return _lastTxResult;
 	}
+
+	// returns true, if transmission is still in progress
+	bool isTxOngoing(void){
+		NRF24L01::nRF24_TXResult result = getLastTxResult();
+		if (result == NRF24L01::nRF24_TX_IS_ONGOING){
+			return true;
+		}
+		return false;
+	}
+	// returns true, if last finished transmission was successful
+	bool lastRxWasSuccess(void){
+		NRF24L01::nRF24_TXResult result = getLastTxResult();
+		if (result != NRF24L01::nRF24_TX_SUCCESS) {
+					if ((result == NRF24L01::nRF24_TX_MAXRT)
+							|| (result == NRF24L01::nRF24_TX_TIMEOUT)
+							|| (result == NRF24L01::nRF24_TX_ERROR)) {
+						return false;
+					}
+				}
+		return true;
+	}
 	void IrqPinRxCallback(void);
 
 private:

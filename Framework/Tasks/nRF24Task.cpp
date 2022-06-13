@@ -22,17 +22,24 @@
 #include <Application/Sensors/ThetaSensors.h>
 #include <System/serialPrintf.h>
 
+extern void initGatewayTask(void);
+
 void startnRF24Task(void *argument) {
 	UNUSED(argument);
-//	radioLink::RadioLink::instance().init();
-//	radioLink::RadioLink::instance().initHardware();
+	radio::RadioLink::instance().init();
+	radio::RadioLink::instance().initHardware();
+
+	if (snsrs::Sensors::instance().getNonVolatileData()->getStationType()
+			== snsrs::SensorIdTable::MASTER){
+		initGatewayTask();
+	}
 
 	for (;;) {
 		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//		radioLink::RadioLink::instance().cycle();
+//		radio::RadioLink::instance().cycle();
 
 //		OsHelpers::delay(
-//				radioLink::RadioLink::instance().getTransmitCycleTime());
+//				radio::RadioLink::instance().getTransmitCycleTime());
 
 		OsHelpers::delay(1000);
 

@@ -40,9 +40,11 @@ public:
 	static constexpr uint8_t CMD_SKIPROM = 0xCC;
 
 	inline void owDelay(uint16_t time_us) {
+		taskENTER_CRITICAL();
 		OW_TIMER->Instance->CNT = 0;
 		while (OW_TIMER->Instance->CNT <= time_us)
 			;
+		taskEXIT_CRITICAL();
 	}
 
 	// pull line

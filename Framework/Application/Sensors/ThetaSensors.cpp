@@ -105,6 +105,8 @@ void ThetaSensors::initTwoChannelDS1820(void) {
 
 void ThetaSensors::storeDS1820ToMeasureArray(DS18B20 ds18Channel) {
 
+	// TODO we need some timeOut-handling, if a sensor-connection breaks
+
 	DS18B20::DS1820SensorType *sensors = ds18Channel.getAllSensors();
 
 	for (uint8_t i = 0; i < ds18Channel.getFoundSensors(); i++) {

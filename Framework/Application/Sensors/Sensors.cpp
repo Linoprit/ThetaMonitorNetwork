@@ -44,6 +44,8 @@ void Sensors::checkRelays(void) {
 
 }
 
+/* For debugging, print the contents of the whole measurement-array.
+ */
 void Sensors::printMsmntArray(void) {
 	for (uint8_t i = 0; i < MAX_SENSORS; i++) {
 		MeasurementType actSensor =

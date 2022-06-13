@@ -102,7 +102,8 @@ left header
 endheader
 (*)--> "Loop (500ms)"
 --> "radioGateway.cycle()"
---> "Loop (500ms)"
+--> "raspySerial.cycle()"
+--> "Loop (1ms)"
 @enduml
 
 */

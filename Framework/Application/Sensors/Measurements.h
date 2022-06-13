@@ -10,7 +10,6 @@
 
 #include <stdint.h>
 #include <Config/config.h>
-#include <Application/Sensors/Measurements.h>
 #include <Application/Sensors/NonVolatileData.h>
 #include <System/OsHelpers.h>
 #include <array>
@@ -28,6 +27,8 @@ constexpr MeasurementType IMVALID_MEASUREMENT {
 		NonVolatileData::EMPTY_SENSOR_HASH,
 		NAN, 0 };
 
+//TODO: add some "isTimedOut"-function, that compares "lastUpdateTick"
+// with actual tick.
 template<int N>
 class Measurements {
 public:
@@ -98,7 +99,6 @@ private:
 };
 
 typedef Measurements<MAX_SENSORS> ThetaMsmnt;
-typedef Measurements<MAX_REMOTE_MEASUREMENTS> RemoteMsmnt;
 
 } /* namespace snsrs */
 

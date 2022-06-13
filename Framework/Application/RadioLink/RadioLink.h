@@ -24,9 +24,6 @@ using namespace gate;
 
 class RadioLink {
 public:
-	typedef RadioMessage<gate::RadioStatisticsType> RadioStatMsgType;
-	typedef RadioMessage<MeasurementType> RadioMsmntType;
-
 	void init(void);
 	static RadioLink& instance(void);
 	void initHardware(void);

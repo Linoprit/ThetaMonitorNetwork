@@ -15,6 +15,11 @@
 namespace gate {
 using namespace snsrs;
 
+// TODO not very satisfied to have them defined here...
+// better put them in some central header.
+typedef RadioStatistics<MAX_SLAVES> RemoteRadioStatistics;
+typedef Measurements<MAX_REMOTE_MEASUREMENTS> RemoteMsmnt;
+
 class RadioGateway {
 public:
 	RadioGateway();
@@ -24,6 +29,9 @@ public:
 	void cycle();
 	void checkRadioBuffer(void);
 	void storeRxMessage(uint8_t *nRF24_payload);
+	RemoteMsmnt* getRemoteMsmnt(void){ return &_remoteMsmnt; };
+	RemoteRadioStatistics* getRemoteRadioStatistics(void){ return &_remoteStats; };
+
 
 private:
 	// measurement of the sensors, sent by the nRF-Modules of the slaves.
