@@ -8,7 +8,7 @@
 #include <System/CommandLine/Lexer.h>
 #include <System/serialPrintf.h>
 #include <string>
-#include <Sockets/CrcSocket.h>
+#include <System/Sockets/CrcSocket.h>
 
 namespace cLine {
 

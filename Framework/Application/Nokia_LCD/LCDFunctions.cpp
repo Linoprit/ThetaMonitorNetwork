@@ -19,7 +19,7 @@
 #include <Application/Sensors/ThetaSensors.h>
 #include <Application/RadioLink/RadioLink.h>
 #include <Config/config.h>
-#include <Devices/PCD8544_LCD/PCD8544_basis.h>
+#include <System/Devices/PCD8544_LCD/PCD8544_basis.h>
 #include <Libraries/HelpersLib.h>
 #include <System/serialPrintf.h>
 #include <array>

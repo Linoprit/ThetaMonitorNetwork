@@ -6,8 +6,8 @@
  */
 
 #include <Application/Sensors/NonVolatileData.h>
-#include <Devices/Eeprom_at24c256/AT24Cxxx.h>
-#include <Sockets/CrcSocket.h>
+#include <System/Devices/Eeprom_at24c256/AT24Cxxx.h>
+#include <System/Sockets/CrcSocket.h>
 #include <Libraries/HelpersLib.h>
 #include <Libraries/Convert.h>
 #include <System/serialPrintf.h>

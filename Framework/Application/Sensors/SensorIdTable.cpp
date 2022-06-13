@@ -7,7 +7,7 @@
 
 #include <Application/Sensors/NonVolatileData.h>
 #include <Application/Sensors/SensorIdTable.h>
-#include <Sockets/CrcSocket.h>
+#include <System/Sockets/CrcSocket.h>
 #include <stddef.h>
 #include <System/serialPrintf.h>
 

@@ -8,7 +8,7 @@
 #include <Application/Sensors/SensorIdTable.h>
 #include <Application/Sensors/Sensors.h>
 #include <System/CommandLine/Interpreter.h>
-#include <Sockets/CrcSocket.h>
+#include <System/Sockets/CrcSocket.h>
 #include <System/serialPrintf.h>
 #include <cstring>
 #include <System/OsHelpers.h>

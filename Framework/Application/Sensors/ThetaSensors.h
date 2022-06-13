@@ -9,9 +9,9 @@
 #define FRAMEWORK_APPLICATION_THETASENSORS_THETAMEASUREMENT_H_
 
 #include <Config/config.h>
-#include <Devices/BME280/BME280.h>
-#include <Devices/ds18b20/DS18B20.h>
-#include <Devices/ds18b20/OneWire.h>
+#include <System/Devices/BME280/BME280.h>
+#include <System/Devices/ds18b20/DS18B20.h>
+#include <System/Devices/ds18b20/OneWire.h>
 #include <Application/Sensors/SensorIdTable.h>
 #include <Application/Sensors/Measurements.h>
 #include <sys/_stdint.h>

@@ -6,7 +6,7 @@
  */
 
 #include <System/OsHelpers.h>
-#include <Sockets/CrcSocket.h>
+#include <System/Sockets/CrcSocket.h>
 #include <Application/Sensors/ThetaSensors.h>
 #include <Application/Sensors/NonVolatileData.h>
 #include <new>

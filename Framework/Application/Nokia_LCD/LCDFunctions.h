@@ -11,7 +11,7 @@
 #include <Application/Sensors/SensorIdTable.h>
 #include <Application/Sensors/ThetaSensors.h>
 #include <Config/config.h>
-#include <Devices/PCD8544_LCD/PCD8544_graphics.h>
+#include <System/Devices/PCD8544_LCD/PCD8544_graphics.h>
 #include <sys/_stdint.h>
 #include <array>
 

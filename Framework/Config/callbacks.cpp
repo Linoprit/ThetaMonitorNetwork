@@ -14,7 +14,7 @@
 #include <System/CommandLine/CommandLine.h>
 #include <Application/RadioLink/RadioLink.h>
 #include <Application/Sensors/ThetaSensors.h>
-#include <Sockets/GPIOSocket_nRF24.h>
+#include <System/Sockets/GPIOSocket_nRF24.h>
 #include <Application/Nokia_LCD/LCDFunctions.h>
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {

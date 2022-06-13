@@ -8,7 +8,7 @@
 #ifndef APPLICATION_RADIOLINK_RADIOLINK_H_
 #define APPLICATION_RADIOLINK_RADIOLINK_H_
 
-#include <Application/RadioLink/NRF24L01_Basis.h>
+#include <Middleware/NRF24L01_Radio/NRF24L01_Basis.h>
 #include <Application/Sensors/ThetaSensors.h>
 #include <Application/RadioGateway/RadioGateway.h>
 #include <Libraries/SimpleQueue.h>
