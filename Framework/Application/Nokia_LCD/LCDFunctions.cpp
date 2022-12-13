@@ -17,7 +17,7 @@
 #include <Application/Nokia_LCD/LCDFunctions.h>
 #include <Application/Sensors/SensorIdTable.h>
 #include <Application/Sensors/ThetaSensors.h>
-#include <Application/RadioLink/RadioLink.h>
+#include <Application/Radio/RadioSlave.h>
 #include <Config/config.h>
 #include <System/Devices/PCD8544_LCD/PCD8544_basis.h>
 #include <Libraries/HelpersLib.h>
@@ -55,6 +55,7 @@ void LCDFunctions::initHardware(void) {
 	_tmpLineLen = _LCD_handle.get_chars_per_line() + 1;
 	_tmpLine = static_cast<char*>(malloc(_tmpLineLen));
 	clrTmpLine();
+
 }
 
 void LCDFunctions::printStates(void) {
@@ -62,7 +63,7 @@ void LCDFunctions::printStates(void) {
 
 	std::string line = "nRFState: ";
 	line.append(
-			radio::RadioLink::instance().getNRF24L01_Basis()->getNRFStateStr());
+			radio::RadioSlave::instance().getNRF24L01_Basis()->getNRFStateStr());
 	_LCD_handle.write_string(0, (_LCD_handle.line_2_y_pix(act_line)),
 			line.c_str());
 	act_line++;

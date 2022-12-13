@@ -5,7 +5,6 @@
  *      Author: harald
  */
 
-
 #ifdef __x86_64
 #include "stm32f1xx_hal.h"
 #include <X86Tasks/SimulationTask.h>
@@ -23,6 +22,7 @@
 #include <Config/config.h>
 #include <System/serialPrintf.h>
 #include <System/CommandLine/CommandLine.h>
+#include <Application/Sensors/Sensors.h>
 #include <System/OsHelpers.h>
 
 // #include <Devices/Eeprom_at24c256/AT24Cxxx.h>
@@ -37,6 +37,19 @@ void initCommandLine(void) {
 	cLine::CommandLine::instance().init();
 	OsHelpers::delay(500);
 	cLine::CommandLine::instance().splash();
+
+	bool isMaster =
+			snsrs::Sensors::instance().getNonVolatileData()->getStationType()
+					== snsrs::SensorIdTable::MASTER;
+	uint32_t statID =
+			snsrs::Sensors::instance().getNonVolatileData()->getStationId();
+
+	if (isMaster) {
+		tx_printf("Station is Master, ID is %lu\n", statID);
+	} else {
+		tx_printf("Station is Slave, ID is %lu\n", statID);
+	}
+
 #ifndef __x86_64
 	tx_cycle();
 #endif
@@ -70,7 +83,6 @@ void startMasterSerialTask(void *argument) {
 	// 			addressTbl[i][4], addressTbl[i][5], addressTbl[i][6],
 	// 			addressTbl[i][7]);
 	// }
-
 
 	for (;;) {
 		osDelay(20);

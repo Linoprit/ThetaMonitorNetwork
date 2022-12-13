@@ -2,8 +2,8 @@
 <export version="E">
   <design>
     <source>/home/harald/eclipse_workspaces/ThetaMonitorNetwork/doc/schematic/ThetaMonitorF401CEU/ThetaMonitorF401CEU.kicad_sch</source>
-    <date>Mo 03 Jan 2022 19:22:20 CET</date>
-    <tool>Eeschema 6.0.0-d3dd2cf0fa~116~ubuntu20.04.1</tool>
+    <date>Tue 14 Jun 2022 01:16:09 PM CEST</date>
+    <tool>Eeschema 6.0.5-a6ca702e91~116~ubuntu20.04.1</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
         <title>ThetaMonitor STM32F401</title>
@@ -11,7 +11,7 @@
         <rev>V2.1</rev>
         <date>2022-01-03</date>
         <source>ThetaMonitorF401CEU.kicad_sch</source>
-        <comment number="1" value="CPU changed, C5 added;"/>
+        <comment number="1" value="CPU changed, C5 added; Pushbutton and NRF_IRQ changed;"/>
         <comment number="2" value=""/>
         <comment number="3" value=""/>
         <comment number="4" value=""/>
@@ -35,7 +35,7 @@
     </comp>
     <comp ref="C2">
       <value>10u</value>
-      <footprint>Capacitor_THT:CP_Axial_L11.0mm_D8.0mm_P15.00mm_Horizontal</footprint>
+      <footprint>Capacitor_THT:CP_Radial_D6.3mm_P2.50mm</footprint>
       <libsource lib="Device" part="C_Polarized" description="Polarized capacitor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -172,7 +172,7 @@
     </comp>
     <comp ref="J11">
       <value>NRF24</value>
-      <footprint>Connector_PinSocket_2.54mm:PinSocket_2x04_P2.54mm_Vertical</footprint>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical</footprint>
       <libsource lib="Connector_Generic" part="Conn_02x04_Odd_Even" description="Generic connector, double row, 02x04, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -221,7 +221,7 @@
     </comp>
     <comp ref="R1">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -230,7 +230,7 @@
     </comp>
     <comp ref="R2">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -239,7 +239,7 @@
     </comp>
     <comp ref="R3">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -248,7 +248,7 @@
     </comp>
     <comp ref="R4">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -257,7 +257,7 @@
     </comp>
     <comp ref="R5">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -266,7 +266,7 @@
     </comp>
     <comp ref="R6">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -275,7 +275,7 @@
     </comp>
     <comp ref="R7">
       <value>47k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -284,7 +284,7 @@
     </comp>
     <comp ref="R8">
       <value>47k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -293,7 +293,7 @@
     </comp>
     <comp ref="R9">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -302,7 +302,7 @@
     </comp>
     <comp ref="R10">
       <value>4.7k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -311,7 +311,7 @@
     </comp>
     <comp ref="R11">
       <value>47k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -320,7 +320,7 @@
     </comp>
     <comp ref="R12">
       <value>47k</value>
-      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical</footprint>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
       <libsource lib="Device" part="R" description="Resistor"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -339,7 +339,7 @@
     </comp>
     <comp ref="U2">
       <value>STM32F401CEU6_WeAct_Part_Like</value>
-      <footprint>STM32-Boards:YAAJ_BluePill_SWD_1</footprint>
+      <footprint>STM32-Boards:YAAJ_BluePill_1</footprint>
       <libsource lib="YAAJ_BluePill_Part_Like" part="STM32F401CEU6_WeAct_Part_Like" description=""/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="ThetaMonitorF401CEU.kicad_sch"/>
@@ -647,9 +647,6 @@
     <library logical="Transistor_BJT">
       <uri>/usr/share/kicad/symbols//Transistor_BJT.kicad_sym</uri>
     </library>
-    <library logical="YAAJ_BluePill_Part_Like">
-      <uri>/opt/kicad_libs/Kicad-STM32-master/Symbols/YAAJ_BluePill_Part_Like.lib</uri>
-    </library>
   </libraries>
   <nets>
     <net code="1" name="+3V3">
@@ -753,7 +750,6 @@
       <node ref="U1" pin="4" pinfunction="GND" pintype="power_in"/>
       <node ref="U1" pin="7" pinfunction="WP" pintype="input"/>
       <node ref="U2" pin="19" pinfunction="GND" pintype="power_in"/>
-      <node ref="U2" pin="40" pinfunction="GND" pintype="power_in"/>
       <node ref="U3" pin="1" pinfunction="GND" pintype="power_in"/>
     </net>
     <net code="14" name="LCD_CE">
@@ -790,7 +786,7 @@
     </net>
     <net code="22" name="NRF_IRQ">
       <node ref="J11" pin="8" pinfunction="Pin_8" pintype="passive"/>
-      <node ref="U2" pin="26" pinfunction="A0" pintype="bidirectional"/>
+      <node ref="U2" pin="10" pinfunction="A15" pintype="bidirectional"/>
     </net>
     <net code="23" name="NRF_MISO">
       <node ref="J11" pin="7" pinfunction="Pin_7" pintype="passive"/>
@@ -837,7 +833,7 @@
     <net code="32" name="Pushbutton">
       <node ref="C1" pin="1" pintype="passive"/>
       <node ref="J1" pin="2" pinfunction="Pin_2" pintype="passive"/>
-      <node ref="U2" pin="9" pinfunction="A12" pintype="bidirectional"/>
+      <node ref="U2" pin="26" pinfunction="A0" pintype="bidirectional"/>
     </net>
     <net code="33" name="RASP_RX">
       <node ref="J4" pin="2" pinfunction="Pin_2" pintype="passive"/>
@@ -855,8 +851,8 @@
       <node ref="J2" pin="3" pinfunction="Pin_3" pintype="passive"/>
       <node ref="U2" pin="17" pinfunction="B9" pintype="bidirectional"/>
     </net>
-    <net code="37" name="unconnected-(U2-Pad10)">
-      <node ref="U2" pin="10" pinfunction="A15" pintype="bidirectional+no_connect"/>
+    <net code="37" name="unconnected-(U2-Pad9)">
+      <node ref="U2" pin="9" pinfunction="A12" pintype="bidirectional+no_connect"/>
     </net>
     <net code="38" name="unconnected-(U2-Pad20)">
       <node ref="U2" pin="20" pinfunction="3V3" pintype="power_in+no_connect"/>
@@ -884,6 +880,9 @@
     </net>
     <net code="46" name="unconnected-(U2-Pad39)">
       <node ref="U2" pin="39" pinfunction="5V" pintype="power_in+no_connect"/>
+    </net>
+    <net code="47" name="unconnected-(U2-Pad40)">
+      <node ref="U2" pin="40" pinfunction="GND" pintype="power_in+no_connect"/>
     </net>
   </nets>
 </export>

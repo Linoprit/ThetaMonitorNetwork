@@ -42,7 +42,7 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- CRC_HandleTypeDef hcrc;
+CRC_HandleTypeDef hcrc;
 
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
@@ -72,7 +72,7 @@ const osThreadAttr_t measureTask_attributes = {
 };
 /* Definitions for nRF24Task */
 osThreadId_t nRF24TaskHandle;
-uint32_t nRF24TaskBuffer[ 164 ];
+uint32_t nRF24TaskBuffer[ 280 ];
 osStaticThreadDef_t nRF24TaskControlBlock;
 const osThreadAttr_t nRF24Task_attributes = {
   .name = "nRF24Task",
@@ -96,7 +96,7 @@ const osThreadAttr_t displayTask_attributes = {
 };
 /* Definitions for masterSerialTas */
 osThreadId_t masterSerialTasHandle;
-uint32_t masterSerialTasBuffer[ 280 ];
+uint32_t masterSerialTasBuffer[ 300 ];
 osStaticThreadDef_t masterSerialTasControlBlock;
 const osThreadAttr_t masterSerialTas_attributes = {
   .name = "masterSerialTas",

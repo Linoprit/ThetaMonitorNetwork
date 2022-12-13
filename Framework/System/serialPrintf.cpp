@@ -48,10 +48,12 @@ int tx_printf(const char *format, ...) {
 	va_start(arg, format);
 	uint16_t tmpLen = vsnprintf((char*) &tmpBuff, TX_BUFF_LEN, format, arg);
 	va_end(arg);
-	if (tx_free_bytes() >= tmpLen){
-		std::memcpy(&txBuff[tx_act_pos], tmpBuff, tmpLen);
-		tx_act_pos += tmpLen;
-	}
+
+	if (tx_free_bytes() < tmpLen)
+		return _FAIL_;
+
+	std::memcpy(&txBuff[tx_act_pos], tmpBuff, tmpLen);
+	tx_act_pos += tmpLen;
 	return _SUCCESS_;
 }
 
@@ -92,6 +94,7 @@ int tx_cycle(SerialIO* serialIO) {
 			result = HAL_UART_Transmit(&SERIAL_UART, &txBuff[0], tx_act_pos, 30);
 #endif
 			// @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
+
 			if (result == _SUCCESS_) {
 				break;
 			} else {
@@ -110,6 +113,9 @@ int tx_cycle(SerialIO* serialIO) {
  * directly print buffer, without formatting
  */
 int tx_printBuff(uint8_t *buffer, uint8_t len) {
+	if (tx_free_bytes() < len)
+		return _FAIL_;
+
 	memcpy(&txBuff[tx_act_pos], buffer, (std::size_t) len);
 	tx_act_pos += len;
 	return _SUCCESS_;

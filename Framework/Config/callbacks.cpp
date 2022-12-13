@@ -12,7 +12,7 @@
 //#include <System/uart_printf.h>
 #include <Config/config.h>
 #include <System/CommandLine/CommandLine.h>
-#include <Application/RadioLink/RadioLink.h>
+#include <Application/Radio/RadioSlave.h>
 #include <Application/Sensors/ThetaSensors.h>
 #include <System/Sockets/GPIOSocket_nRF24.h>
 #include <Application/Nokia_LCD/LCDFunctions.h>
@@ -39,7 +39,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		}
 		HAL_UART_Receive_IT(&SERIAL_UART, &uart1Rx, 1);
 	} else if (huart->Instance == USART2) {
-		// NOP
+		// NOP no receptions on RASPY_UART
 	}
 	//else if (huart->Instance == USART3) {
 		// NOP

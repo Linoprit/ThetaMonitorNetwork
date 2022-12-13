@@ -51,6 +51,10 @@ public:
 	void splash(void);
 	void cycle(void);
 
+	bool isInitDone(void) {
+		return _flagInitIsDone;
+	}
+
 	// must be called by the serial callback
 	inline void putChar(uint8_t chr) {
 		_keyBuffer.enqueue(chr);
@@ -137,9 +141,9 @@ public:
 		tx_printf("\033[%d;%dH", x, y);
 	}
 	;  // cursor move to
-	//	0 erase from cursor to end of display,
-	//  1 erase from start of display to cursor,
-	// 2 erase display
+	   //	0 erase from cursor to end of display,
+	   //  1 erase from start of display to cursor,
+	   // 2 erase display
 	void termEraseDisplay(uint8_t n) {
 		tx_printf("\033[%dJ", n);
 	}
@@ -162,6 +166,7 @@ protected:
 	Interpreter _interpret;
 	CmdBufferType _cmdBuffer;
 	uint8_t _cmdPos;
+	bool _flagInitIsDone;
 
 	void incCmdPos(void) {
 		if (_cmdPos < COMMAND_BUFFER_LEN)

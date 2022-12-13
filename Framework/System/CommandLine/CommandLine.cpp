@@ -30,6 +30,7 @@ CommandLine& CommandLine::instance(void) {
 
 CommandLine::CommandLine() :
 		_keyBuffer(KEY_BUFFER_LEN), _cmdPos(0) {
+	_flagInitIsDone = false;
 	_cmdBuffer.fill('\0');
 	termDisplayClear();
 }
@@ -44,6 +45,7 @@ void CommandLine::splash(void) {
 	termUnHighLight();
 	tx_printf("\n");
 	termPrompt();
+	_flagInitIsDone = true;
 }
 
 void CommandLine::cycle(void) {

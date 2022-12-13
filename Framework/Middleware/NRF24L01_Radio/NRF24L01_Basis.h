@@ -30,7 +30,7 @@ EXTERNC bool stationType_isMaster(void);
 #include <Middleware/NRF24L01_Radio/NRF24L01_Basis.h>
 #include <Libraries/SimpleQueue.h>
 #include <Config/config.h>
-#include <Application/RadioLink/RadioMessage.h>
+#include <Application/Radio/RadioMessage.h>
 #include <string>
 
 static constexpr uint8_t nRF24_CHANNEL = 118;

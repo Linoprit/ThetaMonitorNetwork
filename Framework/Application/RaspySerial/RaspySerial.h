@@ -12,10 +12,15 @@ namespace raspy {
 
 class RaspySerial {
 public:
-	RaspySerial();
-	virtual ~RaspySerial() {}
+	void init(void);
+	static RaspySerial& instance(void);
 
 	void cycle(void);
+
+private:
+	RaspySerial();
+	virtual ~RaspySerial() {
+	}
 };
 
 } /* namespace raspy */

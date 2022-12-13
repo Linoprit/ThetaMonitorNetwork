@@ -1,4 +1,3 @@
-
 /*
  * dspCallbackTask.cpp
  *
@@ -18,32 +17,61 @@
 #endif
 #include <System/OsHelpers.h>
 #include "tasksDef.h"
-#include <Application/RadioLink/RadioLink.h>
+#include <Application/Radio/RadioSlave.h>
 #include <Application/Sensors/ThetaSensors.h>
+#include <Application/RaspySerial/RaspySerial.h>
 #include <System/serialPrintf.h>
+#include <System/CommandLine/CommandLine.h>
 
 extern void initGatewayTask(void);
 
 void startnRF24Task(void *argument) {
 	UNUSED(argument);
-	radio::RadioLink::instance().init();
-	radio::RadioLink::instance().initHardware();
+	bool isMaster =
+			snsrs::Sensors::instance().getNonVolatileData()->getStationType()
+					== snsrs::SensorIdTable::MASTER;
 
-	if (snsrs::Sensors::instance().getNonVolatileData()->getStationType()
-			== snsrs::SensorIdTable::MASTER){
-		initGatewayTask();
+	if (isMaster) {
+		radio::RadioMaster::instance().init();
+		radio::RadioMaster::instance().initHardware();
+		raspy::RaspySerial::instance().init();
+	} else {
+		radio::RadioSlave::instance().init();
+		radio::RadioSlave::instance().initHardware();
 	}
 
 	for (;;) {
+		if (isMaster) {
+			radio::RadioMaster::instance().cycle();
+			raspy::RaspySerial::instance().cycle();
+
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+			OsHelpers::delay(1000); // TODO what is the exact cycletime?
+			// call RaspySerial Cycle
+		} else {
+			OsHelpers::delay(1000);
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+			radio::RadioSlave::instance().cycle();
+			//OsHelpers::delay(radio::RadioSlave::instance().getTransmitCycleTime());
+		}
+
+
+		// TODO
+		// if staionType == Master
+		//		radioMaster.cycle
+		//		rhaspySerial.cycle
+		// else
+		//		radioSlave.cycle
+
 		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 //		radio::RadioLink::instance().cycle();
 
 //		OsHelpers::delay(
 //				radio::RadioLink::instance().getTransmitCycleTime());
 
-		OsHelpers::delay(1000);
 
-		//
+
+		// TODO obsolete, remove this
 		//
 //		msmnt::SensorIdTable::StationType stationType =
 //				msmnt::ThetaMeasurement::instance().getNonVolatileData()->getStationType();

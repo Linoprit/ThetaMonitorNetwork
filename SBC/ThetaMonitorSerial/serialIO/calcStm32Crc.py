@@ -1,0 +1,87 @@
+import numpy as np
+from struct import *
+
+
+class CalcStm32Crc:
+    """ Taken from x86-unittest-framework, file stm32f1xx_hal_crc.h """
+    DEFAULT_CRC32_POLY = 0x04C11DB7
+    DEFAULT_CRC_INITVALUE = 0xFFFFFFFF
+    actCrc = DEFAULT_CRC_INITVALUE
+
+    def resetCrc(self):
+        self.actCrc = self.DEFAULT_CRC_INITVALUE
+
+    def calcCrcUpdate(self, data: np.uint):
+        self.actCrc = self.actCrc ^ (data & self.DEFAULT_CRC_INITVALUE)
+        for i in range(32):
+            if self.actCrc & 0x80000000:
+                self.actCrc = (self.actCrc << 1) ^ self.DEFAULT_CRC32_POLY
+            else:
+                self.actCrc <<= 1
+            self.actCrc = self.actCrc & self.DEFAULT_CRC_INITVALUE
+        return self.actCrc
+
+    def hal_crc_accumulate(self, buffer: list):  # list[np.uint]):
+        for i in range(len(buffer)):
+            self.calcCrcUpdate(buffer[i])
+        return self.actCrc
+
+    def hal_crc_calculate(self, buffer: list):  # list[np.uint]):
+        self.resetCrc()
+        for i in range(len(buffer)):
+            self.calcCrcUpdate(buffer[i])
+        return self.actCrc
+
+    @staticmethod
+    def string_to_uint32(in_string):
+        string_as_bytes = bytearray(in_string, 'utf-8')
+        uint32len = CrcSocket.calcUint32Len(len(in_string))
+        # pad string to a len, multible of four
+        uint8_diff_len = (uint32len * 4) - len(in_string)
+        for i in range(uint8_diff_len):
+            string_as_bytes.append(0)
+        # reinterpret four bytes at a time to uint32
+        uint32_buf = [0] * uint32len
+        for i in range(0, uint32len):
+            # tmp = bytes(padded_buf[i*4:i*4+4])
+            tmp = bytes(string_as_bytes[i*4:i*4+4])
+            tmp_l = unpack("<L", tmp)
+            uint32_buf[i] = tmp_l[0]
+        return uint32_buf
+
+
+class CrcSocket:
+    @staticmethod
+    def calcChksum(data: list) -> np.uint:  # list[np.ubyte]
+        calc_crc = CalcStm32Crc()
+        """ Calls the CRC-Engine and returns a 8-bit CRC, which is
+        simply the truncation of the 32-bit result.
+        !! dataLen MUST BE DIVIDABLE BY 4 !!
+        Params:
+        data: pointer to array
+        dataLen: size of the Array in bytes """
+        if len(data) % 4 != 0:
+            return 0
+        crc = calc_crc.hal_crc_calculate(data)
+        return crc & 0xFF
+
+    @staticmethod
+    def calcUint32Len(sizeInBytes: np.uint) -> np.uint:
+        """ Calculates the size in uint32 multiples. Takes
+        in the size in Bytes and returns
+        how many uint32 values these are, if rounded up.
+        i.E. char[3] = 3 bytes = 1 uint32; char[5] = 5 bytes = 2 uint32; """
+        len32 = (sizeInBytes + 3) / 4
+        return int(len32)
+
+    @staticmethod
+    def calcBufferedChkSum32(data: list) -> np.uint: # list[np.ubyte]
+        """ Takes in data of any size, buffers it in a uint32-array
+        and pads the remainig bytes. The resulting array can
+        directly be passed to the CRC-engine."""
+        calc_crc = CalcStm32Crc()
+        uint32len = CrcSocket.calcUint32Len(len(data))
+        data32 = [0] * uint32len
+        for i in range(len(data)):
+            data32[i] = data[i]
+        return calc_crc.calcChksum32(data32)
