@@ -8,6 +8,8 @@
 #ifndef APPLICATION_RASPYSERIAL_RASPYSERIAL_H_
 #define APPLICATION_RASPYSERIAL_RASPYSERIAL_H_
 
+#include <Config/config.h>
+
 namespace raspy {
 
 class RaspySerial {
@@ -16,6 +18,8 @@ public:
 	static RaspySerial& instance(void);
 
 	void cycle(void);
+
+	void sendMessage(uint8_t* msg);
 
 private:
 	RaspySerial();

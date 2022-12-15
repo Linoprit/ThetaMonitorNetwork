@@ -1,4 +1,7 @@
 #MicroXplorer Configuration settings - do not modify
+CAD.formats=
+CAD.pinconfig=
+CAD.provider=
 Dma.Request0=SPI2_TX
 Dma.Request1=USART1_TX
 Dma.RequestsNb=2
@@ -22,9 +25,10 @@ Dma.USART1_TX.1.PeriphDataAlignment=DMA_PDATAALIGN_BYTE
 Dma.USART1_TX.1.PeriphInc=DMA_PINC_DISABLE
 Dma.USART1_TX.1.Priority=DMA_PRIORITY_LOW
 Dma.USART1_TX.1.RequestParameters=Instance,Direction,PeriphInc,MemInc,PeriphDataAlignment,MemDataAlignment,Mode,Priority,FIFOMode
-FREERTOS.CountingSemaphores01=localMsmntSem,3,Static,localMsmntSemControlBlock;nRF_RxBuffSem,3,Static,nRF_RxBuffSemControlBlock;remoteMsmntSem,3,Static,remoteMsmntSemControlBlock
+FREERTOS.CountingSemaphores01=localMsmntSem,3,Static,localMsmntSemControlBlock;nRF_RxBuffSem,3,Static,nRF_RxBuffSemControlBlock
 FREERTOS.FootprintOK=true
-FREERTOS.IPParameters=Tasks01,FootprintOK,CountingSemaphores01,configUSE_NEWLIB_REENTRANT
+FREERTOS.IPParameters=Tasks01,FootprintOK,CountingSemaphores01,configUSE_NEWLIB_REENTRANT,Queues01
+FREERTOS.Queues01=remoteDataQueue,20,18,1,Static,remoteMsmntQueueBuffer,remoteMsmntQueueControlBlock
 FREERTOS.Tasks01=measureTask,24,160,startMeasureTask,As weak,NULL,Static,measureTaskBuffer,measureTaskControlBlock;nRF24Task,24,164,startnRF24Task,As external,NULL,Static,nRF24TaskBuffer,nRF24TaskControlBlock;displayTask,8,200,startDisplayTask,As external,NULL,Static,displayTaskBuffer,displayTaskControlBlock;masterSerialTas,8,300,startMasterSerialTask,As external,NULL,Static,masterSerialTasBuffer,masterSerialTasControlBlock
 FREERTOS.configUSE_NEWLIB_REENTRANT=1
 File.Version=6

@@ -1,6 +1,6 @@
 import time
 import unittest
-from multiprocessing import Queue
+from queue import Queue
 
 from serialIO.streamDecoder import StreamDecoder as StreamDecoder
 from unittest_setup import Unittest_setup
@@ -20,6 +20,8 @@ class TestStreamDecoder(unittest.TestCase):
         sd.proc_serial_stream(in_buffer)
         self.assertEqual(19, text_queue.qsize())
         self.assertEqual(tst_string, sd.get_txt_queue_as_string(text_queue))
+
+        text_queue.task_done()
         time.sleep(0.4)  # Just enough to let the Queue finish
 
     def test_receive_bin_msg(self):
@@ -38,6 +40,8 @@ class TestStreamDecoder(unittest.TestCase):
         self.assertEqual(3567186629, result.sensorIdHash)
         self.assertEqual(1, result.stationId)
         self.assertEqual(18.375, result.value)
+
+        bin_queue.task_done()
         time.sleep(0.4)  # Just enough to let the Queue finish
 
     @staticmethod
@@ -86,6 +90,8 @@ class TestStreamDecoder(unittest.TestCase):
         text = sd.get_txt_queue_as_string(text_queue)
         self.assertEqual(txt_msg_01 + txt_msg_02, text)
 
+        bin_queue.task_done()
+        text_queue.task_done()
         time.sleep(0.4)  # Just enough to let the Queue finish
 
     # Here, the c-types for documentation:

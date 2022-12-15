@@ -106,6 +106,8 @@ constexpr uint32_t STD_TX_CYCLE_TIME = 300000u; // 5min
 constexpr uint32_t MAXRT_TX_CYCLE_TIME = 60000u; // 1min
 // Statistics of a remote station is timed out after this [ms]
 constexpr uint32_t STATION_TIMEOUT = 2 * STD_TX_CYCLE_TIME;
+// How many sys-tics do we wait, until as started transmission is timed out
+constexpr uint32_t TX_ONGOING_MAX_TICKS = 10; // here: [ms]
 
 // ******* Common  *******
 // how many slaves can connect to the master
@@ -120,5 +122,11 @@ constexpr uint8_t MAX_REMOTE_MEASUREMENTS = MAX_SENSORS * MAX_SLAVES;
 extern osSemaphoreId_t localMsmntSemHandle;
 extern osSemaphoreId_t nRF_RxBuffSemHandle;
 extern osSemaphoreId_t remoteMsmntSemHandle;
+
+// ******* RTOS-Queues  *******
+// Remote-Data-Queue, Size is 20 * RADIO_MESSAGE_LEN
+// We put all NRF24 received Data in here. The RaspySerial consumes it.
+extern osMessageQueueId_t remoteDataQueueHandle;
+
 
 #endif /* INSTANCES_CONFIG_H_ */

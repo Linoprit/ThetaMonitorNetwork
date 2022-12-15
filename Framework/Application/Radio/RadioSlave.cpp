@@ -36,40 +36,14 @@ RadioSlave& RadioSlave::instance(void) {
 	return radioSlave;
 }
 
+// TODO send only measurement, that are valid (not timed-out)
 void RadioSlave::cycle() {
 	sendMeasurements();
-	//OsHelpers::delay(100);
+
+	// TODO send Statistics
 	//sendStatistics();
-
-
-	// TODO  testcode, delete later
-	//	static uint32_t count = 0;
-	//
-	//	radioMessage->getPayload().sensorIdHash = count++;
-	//	radioMessage->prepare();
-	//
-	//	_nRF24L01_Basis.transmitPacket(radioMessage->getMessagePtr(),
-	//			RADIO_MESSAGE_LEN);
-	//	while (_nRF24L01_Basis.getLastTxResult() == NRF24L01::nRF24_TX_IS_ONGOING) {
-	//		OsHelpers::delay(1);
-	//	} // measured: 1.64ms
-	//	NRF24L01::nRF24_TXResult result = _nRF24L01_Basis.getLastTxResult();
-	//
-	//	if (result == NRF24L01::nRF24_TX_ERROR) {
-	//		tx_printf("nRF24_TX_ERROR\n");
-	//	} else if (result == NRF24L01::nRF24_TX_SUCCESS) {
-	//		tx_printf("nRF24_TX_SUCCESS\n");
-	//	} else if (result == NRF24L01::nRF24_TX_TIMEOUT) {
-	//		tx_printf("nRF24_TX_TIMEOUT\n");
-	//	} else if (result == NRF24L01::nRF24_TX_MAXRT) {
-	//		tx_printf("nRF24_TX_MAXRT\n");
-	//	} else {
-	//		tx_printf("nRF24_TX_UNKNOWN\n");
-	//	}
-	//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 }
 
-// TODO send only measurement, that are valid (not timed-out)
 void RadioSlave::sendMeasurements(void) {
 	//RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType;
 
@@ -79,10 +53,6 @@ void RadioSlave::sendMeasurements(void) {
 	// we send all found sensors, even if they timed out
 	for (uint8_t i = 0; i < sensorCount; i++) {
 		osSemaphoreAcquire(localMsmntSemHandle, 0);
-		// ToDo clean, if it works
-		// MeasurementType payload = radioMessage->getPayload();
-		// payload = measurementArray->at(i);
-		//radioMessage->prepare(MsgClass::MEASUREMENT);
 
 		ThetaMsmnt::MeasurementArray *measurementArray =
 		Sensors::instance().getThetaSensors()->getMeasurementArray();

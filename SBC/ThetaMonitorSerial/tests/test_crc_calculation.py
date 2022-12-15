@@ -39,48 +39,48 @@ class TestAppSettings(unittest.TestCase):
     def test_CrcSocket_code_1(self):
         calc_crc = CalcStm32Crc()
         test_str = "e2dumpjournal"
-        uint32_buff = calc_crc.string_to_uint32(test_str)
+        uint32_buff = calc_crc.string_to_uint32_list(test_str)
         crc: np.uint = calc_crc.hal_crc_calculate(uint32_buff)
         self.assertEqual(1884395996, crc)
 
     def test_CrcSocket_code_2(self):
         calc_crc = CalcStm32Crc()
         test_str = "e2init"
-        uint32_buff = calc_crc.string_to_uint32(test_str)
+        uint32_buff = calc_crc.string_to_uint32_list(test_str)
         crc: np.uint = calc_crc.hal_crc_calculate(uint32_buff)
         self.assertEqual(3743823511, crc)
 
     def test_CrcSocket_code_3(self):
         calc_crc = CalcStm32Crc()
         test_str = "e2dumpjournalmap"
-        uint32_buff = calc_crc.string_to_uint32(test_str)
+        uint32_buff = calc_crc.string_to_uint32_list(test_str)
         crc: np.uint = calc_crc.hal_crc_calculate(uint32_buff)
         self.assertEqual(2362017329, crc)
 
     def test_CrcSocket_code_4(self):
         calc_crc = CalcStm32Crc()
         test_str = "e2erase"
-        uint32_buff = calc_crc.string_to_uint32(test_str)
+        uint32_buff = calc_crc.string_to_uint32_list(test_str)
         crc: np.uint = calc_crc.hal_crc_calculate(uint32_buff)
         self.assertEqual(3704805521, crc)
 
     def test_CrcSocket_code_5(self):
         calc_crc = CalcStm32Crc()
         test_str = "e2dumpcalib"
-        uint32_buff = calc_crc.string_to_uint32(test_str)
+        uint32_buff = calc_crc.string_to_uint32_list(test_str)
         crc: np.uint = calc_crc.hal_crc_calculate(uint32_buff)
         self.assertEqual(2821683926, crc)
 
     def test_CrcSocket_code_6(self):
         calc_crc = CalcStm32Crc()
         test_str = "e2dumpmem"
-        uint32_buff = calc_crc.string_to_uint32(test_str)
+        uint32_buff = calc_crc.string_to_uint32_list(test_str)
         crc: np.uint = calc_crc.hal_crc_calculate(uint32_buff)
         self.assertEqual(1704472323, crc)
 
     def test_CrcSocket_code_7(self):
         calc_crc = CalcStm32Crc()
         test_str = "e2dumpstart"
-        uint32_buff = calc_crc.string_to_uint32(test_str)
+        uint32_buff = calc_crc.string_to_uint32_list(test_str)
         crc: np.uint = calc_crc.hal_crc_calculate(uint32_buff)
         self.assertEqual(302299815, crc)

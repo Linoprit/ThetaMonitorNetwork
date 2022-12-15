@@ -18,7 +18,7 @@ import wx.html
 class ThetaMonitorFrame ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Theta Monitor", pos = wx.DefaultPosition, size = wx.Size( 800,500 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL, name = u"MainWindow" )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Theta Monitor", pos = wx.DefaultPosition, size = wx.Size( 800,800 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL, name = u"MainWindow" )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -29,17 +29,32 @@ class ThetaMonitorFrame ( wx.Frame ):
 
 		bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_staticText1 = wx.StaticText( self.m_panel4, wx.ID_ANY, u"Serial Device: ", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText1.Wrap( -1 )
+		self.m_buttonRefreshCombo = wx.Button( self.m_panel4, wx.ID_ANY, u"Serial Device", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_buttonRefreshCombo.SetToolTip( u"Refresh device combo" )
 
-		bSizer5.Add( self.m_staticText1, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		bSizer5.Add( self.m_buttonRefreshCombo, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
 		m_choiceSerialPortChoices = [ u"Uart" ]
 		self.m_choiceSerialPort = wx.Choice( self.m_panel4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choiceSerialPortChoices, 0 )
 		self.m_choiceSerialPort.SetSelection( 0 )
 		self.m_choiceSerialPort.SetMinSize( wx.Size( 300,-1 ) )
 
-		bSizer5.Add( self.m_choiceSerialPort, 0, wx.ALL, 5 )
+		bSizer5.Add( self.m_choiceSerialPort, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+
+		self.m_bmToggleBtnConnect = wx.BitmapToggleButton( self.m_panel4, wx.ID_ANY, wx.ArtProvider.GetBitmap( wx.ART_TICK_MARK, wx.ART_BUTTON ), wx.DefaultPosition, wx.DefaultSize, 0 )
+
+		self.m_bmToggleBtnConnect.SetBitmap( wx.ArtProvider.GetBitmap( wx.ART_TICK_MARK, wx.ART_BUTTON ) )
+		self.m_bmToggleBtnConnect.SetToolTip( u"Connect to target" )
+
+		bSizer5.Add( self.m_bmToggleBtnConnect, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+
+		self.m_bmToggleBtnAutoScroll = wx.BitmapToggleButton( self.m_panel4, wx.ID_ANY, wx.ArtProvider.GetBitmap( u"gtk-refresh", wx.ART_BUTTON ), wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_bmToggleBtnAutoScroll.SetValue( True )
+
+		self.m_bmToggleBtnAutoScroll.SetBitmap( wx.ArtProvider.GetBitmap( u"gtk-refresh", wx.ART_BUTTON ) )
+		self.m_bmToggleBtnAutoScroll.SetToolTip( u"Toggle auto scroll" )
+
+		bSizer5.Add( self.m_bmToggleBtnAutoScroll, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
 
 		bSizer5.Add( ( 0, 0), 1, wx.EXPAND, 5 )
@@ -47,7 +62,9 @@ class ThetaMonitorFrame ( wx.Frame ):
 		self.m_bpButtonExit = wx.BitmapButton( self.m_panel4, wx.ID_ANY, wx.NullBitmap, wx.DefaultPosition, wx.DefaultSize, wx.BU_AUTODRAW|0 )
 
 		self.m_bpButtonExit.SetBitmap( wx.ArtProvider.GetBitmap( wx.ART_QUIT, wx.ART_TOOLBAR ) )
-		bSizer5.Add( self.m_bpButtonExit, 0, wx.ALL, 5 )
+		self.m_bpButtonExit.SetToolTip( u"Exit application" )
+
+		bSizer5.Add( self.m_bpButtonExit, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
 
 		self.m_panel4.SetSizer( bSizer5 )
@@ -61,8 +78,8 @@ class ThetaMonitorFrame ( wx.Frame ):
 		self.m_panelTabOne = wx.Panel( self.m_notebookMain, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		bSizer3 = wx.BoxSizer( wx.VERTICAL )
 
-		self.m_htmlWinTabOne = wx.html.HtmlWindow( self.m_panelTabOne, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.html.HW_SCROLLBAR_AUTO )
-		bSizer3.Add( self.m_htmlWinTabOne, 1, wx.ALL|wx.EXPAND, 5 )
+		self.m_htmlWinMonitor = wx.html.HtmlWindow( self.m_panelTabOne, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.html.HW_SCROLLBAR_AUTO )
+		bSizer3.Add( self.m_htmlWinMonitor, 1, wx.ALL|wx.EXPAND, 5 )
 
 
 		self.m_panelTabOne.SetSizer( bSizer3 )
@@ -104,6 +121,10 @@ class ThetaMonitorFrame ( wx.Frame ):
 		self.Centre( wx.BOTH )
 
 		# Connect Events
+		self.m_buttonRefreshCombo.Bind( wx.EVT_BUTTON, self.on_RefreshCombo )
+		self.m_choiceSerialPort.Bind( wx.EVT_CHOICE, self.on_choice_serial_port )
+		self.m_bmToggleBtnConnect.Bind( wx.EVT_TOGGLEBUTTON, self.on_button_connect_toggled )
+		self.m_bmToggleBtnAutoScroll.Bind( wx.EVT_TOGGLEBUTTON, self.on_button_auto_scroll_toggled )
 		self.m_bpButtonExit.Bind( wx.EVT_BUTTON, self.on_quit_button_click )
 		self.m_notebookMain.Bind( wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_notebook_page_changed )
 
@@ -112,6 +133,18 @@ class ThetaMonitorFrame ( wx.Frame ):
 
 
 	# Virtual event handlers, override them in your derived class
+	def on_RefreshCombo( self, event ):
+		event.Skip()
+
+	def on_choice_serial_port( self, event ):
+		event.Skip()
+
+	def on_button_connect_toggled( self, event ):
+		event.Skip()
+
+	def on_button_auto_scroll_toggled( self, event ):
+		event.Skip()
+
 	def on_quit_button_click( self, event ):
 		event.Skip()
 

@@ -2,6 +2,8 @@ from enum import Enum, auto
 from queue import Queue
 from struct import *
 
+from serialIO.calcStm32Crc import CalcStm32Crc
+
 # -------- definitions from Stm-Code --------
 # https://www.windmill.co.uk/ascii-control-codes.html
 # Ctrl	ASCII 	Dec 	Hex	Meaning
@@ -101,6 +103,7 @@ class StreamDecoder:
         self._bin_tmp_buffer = []
         self._text_queue = text_queue
         self._bin_queue = bin_queue
+        self._crc_fail_count = 0
 
     def proc_serial_stream(self, stream_data: bytes):
         for char in stream_data:
@@ -143,8 +146,12 @@ class StreamDecoder:
         if not result:  # cycle code
             self._bin_tmp_buffer.append(char)
         else:  # exit code
-            msmt = self.get_bin_msg_decoded(self._bin_tmp_buffer)
-            self._bin_queue.put(msmt, block=True, timeout=None)
+            crc_ok = CalcStm32Crc().check_crc_from_serial(self._bin_tmp_buffer)
+            if crc_ok:
+                msmt = self.get_bin_msg_decoded(self._bin_tmp_buffer)
+                self._bin_queue.put(msmt, block=True, timeout=None)
+            else:
+                self._crc_fail_count += 1
 
     def _await_end_trm_state(self, char):
         if self._is_state_new():  # entry code
@@ -211,9 +218,8 @@ class StreamDecoder:
             pass  # will not be sent
         return None
 
-    def calc_checksum(self):
-        pass
-        # TODO
+    def reset_crc_fail_count(self):
+        self._crc_fail_count = 0
 
     def _is_state_new(self) -> bool:
         return self._old_state != self._act_state

@@ -1,9 +1,9 @@
 import framework.settings
-from serialIO import serialIO as Sio
-from serialIO import Thread as Thr
+from serialIO import serialIO_toDelete as Sio
+from serialIO import serialThread as Thr
 from serialIO import serialHelpers as Seh
 import wx
-import gui.guiFrame as Mf
+import gui.classThetaMonGui as Mf
 
 
 if __name__ == '__main__':
@@ -19,7 +19,7 @@ if __name__ == '__main__':
         print("to be implemented")
     elif what_to_run == 'GUI_TARGET':
         app = wx.App(False)
-        frame = Mf.MainFrame(None, settings)
+        frame = Mf.ThetaMonGui(None, settings)
         frame.Show(True)
         app.MainLoop()
     elif what_to_run == 'SERIALIO':

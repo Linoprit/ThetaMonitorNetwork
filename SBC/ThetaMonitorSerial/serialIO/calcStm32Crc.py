@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 from struct import *
 
@@ -33,21 +35,31 @@ class CalcStm32Crc:
         return self.actCrc
 
     @staticmethod
-    def string_to_uint32(in_string):
+    def string_to_uint32_list(in_string):
         string_as_bytes = bytearray(in_string, 'utf-8')
-        uint32len = CrcSocket.calcUint32Len(len(in_string))
-        # pad string to a len, multible of four
-        uint8_diff_len = (uint32len * 4) - len(in_string)
+        return CalcStm32Crc.uint8_to_uint32_list(string_as_bytes)
+
+    @staticmethod
+    def uint8_to_uint32_list(buffer: list) -> list:  # list[np.byte]
+        tmp_buffer = copy.copy(buffer)
+        uint32len = CrcSocket.calcUint32Len(len(buffer))
+        # pad string to a len, multiple of four
+        uint8_diff_len = (uint32len * 4) - len(buffer)
         for i in range(uint8_diff_len):
-            string_as_bytes.append(0)
+            tmp_buffer.append(0)
         # reinterpret four bytes at a time to uint32
         uint32_buf = [0] * uint32len
         for i in range(0, uint32len):
-            # tmp = bytes(padded_buf[i*4:i*4+4])
-            tmp = bytes(string_as_bytes[i*4:i*4+4])
+            tmp = bytes(tmp_buffer[i*4:i*4+4])
             tmp_l = unpack("<L", tmp)
             uint32_buf[i] = tmp_l[0]
         return uint32_buf
+
+    def check_crc_from_serial(self, serial_bin_msg: list):
+        uint32_list = CalcStm32Crc.uint8_to_uint32_list(
+            serial_bin_msg[0:-1])
+        crc8 = self.hal_crc_calculate(uint32_list) & 0xFF
+        return crc8 == serial_bin_msg[-1]
 
 
 class CrcSocket:

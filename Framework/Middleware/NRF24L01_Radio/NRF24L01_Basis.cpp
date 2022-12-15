@@ -16,7 +16,7 @@
 using namespace snsrs;
 
 NRF24L01_Basis::NRF24L01_Basis() :
-		_lostPkgCount { 0 }, _retransCount { 0 }, _lastTxResult {
+		_nrfLostPkgCount { 0 }, _nrfRetransCount { 0 }, _lastTxResult {
 				NRF24L01::nRF24_NOP }, _nRFState { none } {
 }
 
@@ -113,7 +113,7 @@ std::string NRF24L01_Basis::getNRFStateStr(void) {
 }
 
 void NRF24L01_Basis::transmitPacket(uint8_t *pBuf, uint8_t length) {
-// in Case of no success, we have to flush the fifos
+	// in Case of no success, we have to flush the fifos
 	if (_lastTxResult != NRF24L01::nRF24_TX_SUCCESS) {
 		_nRF24.FlushRX();
 		_nRF24.FlushTX();
@@ -126,11 +126,13 @@ void NRF24L01_Basis::transmitPacket(uint8_t *pBuf, uint8_t length) {
 
 	_nRF24.CE_H(); // Start transmission. CE pin must be held at least 10us
 	_lastTxResult = NRF24L01::nRF24_TX_IS_ONGOING;
+	_tickTransmissionStarted = OsHelpers::get_tick();
+	// CAUTION: if the IRQ never occurs, _lastTxResult keeps its state forever
 }
 
 void NRF24L01_Basis::addStatistics(uint8_t lostPkgCount, uint8_t retransCount) {
-	this->_lostPkgCount += lostPkgCount;
-	this->_retransCount += retransCount;
+	this->_nrfLostPkgCount += lostPkgCount;
+	this->_nrfRetransCount += retransCount;
 }
 
 // will be called after transmission is done
@@ -138,7 +140,7 @@ void NRF24L01_Basis::IrqPinRxCallback(void) {
 	// we are in TX-IRQ, because we started a transmission
 	if (_lastTxResult == NRF24L01::nRF24_TX_IS_ONGOING) {
 		uint8_t status = _nRF24.GetStatus();
-		_nRF24.CE_L();	// Deassert the CE pin (Standby-II --> Standby-I)
+		_nRF24.CE_L();	// De-assert the CE pin (Standby-II --> Standby-I)
 		_nRF24.ClearIRQFlags();
 		_nRF24.SetOperationalMode(nRF24_MODE_RX);
 
@@ -177,3 +179,31 @@ void NRF24L01_Basis::IrqPinRxCallback(void) {
 		} // measured: 190us
 	}
 }
+
+bool NRF24L01_Basis::isTxOngoing(void) {
+	NRF24L01::nRF24_TXResult result = getLastTxResult();
+	// TODO handle overflow
+	uint32_t tickDiff = OsHelpers::get_tick() - _tickTransmissionStarted;
+	if (result != NRF24L01::nRF24_TX_IS_ONGOING) {
+		return false;
+	}
+	if (tickDiff > TX_ONGOING_MAX_TICKS) {
+		_lastTxResult = NRF24L01::nRF24_TX_TIMEOUT;
+		_nrfLostPkgCount++;
+		return false;
+	}
+	return true;
+}
+
+bool NRF24L01_Basis::lastRxWasSuccess(void) {
+	NRF24L01::nRF24_TXResult result = getLastTxResult();
+	if (result != NRF24L01::nRF24_TX_SUCCESS) {
+		if ((result == NRF24L01::nRF24_TX_MAXRT)
+				|| (result == NRF24L01::nRF24_TX_TIMEOUT)
+				|| (result == NRF24L01::nRF24_TX_ERROR)) {
+			return false;
+		}
+	}
+	return true;
+}
+

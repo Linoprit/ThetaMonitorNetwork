@@ -29,15 +29,15 @@ public:
 	void cycle(void);
 
 	void checkRadioBuffer(void);
-	void storeRxMessage(uint8_t *nRF24_payload);
-	RemoteMsmnt* getRemoteMsmnt(void) {
-		return &_remoteMsmnt;
-	}
-	;
-	RemoteRadioStatistics* getRemoteRadioStatistics(void) {
-		return &_remoteStats;
-	}
-	;
+	void enqueRxMessage(uint8_t *nRF24_payload);
+//	RemoteMsmnt* getRemoteMsmnt(void) {
+//		return &_remoteMsmnt;
+//	}
+//	;
+//	RemoteRadioStatistics* getRemoteRadioStatistics(void) {
+//		return &_remoteStats;
+//	}
+//	;
 
 private:
 	RadioMaster();
@@ -45,8 +45,8 @@ private:
 	}
 
 	// measurement of the sensors, sent by the nRF-Modules of the slaves.
-	RemoteMsmnt _remoteMsmnt;
-	RemoteRadioStatistics _remoteStats;
+	//RemoteMsmnt _remoteMsmnt;
+	//RemoteRadioStatistics _remoteStats;
 
 };
 

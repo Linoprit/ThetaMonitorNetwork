@@ -27,6 +27,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 typedef StaticTask_t osStaticThreadDef_t;
+typedef StaticQueue_t osStaticMessageQDef_t;
 typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN PTD */
 
@@ -72,7 +73,7 @@ const osThreadAttr_t measureTask_attributes = {
 };
 /* Definitions for nRF24Task */
 osThreadId_t nRF24TaskHandle;
-uint32_t nRF24TaskBuffer[ 280 ];
+uint32_t nRF24TaskBuffer[ 164 ];
 osStaticThreadDef_t nRF24TaskControlBlock;
 const osThreadAttr_t nRF24Task_attributes = {
   .name = "nRF24Task",
@@ -106,6 +107,17 @@ const osThreadAttr_t masterSerialTas_attributes = {
   .stack_size = sizeof(masterSerialTasBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for remoteDataQueue */
+osMessageQueueId_t remoteDataQueueHandle;
+uint8_t remoteMsmntQueueBuffer[ 20 * 18 ];
+osStaticMessageQDef_t remoteMsmntQueueControlBlock;
+const osMessageQueueAttr_t remoteDataQueue_attributes = {
+  .name = "remoteDataQueue",
+  .cb_mem = &remoteMsmntQueueControlBlock,
+  .cb_size = sizeof(remoteMsmntQueueControlBlock),
+  .mq_mem = &remoteMsmntQueueBuffer,
+  .mq_size = sizeof(remoteMsmntQueueBuffer)
+};
 /* Definitions for localMsmntSem */
 osSemaphoreId_t localMsmntSemHandle;
 osStaticSemaphoreDef_t localMsmntSemControlBlock;
@@ -121,14 +133,6 @@ const osSemaphoreAttr_t nRF_RxBuffSem_attributes = {
   .name = "nRF_RxBuffSem",
   .cb_mem = &nRF_RxBuffSemControlBlock,
   .cb_size = sizeof(nRF_RxBuffSemControlBlock),
-};
-/* Definitions for remoteMsmntSem */
-osSemaphoreId_t remoteMsmntSemHandle;
-osStaticSemaphoreDef_t remoteMsmntSemControlBlock;
-const osSemaphoreAttr_t remoteMsmntSem_attributes = {
-  .name = "remoteMsmntSem",
-  .cb_mem = &remoteMsmntSemControlBlock,
-  .cb_size = sizeof(remoteMsmntSemControlBlock),
 };
 /* USER CODE BEGIN PV */
 
@@ -217,9 +221,6 @@ int main(void)
   /* creation of nRF_RxBuffSem */
   nRF_RxBuffSemHandle = osSemaphoreNew(3, 3, &nRF_RxBuffSem_attributes);
 
-  /* creation of remoteMsmntSem */
-  remoteMsmntSemHandle = osSemaphoreNew(3, 3, &remoteMsmntSem_attributes);
-
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -227,6 +228,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* creation of remoteDataQueue */
+  remoteDataQueueHandle = osMessageQueueNew (20, 18, &remoteDataQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

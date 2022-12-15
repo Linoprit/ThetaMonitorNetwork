@@ -27,6 +27,7 @@ class Worker(Thread):
             data = self.serial.read(self.serial.inWaiting())
             if data:
                 self._serial_queue.put(data, block=True, timeout=0.5)
+                print(self._serial_queue.qsize(), len(data))
             time.sleep(1.0)
         # some exit code
         print("Exiting")
@@ -40,7 +41,7 @@ def main():
     worker = Worker(serial_queue, '/dev/ttyUSB0', 115200, 0.5)
     worker.start()
 
-    for i in range(1000):
+    for i in range(10):
         print("pass " + str(i))
         for j in range(serial_queue.qsize() - 1):
             data = serial_queue.get(block=True, timeout=None)

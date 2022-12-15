@@ -40,6 +40,7 @@ void tx_buff_clear(void);
  * or
  * - printf("Result is: %d.%d", i/10, i%10);
  * CAREFUL: the message must not be longer than TMP_BUFF_LEN!!
+ * TODO: Make it thread-safe
  */
 int tx_printf(const char *format, ...) {
 	uint8_t tmpBuff[TMP_BUFF_LEN];

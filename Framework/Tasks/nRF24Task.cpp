@@ -43,67 +43,20 @@ void startnRF24Task(void *argument) {
 	for (;;) {
 		if (isMaster) {
 			radio::RadioMaster::instance().cycle();
+
+			// TODO send internal Msmts in a cycle of STD_TX_CYCLE_TIME,
+			// send remote Msmts when they come in
 			raspy::RaspySerial::instance().cycle();
 
 			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			OsHelpers::delay(1000); // TODO what is the exact cycletime?
-			// call RaspySerial Cycle
 		} else {
 			OsHelpers::delay(1000);
 			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			radio::RadioSlave::instance().cycle();
-			//OsHelpers::delay(radio::RadioSlave::instance().getTransmitCycleTime());
+			// TODO OsHelpers::delay(radio::RadioSlave::instance().getTransmitCycleTime());
 		}
-
-
-		// TODO
-		// if staionType == Master
-		//		radioMaster.cycle
-		//		rhaspySerial.cycle
-		// else
-		//		radioSlave.cycle
-
-		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//		radio::RadioLink::instance().cycle();
-
-//		OsHelpers::delay(
-//				radio::RadioLink::instance().getTransmitCycleTime());
-
-
-
-		// TODO obsolete, remove this
-		//
-//		msmnt::SensorIdTable::StationType stationType =
-//				msmnt::ThetaMeasurement::instance().getNonVolatileData()->getStationType();
-//
-//		if (stationType == msmnt::SensorIdTable::StationType::SLAVE_01) {
-//
-//		} else if (stationType == msmnt::SensorIdTable::StationType::MASTER) {
-//
-//			bool isLocked =
-//					radioLink::RadioLink::instance().getNRF24L01_Basis()->isRxBufLocked();
-//			if (!isLocked) {
-//				RadioMessage<msmnt::ThetaMeasurement::SensorMeasureType> radioMessage;
-//
-//				SimpleQueue<uint8_t, nRF24_RX_BUFFER_SIZE> *rxBuffer =
-//						radioLink::RadioLink::instance().getNRF24L01_Basis()->getRxBuffer();
-//
-//				if (static_cast<std::size_t>(rxBuffer->size())
-//						>= RADIO_MESSAGE_LEN) {
-//					for (uint8_t i = 0; i < RADIO_MESSAGE_LEN; i++) {
-//						radioMessage.getMessagePtr()[i] = rxBuffer->dequeue();
-//					}
-//
-//					msmnt::ThetaMeasurement::SensorMeasureType radioMeasurement =
-//							radioMessage.getPayload();
-//					tx_printf("count: %lu / %i\n",
-//							radioMeasurement.sensorIdHash,
-//							radioMessage.isChkSumOk());
-//				}
-//			}
-//		}
-//		OsHelpers::delay(1000);
-	}
+}
 
 }
 

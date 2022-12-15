@@ -91,7 +91,7 @@ private:
 
 // The longest message type + radio-message overhead
 constexpr size_t RADIO_MESSAGE_LEN =
-		sizeof(RadioMessage<uint8_t>::RadioMessageType);
+		sizeof(RadioMessage<uint8_t>::RadioMessageType); // currently : 18
 
 typedef RadioMessage<radio::RadioStatisticsType> RadioStatMsgType;
 typedef RadioMessage<snsrs::MeasurementType> RadioMsmntType;

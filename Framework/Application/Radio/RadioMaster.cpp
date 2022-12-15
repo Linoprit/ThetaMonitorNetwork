@@ -9,6 +9,7 @@
 #include <stm32f1xx.h>
 #elif defined STM32F401xC ||  defined STM32F401xE
 #include "stm32f4xx_hal.h"
+#include "cmsis_os.h"
 #include <main.h>
 #elif defined STM32F103xB
 #include "stm32f1xx_hal.h"
@@ -19,12 +20,12 @@
 #include <Application/Sensors/NonVolatileData.h>
 #include <Application/Radio/RadioSlave.h>
 #include <Config/config.h>
+#include <System/serialPrintf.h>
 #include <new>
 
 namespace radio {
 
-RadioMaster::RadioMaster() :
-		_remoteMsmnt { remoteMsmntSemHandle } {
+RadioMaster::RadioMaster() {
 }
 
 void RadioMaster::init(void) {
@@ -49,7 +50,7 @@ void RadioMaster::cycle() {
 void RadioMaster::checkRadioBuffer(void) {
 	uint8_t nRF24_payload[RADIO_MESSAGE_LEN];
 
-	//TODO divide MASTER and SLAVE data
+	//TODO Use RTOS-Queue
 	NRF24L01_Basis::RxBufferQueue *nrfRxQueue =
 			radio::RadioSlave::instance().getNRF24L01_Basis()->getRxBuffer();
 
@@ -66,27 +67,29 @@ void RadioMaster::checkRadioBuffer(void) {
 		queueSize = nrfRxQueue->size();
 		osSemaphoreRelease(nRF_RxBuffSemHandle);
 
-		storeRxMessage(nRF24_payload);
+		enqueRxMessage(nRF24_payload);
+		tx_printf("got Message.\n");
 	}
 }
 
-void RadioMaster::storeRxMessage(uint8_t *nRF24_payload) {
+void RadioMaster::enqueRxMessage(uint8_t *nRF24_payload) {
+	// after checksum is ok, we put all messages into the same queue.
+	// optimization: calculate the checksum on bare payload.
+	// there is no need to cast the messages.
+
 	MsgClass msgClass = static_cast<MsgClass>(nRF24_payload[0]);
 
 	if (msgClass == MEASUREMENT) {
 		RadioMsmntType *radioMsmnt =
 				reinterpret_cast<RadioMsmntType*>(nRF24_payload);
 		if (radioMsmnt->isChkSumOk()) {
-			MeasurementType measurement = radioMsmnt->getPayload();
-			//TODO remove this class and use a queue, do not mix local and remote msmnt
-			_remoteMsmnt.update(measurement.sensorIdHash, measurement.value);
+			osMessageQueuePut(remoteDataQueueHandle, radioMsmnt, 5, 2);
 		}
 	} else if (msgClass == STATISTICS) {
 		RadioStatMsgType *radioStat =
 				reinterpret_cast<RadioStatMsgType*>(nRF24_payload);
 		if(radioStat->isChkSumOk()){
-			RadioStatisticsType stat = radioStat->getPayload();
-			_remoteStats.update(stat);
+			osMessageQueuePut(remoteDataQueueHandle, radioStat, 5, 2);
 		}
 	} // other Msg-classes are not used, at the moment
 

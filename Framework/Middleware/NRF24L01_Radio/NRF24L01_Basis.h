@@ -69,17 +69,17 @@ public:
 		return _nRFState;
 	}
 	uint8_t get_lostPkgCount(void) {
-		return _lostPkgCount;
+		return _nrfLostPkgCount;
 	}
 	uint8_t get_retransCount(void) {
-		return _retransCount;
+		return _nrfRetransCount;
 	}
 	uint8_t get_rxBufferOverflows(void) {
 		return _rxBufferOverflows;
 	}
 	void resetStatistics(void) {
-		_lostPkgCount = 0;
-		_retransCount = 0;
+		_nrfLostPkgCount = 0;
+		_nrfRetransCount = 0;
 		_rxBufferOverflows = 0;
 	}
 	void addStatistics(uint8_t lostPkgCount, uint8_t retransCount);
@@ -90,34 +90,22 @@ public:
 		return _lastTxResult;
 	}
 
-	// returns true, if transmission is still in progress
-	bool isTxOngoing(void){
-		NRF24L01::nRF24_TXResult result = getLastTxResult();
-		if (result == NRF24L01::nRF24_TX_IS_ONGOING){
-			return true;
-		}
-		return false;
-	}
+	// To be called cyclically. Returns true, if transmission is still
+	// in progress, and checks for transmission time-out.
+	bool isTxOngoing(void);
+
 	// returns true, if last finished transmission was successful
-	bool lastRxWasSuccess(void){
-		NRF24L01::nRF24_TXResult result = getLastTxResult();
-		if (result != NRF24L01::nRF24_TX_SUCCESS) {
-					if ((result == NRF24L01::nRF24_TX_MAXRT)
-							|| (result == NRF24L01::nRF24_TX_TIMEOUT)
-							|| (result == NRF24L01::nRF24_TX_ERROR)) {
-						return false;
-					}
-				}
-		return true;
-	}
+	bool lastRxWasSuccess(void);
+
 	void IrqPinRxCallback(void);
 
 private:
 	NRF24L01 _nRF24;
-	uint8_t _lostPkgCount;
-	uint8_t _retransCount;
+	uint8_t _nrfLostPkgCount;
+	uint8_t _nrfRetransCount;
 	uint8_t _rxBufferOverflows;
 	NRF24L01::nRF24_TXResult _lastTxResult;
+	uint32_t _tickTransmissionStarted;  // when start transmission, current tick saved here
 	nRFState _nRFState;
 	RxBufferQueue _rxBuffer;
 };
