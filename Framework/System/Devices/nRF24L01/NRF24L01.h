@@ -19,6 +19,8 @@
 // nRF24L0 instruction definitions
 #define nRF24_CMD_R_REGISTER       (uint8_t)0x00 // Register read
 #define nRF24_CMD_W_REGISTER       (uint8_t)0x20 // Register write
+#define nRF24_CMD_ACTIVATE         (uint8_t)0x50 // (De)Activates R_RX_PL_WID, W_ACK_PAYLOAD, W_TX_PAYLOAD_NOACK features
+#define nRF24_CMD_R_RX_PL_WID	   (uint8_t)0x60 // Read RX-payload width for the top R_RX_PAYLOAD in the RX FIFO.
 #define nRF24_CMD_R_RX_PAYLOAD     (uint8_t)0x61 // Read RX payload
 #define nRF24_CMD_W_TX_PAYLOAD     (uint8_t)0xA0 // Write TX payload
 #define nRF24_CMD_FLUSH_TX         (uint8_t)0xE1 // Flush TX FIFO
@@ -58,6 +60,9 @@
 // Register bits definitions
 #define nRF24_CONFIG_PRIM_RX       (uint8_t)0x01 // PRIM_RX bit in CONFIG register
 #define nRF24_CONFIG_PWR_UP        (uint8_t)0x02 // PWR_UP bit in CONFIG register
+#define nRF24_FEATURE_EN_DYN_ACK   (uint8_t)0x01 // EN_DYN_ACK bit in FEATURE register
+#define nRF24_FEATURE_EN_ACK_PAY   (uint8_t)0x02 // EN_ACK_PAY bit in FEATURE register
+#define nRF24_FEATURE_EN_DPL       (uint8_t)0x04 // EN_DPL bit in FEATURE register
 #define nRF24_FLAG_RX_DR           (uint8_t)0x40 // RX_DR bit (data ready RX FIFO interrupt)
 #define nRF24_FLAG_TX_DS           (uint8_t)0x20 // TX_DS bit (data sent TX FIFO interrupt)
 #define nRF24_FLAG_MAX_RT          (uint8_t)0x10 // MAX_RT bit (maximum number of TX retransmits interrupt)
@@ -136,6 +141,12 @@ enum {
 	nRF24_MODE_TX = (uint8_t) 0x00  // PTX
 };
 
+// Dynamic Payload
+enum {
+	nRF24_DPL_ON = (uint8_t) 0x01, // PRX
+	nRF24_DPL_OFF = (uint8_t) 0x00  // PTX
+};
+
 // Enumeration of RX pipe addresses and TX address
 enum {
 	nRF24_PIPE0 = (uint8_t) 0x00, // pipe0
@@ -200,7 +211,7 @@ nRF24_REG_TX_ADDR };
 
 class NRF24L01 {
 public:
-	// Hm. We mix the current state of the nRF with operation results.
+	// Hm. We mix the current state of the nRF with operation results?
 	typedef enum {
 		nRF24_TX_ERROR = (uint8_t) 0x00, // Unknown error
 		nRF24_NOP,						 // no operation, device is not used
@@ -226,6 +237,8 @@ public:
 	uint8_t Check(void);
 	void SetPowerMode(uint8_t mode);
 	void SetOperationalMode(uint8_t mode);
+	void SetDynamicPayloadLength(uint8_t mode);
+	void SetPayloadWithAck(uint8_t mode);
 	void SetCRCScheme(uint8_t scheme);
 	void SetRFChannel(uint8_t channel);
 	void SetAutoRetr(uint8_t ard, uint8_t arc);
@@ -249,7 +262,11 @@ public:
 	void ClearIRQFlags(void);
 
 	void WritePayload(uint8_t *pBuf, uint8_t length);
+	uint8_t GetRxDplPayloadWidth(void);
+	nRF24_RXResult ReadPayloadGeneric(uint8_t *pBuf, uint8_t *length,
+			uint8_t dpl);
 	nRF24_RXResult ReadPayload(uint8_t *pBuf, uint8_t *length);
+	nRF24_RXResult ReadPayloadDpl(uint8_t *pBuf, uint8_t *length);
 	nRF24_TXResult TransmitPacket(uint8_t *pBuf, uint8_t length);
 	std::string txResultToStr(nRF24_TXResult ErrorCode);
 

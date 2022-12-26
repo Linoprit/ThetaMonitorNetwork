@@ -66,7 +66,7 @@ public:
 	virtual ~SensorIdTable() {
 	}
 
-	SensorIdTable::SensorIdType getSensorId(NonVolatileData *nvData,
+	SensorIdTable::SensorIdType getSensorTableData(NonVolatileData *nvData,
 			uint32_t hashId);
 
 	static std::string sensorType2Str(SensorType sensorType);

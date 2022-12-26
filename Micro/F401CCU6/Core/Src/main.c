@@ -28,6 +28,7 @@
 /* Private typedef -----------------------------------------------------------*/
 typedef StaticTask_t osStaticThreadDef_t;
 typedef StaticQueue_t osStaticMessageQDef_t;
+typedef StaticTimer_t osStaticTimerDef_t;
 typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN PTD */
 
@@ -57,11 +58,10 @@ TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
-DMA_HandleTypeDef hdma_usart1_tx;
 
 /* Definitions for measureTask */
 osThreadId_t measureTaskHandle;
-uint32_t measureTaskBuffer[ 160 ];
+uint32_t measureTaskBuffer[ 300 ];
 osStaticThreadDef_t measureTaskControlBlock;
 const osThreadAttr_t measureTask_attributes = {
   .name = "measureTask",
@@ -73,7 +73,7 @@ const osThreadAttr_t measureTask_attributes = {
 };
 /* Definitions for nRF24Task */
 osThreadId_t nRF24TaskHandle;
-uint32_t nRF24TaskBuffer[ 164 ];
+uint32_t nRF24TaskBuffer[ 200 ];
 osStaticThreadDef_t nRF24TaskControlBlock;
 const osThreadAttr_t nRF24Task_attributes = {
   .name = "nRF24Task",
@@ -97,7 +97,7 @@ const osThreadAttr_t displayTask_attributes = {
 };
 /* Definitions for masterSerialTas */
 osThreadId_t masterSerialTasHandle;
-uint32_t masterSerialTasBuffer[ 300 ];
+uint32_t masterSerialTasBuffer[ 400 ];
 osStaticThreadDef_t masterSerialTasControlBlock;
 const osThreadAttr_t masterSerialTas_attributes = {
   .name = "masterSerialTas",
@@ -118,6 +118,14 @@ const osMessageQueueAttr_t remoteDataQueue_attributes = {
   .mq_mem = &remoteMsmntQueueBuffer,
   .mq_size = sizeof(remoteMsmntQueueBuffer)
 };
+/* Definitions for ownSysTickTimer */
+osTimerId_t ownSysTickTimerHandle;
+osStaticTimerDef_t ownSysTickTimerControlBlock;
+const osTimerAttr_t ownSysTickTimer_attributes = {
+  .name = "ownSysTickTimer",
+  .cb_mem = &ownSysTickTimerControlBlock,
+  .cb_size = sizeof(ownSysTickTimerControlBlock),
+};
 /* Definitions for localMsmntSem */
 osSemaphoreId_t localMsmntSemHandle;
 osStaticSemaphoreDef_t localMsmntSemControlBlock;
@@ -126,13 +134,13 @@ const osSemaphoreAttr_t localMsmntSem_attributes = {
   .cb_mem = &localMsmntSemControlBlock,
   .cb_size = sizeof(localMsmntSemControlBlock),
 };
-/* Definitions for nRF_RxBuffSem */
-osSemaphoreId_t nRF_RxBuffSemHandle;
-osStaticSemaphoreDef_t nRF_RxBuffSemControlBlock;
-const osSemaphoreAttr_t nRF_RxBuffSem_attributes = {
-  .name = "nRF_RxBuffSem",
-  .cb_mem = &nRF_RxBuffSemControlBlock,
-  .cb_size = sizeof(nRF_RxBuffSemControlBlock),
+/* Definitions for txPrintSem */
+osSemaphoreId_t txPrintSemHandle;
+osStaticSemaphoreDef_t nRF_txPrintSemControlBlock;
+const osSemaphoreAttr_t txPrintSem_attributes = {
+  .name = "txPrintSem",
+  .cb_mem = &nRF_txPrintSemControlBlock,
+  .cb_size = sizeof(nRF_txPrintSemControlBlock),
 };
 /* USER CODE BEGIN PV */
 
@@ -155,6 +163,7 @@ void startMeasureTask(void *argument);
 extern void startnRF24Task(void *argument);
 extern void startDisplayTask(void *argument);
 extern void startMasterSerialTask(void *argument);
+void ownSysTick(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -218,12 +227,16 @@ int main(void)
   /* creation of localMsmntSem */
   localMsmntSemHandle = osSemaphoreNew(3, 3, &localMsmntSem_attributes);
 
-  /* creation of nRF_RxBuffSem */
-  nRF_RxBuffSemHandle = osSemaphoreNew(3, 3, &nRF_RxBuffSem_attributes);
+  /* creation of txPrintSem */
+  txPrintSemHandle = osSemaphoreNew(3, 3, &txPrintSem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
+
+  /* Create the timer(s) */
+  /* creation of ownSysTickTimer */
+  ownSysTickTimerHandle = osTimerNew(ownSysTick, osTimerPeriodic, NULL, &ownSysTickTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -445,7 +458,7 @@ static void MX_SPI1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI1_Init 2 */
-
+  /* SPI1 parameter configuration*/
   /* USER CODE END SPI1_Init 2 */
 
 }
@@ -653,15 +666,11 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA1_CLK_ENABLE();
-  __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Stream4_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
-  /* DMA2_Stream7_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 
 }
 
@@ -684,11 +693,12 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, NRF_CE_Pin|NRF_CSN_Pin|LCD_Reset_Pin|LCD_BCKLT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, NRF_CE_Pin|NRF_CSN_Pin|LCD_Reset_Pin|LCD_BCKLT_Pin
+                          |DebLed_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, CH2_TX_Pin|LCD_CE_Pin|LCD_DC_Pin|CH1_TX_Pin
-                          |RELAY_1__Pin|RELAY_2__Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, DebLed_1_Pin|CH2_TX_Pin|LCD_CE_Pin|LCD_DC_Pin
+                          |CH1_TX_Pin|RELAY_1__Pin|RELAY_2__Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -703,17 +713,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUTTON_1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : NRF_CE_Pin NRF_CSN_Pin LCD_Reset_Pin LCD_BCKLT_Pin */
-  GPIO_InitStruct.Pin = NRF_CE_Pin|NRF_CSN_Pin|LCD_Reset_Pin|LCD_BCKLT_Pin;
+  /*Configure GPIO pins : NRF_CE_Pin NRF_CSN_Pin LCD_Reset_Pin LCD_BCKLT_Pin
+                           DebLed_2_Pin */
+  GPIO_InitStruct.Pin = NRF_CE_Pin|NRF_CSN_Pin|LCD_Reset_Pin|LCD_BCKLT_Pin
+                          |DebLed_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CH2_TX_Pin LCD_CE_Pin LCD_DC_Pin CH1_TX_Pin
-                           RELAY_1__Pin RELAY_2__Pin */
-  GPIO_InitStruct.Pin = CH2_TX_Pin|LCD_CE_Pin|LCD_DC_Pin|CH1_TX_Pin
-                          |RELAY_1__Pin|RELAY_2__Pin;
+  /*Configure GPIO pins : DebLed_1_Pin CH2_TX_Pin LCD_CE_Pin LCD_DC_Pin
+                           CH1_TX_Pin RELAY_1__Pin RELAY_2__Pin */
+  GPIO_InitStruct.Pin = DebLed_1_Pin|CH2_TX_Pin|LCD_CE_Pin|LCD_DC_Pin
+                          |CH1_TX_Pin|RELAY_1__Pin|RELAY_2__Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -727,7 +739,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : NRF_IRQ_Pin */
   GPIO_InitStruct.Pin = NRF_IRQ_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(NRF_IRQ_GPIO_Port, &GPIO_InitStruct);
 
@@ -760,6 +772,14 @@ __weak void startMeasureTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END 5 */
+}
+
+/* ownSysTick function */
+__weak void ownSysTick(void *argument)
+{
+  /* USER CODE BEGIN ownSysTick */
+
+  /* USER CODE END ownSysTick */
 }
 
 /**

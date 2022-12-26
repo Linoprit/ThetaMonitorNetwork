@@ -26,11 +26,6 @@ void RadioSlave::init(void) {
 	new (&instance()) RadioSlave();
 }
 
-void RadioSlave::initHardware() {
-	OsHelpers::delay(200);
-	_nRF24L01_Basis.init();
-}
-
 RadioSlave& RadioSlave::instance(void) {
 	static RadioSlave radioSlave;
 	return radioSlave;
@@ -39,14 +34,10 @@ RadioSlave& RadioSlave::instance(void) {
 // TODO send only measurement, that are valid (not timed-out)
 void RadioSlave::cycle() {
 	sendMeasurements();
-
-	// TODO send Statistics
-	//sendStatistics();
+	sendStatistics();
 }
 
 void RadioSlave::sendMeasurements(void) {
-	//RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType;
-
 	uint8_t sensorCount =
 			Sensors::instance().getThetaSensors()->getMeasurements()->getValidCount();
 
@@ -62,14 +53,14 @@ void RadioSlave::sendMeasurements(void) {
 
 		osSemaphoreRelease(localMsmntSemHandle);
 
-		_nRF24L01_Basis.transmitPacket(radioMessage->asUint8Ptr(),
+		_nRF24L01_Basis.transmitPacket_IRQ(radioMessage->asUint8Ptr(),
 				RADIO_MESSAGE_LEN);
 		while (_nRF24L01_Basis.isTxOngoing()) {
 			OsHelpers::delay(1);
 		} // measured: 1.64ms
 
 		// adjust send-cycle-time
-		if (_nRF24L01_Basis.lastRxWasSuccess()) {
+		if (_nRF24L01_Basis.lastTxWasSuccess()) {
 			_transmitCycleTime = STD_TX_CYCLE_TIME;
 		} else {
 			_transmitCycleTime = MAXRT_TX_CYCLE_TIME;
@@ -90,13 +81,13 @@ void RadioSlave::sendStatistics(void) {
 	RadioStatMsgType *radioStatistics = new (RadioMsgBuff) RadioStatMsgType(
 			MsgClass::STATISTICS, radiostats);
 
-	_nRF24L01_Basis.transmitPacket(radioStatistics->asUint8Ptr(),
+	_nRF24L01_Basis.transmitPacket_IRQ(radioStatistics->asUint8Ptr(),
 			RADIO_MESSAGE_LEN);
 	while (_nRF24L01_Basis.isTxOngoing()) {
 		OsHelpers::delay(1);
 	} // measured: 1.64ms
 
-	if (_nRF24L01_Basis.lastRxWasSuccess()) {
+	if (_nRF24L01_Basis.lastTxWasSuccess()) {
 		_nRF24L01_Basis.resetStatistics();
 	}
 }

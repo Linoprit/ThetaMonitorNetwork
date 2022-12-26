@@ -32,17 +32,13 @@ public:
 	NonVolatileData* getNonVolatileData(void) {
 		return &_nonVolatileData;
 	}
-	uint8_t getRelayStates(void) {
-		return _relayStates;
-	}
+	uint8_t getRelayStates(void);
 	void printMsmntArray(void);
 
 private:
 	Sensors();
 	virtual ~Sensors() {
 	}
-
-	uint8_t _relayStates; // bitfield, relay_1 = bit0, etc.
 
 	NonVolatileData _nonVolatileData;
 	SensorIdTable _sensorIdTable;

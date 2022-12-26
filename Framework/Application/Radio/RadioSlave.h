@@ -8,6 +8,7 @@
 #ifndef APPLICATION_RADIOLINK_RADIOLINK_H_
 #define APPLICATION_RADIOLINK_RADIOLINK_H_
 
+#include <Application/Radio/RadioBase.h>
 #include <Application/Radio/RadioMaster.h>
 #include <Middleware/NRF24L01_Radio/NRF24L01_Basis.h>
 #include <Application/Sensors/ThetaSensors.h>
@@ -18,21 +19,16 @@
 #define	 PACKED	__attribute__ ((packed))
 
 namespace radio {
-
 using namespace snsrs;
 
-class RadioSlave {
+class RadioSlave: public RadioBase {
 public:
 	void init(void);
 	static RadioSlave& instance(void);
-	void initHardware(void);
 	void cycle(void);
 
 	uint32_t getTransmitCycleTime(void) {
 		return _transmitCycleTime;
-	}
-	NRF24L01_Basis* getNRF24L01_Basis(void) {
-		return &_nRF24L01_Basis;
 	}
 
 private:
@@ -40,7 +36,6 @@ private:
 	virtual ~RadioSlave() {
 	}
 	uint32_t _transmitCycleTime;
-	NRF24L01_Basis _nRF24L01_Basis;
 
 	void sendMeasurements(void);
 	void sendStatistics(void);

@@ -25,6 +25,7 @@ EXTERNC int tx_printf(const char *format, ...) ;
 EXTERNC int tx_printBuff(uint8_t* buffer, uint8_t len) ;
 EXTERNC void _putchar(char character);
 EXTERNC uint16_t tx_free_bytes(void);
+EXTERNC void tx_buff_clear(void);
 
 #undef EXTERNC
 #ifdef __cplusplus

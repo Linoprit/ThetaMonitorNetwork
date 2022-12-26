@@ -33,8 +33,8 @@ EXTERNC bool stationType_isMaster(void);
 #include <Application/Radio/RadioMessage.h>
 #include <string>
 
-static constexpr uint8_t nRF24_CHANNEL = 118;
-static constexpr int32_t nRF24_WAIT_TIMEOUT = (int32_t) 0x00000FFF;
+static constexpr uint8_t nRF24_CHANNEL = 80;
+static constexpr int32_t nRF24_WAIT_TIMEOUT = (int32_t) 0x0000FFFF;
 static constexpr uint8_t nRF_AUTO_RETRY = 10;
 
 // TX addresses
@@ -53,7 +53,7 @@ static constexpr uint8_t nRF24_RX_ADDR5[1] = { 'V' };                 // Slave 5
 
 class NRF24L01_Basis {
 public:
-	typedef SimpleQueue<uint8_t, nRF24_RX_QUEUE_SIZE> RxBufferQueue;
+	//typedef SimpleQueue<uint8_t, nRF24_RX_QUEUE_SIZE> RxBufferQueue;
 	enum nRFState {
 		none, checkOk, initDone
 	};
@@ -63,7 +63,12 @@ public:
 	}
 
 	void init();
-	void transmitPacket(uint8_t *pBuf, uint8_t length = 0);
+	// Blocks, until transmission is done
+	NRF24L01::nRF24_TXResult transmitPacket(uint8_t *pBuf, uint8_t length = 0);
+	// needs the Irq-callback tied to nRF-IRQ-Pin
+	void transmitPacket_IRQ(uint8_t *pBuf, uint8_t length = 0);
+	void IrqPinRxCallback(void);
+
 	std::string getNRFStateStr(void);
 	nRFState getNRFState(void) {
 		return _nRFState;
@@ -83,21 +88,23 @@ public:
 		_rxBufferOverflows = 0;
 	}
 	void addStatistics(uint8_t lostPkgCount, uint8_t retransCount);
-	RxBufferQueue* getRxBuffer(void) {
-		return &_rxBuffer;
-	}
+
 	NRF24L01::nRF24_TXResult getLastTxResult(void) {
 		return _lastTxResult;
 	}
 
-	// To be called cyclically. Returns true, if transmission is still
-	// in progress, and checks for transmission time-out.
+	// only for debugging
+	NRF24L01* getNrf24(void){
+		return &_nRF24;
+	}
+
+	// To be called cyclically, if data was sent by transmitPacket_IRQ.
+	// Returns true, if transmission is still in progress,
+	// and checks for transmission time-out.
 	bool isTxOngoing(void);
 
 	// returns true, if last finished transmission was successful
-	bool lastRxWasSuccess(void);
-
-	void IrqPinRxCallback(void);
+	bool lastTxWasSuccess(void);
 
 private:
 	NRF24L01 _nRF24;
@@ -107,7 +114,6 @@ private:
 	NRF24L01::nRF24_TXResult _lastTxResult;
 	uint32_t _tickTransmissionStarted;  // when start transmission, current tick saved here
 	nRFState _nRFState;
-	RxBufferQueue _rxBuffer;
 };
 
 #endif // C interface

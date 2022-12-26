@@ -21,8 +21,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	//UNUSED(GPIO_Pin);
 
 	if (GPIO_Pin == GPIOSocket_nRF24::get_IRQ_Pin()) {
-		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		//radioLink::RadioLink::instance().getNRF24L01_Basis()->IrqPinRxCallback();
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+		// Hm. Since we call a base-class function... does it make sense to go
+		// through the actual initialized class?
+		bool isMaster =
+				snsrs::Sensors::instance().getNonVolatileData()->getStationType()
+						== snsrs::SensorIdTable::MASTER;
+		if (isMaster) {
+			radio::RadioMaster::instance().getNRF24L01_Basis()->IrqPinRxCallback();
+		} else {
+			radio::RadioSlave::instance().getNRF24L01_Basis()->IrqPinRxCallback();
+		}
 
 	} else if (GPIO_Pin == BUTTON_1_Pin) {
 		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -67,5 +77,12 @@ void USART1_IRQHandler(void) {
 // 	//HAL_GPIO_TogglePin(LED_03_GPIO_Port, LED_03_Pin);
 // 	HAL_UART_IRQHandler(get_huart3());
 // }
+
+// ownSysTick-Handler for sysTick counter in one second steps.
+// defined under mx / rtos / Timers and Semaphores
+void ownSysTick(void *argument)
+{
+	OsHelpers::inc_tick_seconds();
+}
 
 #endif

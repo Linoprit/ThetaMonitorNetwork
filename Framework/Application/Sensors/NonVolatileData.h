@@ -48,6 +48,7 @@ public:
 	ErrorCode writeStatId(uint32_t stationId);
 	uint32_t getStationId(void);
 	SensorIdTable::StationType getStationType(void);
+	std::string getStationTypeStr(void);
 	static uint8_t calcChkSum(SensorTypeE2 idTableDatum);
 	bool compareIdTableDatum(SensorTypeE2 tableIDLeft,
 			SensorTypeE2 tableIDRight);

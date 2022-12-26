@@ -59,15 +59,15 @@ public:
 		return INVALID_RADIO_STATISTIC;
 	}
 
-	bool isTimedOut(uint32_t stationId) {
-		RadioStatisticsType item = getStatistic(stationId);
-		if ((item.stationId == 0)
-				|| ((item.lastUpdateTick + STATION_TIMEOUT)
-						< OsHelpers::get_tick())) {
-			return true;
-		}
-		return false;
-	}
+//	bool isTimedOut(uint32_t stationId) {
+//		RadioStatisticsType item = getStatistic(stationId);
+//		if ((item.stationId == 0)
+//				|| ((item.lastUpdateTick + STATION_TIMEOUT)
+//						< OsHelpers::get_tick())) {
+//			return true;
+//		}
+//		return false;
+//	}
 
 	RadioStatisticsArray* getArray(void) {
 		return &_radioStatisticsArray;

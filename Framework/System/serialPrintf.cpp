@@ -40,7 +40,6 @@ void tx_buff_clear(void);
  * or
  * - printf("Result is: %d.%d", i/10, i%10);
  * CAREFUL: the message must not be longer than TMP_BUFF_LEN!!
- * TODO: Make it thread-safe
  */
 int tx_printf(const char *format, ...) {
 	uint8_t tmpBuff[TMP_BUFF_LEN];
@@ -53,8 +52,11 @@ int tx_printf(const char *format, ...) {
 	if (tx_free_bytes() < tmpLen)
 		return _FAIL_;
 
+	osSemaphoreAcquire(txPrintSemHandle, 0);
 	std::memcpy(&txBuff[tx_act_pos], tmpBuff, tmpLen);
 	tx_act_pos += tmpLen;
+	osSemaphoreRelease(txPrintSemHandle);
+
 	return _SUCCESS_;
 }
 
@@ -90,9 +92,9 @@ int tx_cycle(SerialIO* serialIO) {
 			result = serialIO->transmit(txBuff, tx_act_pos);
 #else
 			//result = CDC_Transmit_FS(txBuff, tx_act_pos);
-			//result = HAL_UART_Transmit_IT(&SERIAL_UART, &txBuff[0], tx_act_pos);
+			result = HAL_UART_Transmit_IT(&SERIAL_UART, &txBuff[0], tx_act_pos);
 			//result = HAL_UART_Transmit_DMA(&SERIAL_UART, &txBuff[0], tx_act_pos);
-			result = HAL_UART_Transmit(&SERIAL_UART, &txBuff[0], tx_act_pos, 30);
+			//result = HAL_UART_Transmit(&SERIAL_UART, &txBuff[0], tx_act_pos, 30);
 #endif
 			// @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
 
@@ -117,14 +119,18 @@ int tx_printBuff(uint8_t *buffer, uint8_t len) {
 	if (tx_free_bytes() < len)
 		return _FAIL_;
 
+	osSemaphoreAcquire(txPrintSemHandle, 0);
 	memcpy(&txBuff[tx_act_pos], buffer, (std::size_t) len);
 	tx_act_pos += len;
+	osSemaphoreRelease(txPrintSemHandle);
 	return _SUCCESS_;
 }
 
 void tx_buff_clear(void) {
+	osSemaphoreAcquire(txPrintSemHandle, 0);
 	memset(txBuff, '\0', TX_BUFF_LEN);
 	tx_act_pos = 0;
+	osSemaphoreRelease(txPrintSemHandle);
 }
 
 // test memory consumption

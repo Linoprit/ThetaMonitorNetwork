@@ -94,6 +94,19 @@ private:
 	static inline void SYSTEM_EXIT() {
 		NVIC_SystemReset();
 	}
+
+	static inline uint32_t get_tick_seconds(void) {
+		return systemTickSeconds;
+	}
+
+	// to be used by the ownTick-Timer callback
+	static inline void inc_tick_seconds(void) {
+		systemTickSeconds++;
+	}
+
+private:
+	static uint32_t systemTickSeconds;
+
 };
 #endif	// #ifdef __x86_64
 

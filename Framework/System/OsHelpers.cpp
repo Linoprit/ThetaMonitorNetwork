@@ -9,6 +9,9 @@
 #ifdef __x86_64
 	uint32_t OsHelpers::systemTick = 0;
 #else
+
+	uint32_t OsHelpers::systemTickSeconds = 0;
+
 void * operator new( size_t size ) {
     return pvPortMalloc(size);
 }

@@ -52,8 +52,8 @@ constexpr uint8_t DS18B20_MAX_DEVICES = 4; // in one channel
 constexpr uint32_t DS18B20_CONVERSION_TIMEOUT_MS = 5000;
 // time in [ms] the measureTask delays
 constexpr uint32_t MEASURETASK_CYCLE = 5000;
-// after which time [ms] getting no result from a sensor, it is invalid
-constexpr uint32_t SENSOR_TIMEOUT = MEASURETASK_CYCLE * 3;
+// after which time in seconds [s] getting no result from a sensor, it is invalid
+constexpr uint32_t SENSOR_TIMEOUT = 180;
 
 // ******* I2C for AT24Cxx EEPROM *******
 extern I2C_HandleTypeDef hi2c1; // see main.c
@@ -77,16 +77,6 @@ extern SPI_HandleTypeDef hspi1;
 // NRF_CSN_GPIO_Port,  NRF_CSN_Pin
 // Enable IRQ on IRQ-Pin, i.E. EXTI0
 
-// The size of the rx-buffer in NRF24L01_Basis.
-// We must run the nRFs at 250kbps, to get the maximum range. 250kbps = 31.25 bytes/ms
-// So the task, that reads the buffer must run in 1ms-cycles. We could now reduce
-// the RX-Buffer-Size. Since the complete telegram is 14 bytes wide (without
-// nRF-overhead), we can get a maximum of three messages/cycle.
-// The data that we must hold is for SensorMeasureType and for StatisticType
-// sizeof(SensorMeasureType) = 8, we assume StatisticType has the same size.
-// [SensorMeasureType: 3 * 8] + [StatisticType: 3 * 8] = 48 bytes
-#define nRF24_RX_QUEUE_SIZE (RADIO_MESSAGE_LEN * 3)
-
 // ******* SPI for LCD PCD8544 *******
 extern SPI_HandleTypeDef hspi2;
 #define lcd_SPI hspi2
@@ -105,7 +95,7 @@ constexpr uint32_t STD_TX_CYCLE_TIME = 300000u; // 5min
 // if data could not be provided, nRF-cycleTime will be this
 constexpr uint32_t MAXRT_TX_CYCLE_TIME = 60000u; // 1min
 // Statistics of a remote station is timed out after this [ms]
-constexpr uint32_t STATION_TIMEOUT = 2 * STD_TX_CYCLE_TIME;
+//constexpr uint32_t STATION_TIMEOUT = 2 * STD_TX_CYCLE_TIME;
 // How many sys-tics do we wait, until as started transmission is timed out
 constexpr uint32_t TX_ONGOING_MAX_TICKS = 10; // here: [ms]
 
@@ -120,13 +110,22 @@ constexpr uint8_t MAX_REMOTE_MEASUREMENTS = MAX_SENSORS * MAX_SLAVES;
 
 // ******* RTOS-Semaphores  *******
 extern osSemaphoreId_t localMsmntSemHandle;
-extern osSemaphoreId_t nRF_RxBuffSemHandle;
-extern osSemaphoreId_t remoteMsmntSemHandle;
+extern osSemaphoreId_t txPrintSemHandle;
+//extern osSemaphoreId_t remoteMsmntSemHandle;
 
 // ******* RTOS-Queues  *******
 // Remote-Data-Queue, Size is 20 * RADIO_MESSAGE_LEN
 // We put all NRF24 received Data in here. The RaspySerial consumes it.
 extern osMessageQueueId_t remoteDataQueueHandle;
 
+// ******* RTOS-Queues  *******
+// sysTick in seconds
+extern osTimerId_t ownSysTickTimerHandle;
+
+
+/*
+ actual Task stack sizes:
+ 160 164 200 300
+ */
 
 #endif /* INSTANCES_CONFIG_H_ */

@@ -125,11 +125,15 @@ void LCDFunctions::cycle(void) {
 
 		MeasurementType actSensor = _sensorMeasureArray->at(i);
 		NonVolatileData *nvData = Sensors::instance().getNonVolatileData();
-		SensorIdTable::SensorIdType sensorConfig = _sensorIdTable->getSensorId(
+		SensorIdTable::SensorIdType sensorConfig = _sensorIdTable->getSensorTableData(
 				nvData, actSensor.sensorIdHash);
 		std::string shortname = std::string(sensorConfig.shortname, 8);
 
-		copyString(&_tmpLine[0], shortname.c_str(), shortname.length());
+		if(sensorConfig.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH){
+			shortname = "E2 inval";
+		}
+
+		copyString(_tmpLine, shortname.c_str(), shortname.length());
 		pushTheta(actSensor.value);
 
 		if ((_pages > 1) && (act_line == 0)) // display page-nr
@@ -139,10 +143,11 @@ void LCDFunctions::cycle(void) {
 		}
 
 		_LCD_handle.write_string(0, (_LCD_handle.line_2_y_pix(act_line)),
-				static_cast<char*>(&_tmpLine[0]));
+				static_cast<char*>(_tmpLine));
 
-		//tx_printf("lcd: %i, %i, %i, %i\n", start, end, i, LCD_handle.line_2_y_pix(act_line));
-		//tx_printf("lcd: %s\n", shortname.c_str());
+		// tx_printf("  tmpline: '%s'  " , _tmpLine);
+		// tx_printf("lcd: %i, %i, %i, %i\n", start, end, i, _LCD_handle.line_2_y_pix(act_line));
+		// tx_printf("lcd: '%s'\n", shortname.c_str());
 
 		act_line++;
 	}

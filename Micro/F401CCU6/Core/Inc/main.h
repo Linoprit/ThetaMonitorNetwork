@@ -72,6 +72,8 @@ void Error_Handler(void);
 #define NRF_MISO_GPIO_Port GPIOA
 #define NRF_MOSI_Pin GPIO_PIN_7
 #define NRF_MOSI_GPIO_Port GPIOA
+#define DebLed_1_Pin GPIO_PIN_0
+#define DebLed_1_GPIO_Port GPIOB
 #define CH2_TX_Pin GPIO_PIN_1
 #define CH2_TX_GPIO_Port GPIOB
 #define CH2_RX_Pin GPIO_PIN_2
@@ -90,6 +92,8 @@ void Error_Handler(void);
 #define LCD_Reset_GPIO_Port GPIOA
 #define LCD_BCKLT_Pin GPIO_PIN_11
 #define LCD_BCKLT_GPIO_Port GPIOA
+#define DebLed_2_Pin GPIO_PIN_12
+#define DebLed_2_GPIO_Port GPIOA
 #define NRF_IRQ_Pin GPIO_PIN_15
 #define NRF_IRQ_GPIO_Port GPIOA
 #define NRF_IRQ_EXTI_IRQn EXTI15_10_IRQn

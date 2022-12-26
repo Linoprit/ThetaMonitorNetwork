@@ -21,14 +21,12 @@ namespace snsrs {
 typedef struct PACKED {
 	uint32_t sensorIdHash;
 	float value;
-	uint32_t lastUpdateTick; // TODO should become a timestamp later!
+	uint32_t lastUpdateTick; // in seconds
 } MeasurementType;
 constexpr MeasurementType IMVALID_MEASUREMENT {
 		NonVolatileData::EMPTY_SENSOR_HASH,
 		NAN, 0 };
 
-//TODO: add some "isTimedOut"-function, that compares "lastUpdateTick"
-// with actual tick.
 template<int N>
 class Measurements {
 public:
@@ -51,7 +49,7 @@ public:
 					|| (item.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH)) {
 				item.sensorIdHash = sensorIdHash;
 				item.value = value;
-				item.lastUpdateTick = OsHelpers::get_tick();
+				item.lastUpdateTick = OsHelpers::get_tick_seconds();
 				return;
 			}
 		}
@@ -67,12 +65,12 @@ public:
 		return IMVALID_MEASUREMENT;
 	}
 
-	// returns true if sensorId is not found.
+	// checks for time-out. Also returns true if sensorId is not found.
 	bool isTimedOut(uint32_t sensorId) {
 		MeasurementType item = getMsmnt(sensorId);
 		if ((item.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH)
 				|| ((item.lastUpdateTick + SENSOR_TIMEOUT)
-						< OsHelpers::get_tick())) {
+						< OsHelpers::get_tick_seconds())) {
 			return true;
 		}
 		return false;
@@ -88,6 +86,12 @@ public:
 		}
 		return _measurementArray.size();
 	}
+
+	// In case of a sensor-timeout, the value is set to NAN
+	static bool isValueValid(MeasurementType msmntItem){
+		return !isnan(msmntItem.value);
+	}
+
 	MeasurementArray* getArray(void) {
 		return &_measurementArray;
 	}

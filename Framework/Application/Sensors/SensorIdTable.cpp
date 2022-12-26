@@ -19,8 +19,8 @@ SensorIdTable::SensorIdTable() {
 	sensorIdArray.fill(sensorId);
 }
 
-SensorIdTable::SensorIdType SensorIdTable::getSensorId(NonVolatileData *nvData,
-		uint32_t hashId) {
+SensorIdTable::SensorIdType SensorIdTable::getSensorTableData(
+		NonVolatileData *nvData, uint32_t hashId) {
 	SensorIdType *sensorId;
 	for (uint8_t i = 0; i < sensorIdArray.size(); i++) {
 		sensorId = &sensorIdArray.at(i);
@@ -31,8 +31,7 @@ SensorIdTable::SensorIdType SensorIdTable::getSensorId(NonVolatileData *nvData,
 		}
 	}
 
-	SensorIdTable::SensorIdType sensorIdE2 =
-			nvData->getIdTableData(hashId);
+	SensorIdTable::SensorIdType sensorIdE2 = nvData->getIdTableData(hashId);
 	*sensorId = sensorIdE2;
 	return *sensorId;
 }

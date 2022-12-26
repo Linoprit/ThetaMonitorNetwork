@@ -50,7 +50,7 @@ void ThetaSensors::initHardware(void) {
 void ThetaSensors::initBme280(void) {
 	bme280.init(&BME280_HI2C, TEMPERATURE_16BIT, PRESSURE_ULTRALOWPOWER,
 	HUMINIDITY_STANDARD, NORMALMODE);
-	bme280.setConfig( STANDBY_MS_10, FILTER_OFF);
+	bme280.setConfig(STANDBY_MS_10, FILTER_OFF);
 }
 
 void ThetaSensors::cycleBme280(void) {
@@ -104,9 +104,6 @@ void ThetaSensors::initTwoChannelDS1820(void) {
 }
 
 void ThetaSensors::storeDS1820ToMeasureArray(DS18B20 ds18Channel) {
-
-	// TODO we need some timeOut-handling, if a sensor-connection breaks
-
 	DS18B20::DS1820SensorType *sensors = ds18Channel.getAllSensors();
 
 	for (uint8_t i = 0; i < ds18Channel.getFoundSensors(); i++) {
@@ -118,8 +115,20 @@ void ThetaSensors::storeDS1820ToMeasureArray(DS18B20 ds18Channel) {
 	}
 }
 
-void ThetaSensors::cycleTwoChannelsDS1820(void) {
+void ThetaSensors::checkForTimeout(void) {
+	uint8_t sensorCount = _measurementArray.getValidCount();
 
+	for (uint8_t i = 0; i < sensorCount; i++) {
+		osSemaphoreAcquire(localMsmntSemHandle, 0);
+		MeasurementType actSensor = _measurementArray.getArray()->at(i);
+		if(_measurementArray.isTimedOut(actSensor.sensorIdHash)){
+			actSensor.value = NAN;
+		}
+		osSemaphoreRelease(localMsmntSemHandle);
+	}
+}
+
+void ThetaSensors::cycleTwoChannelsDS1820(void) {
 	if (ds18B20Ch1.doAllMeasure() == true) {
 		storeDS1820ToMeasureArray(ds18B20Ch1);
 	}
@@ -131,6 +140,7 @@ void ThetaSensors::cycleTwoChannelsDS1820(void) {
 void ThetaSensors::cycle(void) {
 	cycleTwoChannelsDS1820();
 	cycleBme280();
+	checkForTimeout();
 }
 
 } // namespace msmnt

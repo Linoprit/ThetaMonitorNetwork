@@ -9,6 +9,8 @@
 
 #include <System/Devices/nRF24L01/NRF24L01.h>
 #include <Config/config.h>
+#include <System/serialPrintf.h>
+#include <System/OsHelpers.h>
 
 using namespace std;
 
@@ -27,10 +29,10 @@ uint8_t NRF24L01::LL_RW(uint8_t data) {
 uint8_t NRF24L01::ReadReg(uint8_t reg) {
 	uint8_t value;
 
-	gpio_socket.nRF24_CSN_L(); //  nRF24_CSN_L();
+	gpio_socket.nRF24_CSN_L();
 	LL_RW(reg & nRF24_MASK_REG_MAP);
 	value = LL_RW(nRF24_CMD_NOP);
-	gpio_socket.nRF24_CSN_H(); //nRF24_CSN_H();
+	gpio_socket.nRF24_CSN_H();
 
 	return value;
 }
@@ -169,6 +171,34 @@ void NRF24L01::SetOperationalMode(uint8_t mode) {
 	reg &= ~nRF24_CONFIG_PRIM_RX;
 	reg |= (mode & nRF24_CONFIG_PRIM_RX );
 	WriteReg(nRF24_REG_CONFIG, reg);
+}
+
+// Set transceiver DynamicPayloadLength feature for all the pipes
+// input:
+//   mode - status, one of nRF24_DPL_xx values
+void NRF24L01::SetDynamicPayloadLength(uint8_t mode) {
+	uint8_t reg;
+	reg = ReadReg(nRF24_REG_FEATURE);
+	if (mode) {
+		WriteReg(nRF24_REG_FEATURE, reg | nRF24_FEATURE_EN_DPL);
+		WriteReg(nRF24_REG_DYNPD, 0x1F);
+	} else {
+		WriteReg(nRF24_REG_FEATURE, reg & ~ nRF24_FEATURE_EN_DPL);
+		WriteReg(nRF24_REG_DYNPD, 0x0);
+	}
+}
+
+// Enables Payload With Ack. NB Refer to the datasheet for proper retransmit timing.
+// input:
+//   mode - status, 1 or 0
+void NRF24L01::SetPayloadWithAck(uint8_t mode) {
+	uint8_t reg;
+	reg = ReadReg(nRF24_REG_FEATURE);
+	if (mode) {
+		WriteReg(nRF24_REG_FEATURE, reg | nRF24_FEATURE_EN_ACK_PAY);
+	} else {
+		WriteReg(nRF24_REG_FEATURE, reg & ~ nRF24_FEATURE_EN_ACK_PAY);
+	}
 }
 
 // Configure transceiver CRC scheme
@@ -325,10 +355,15 @@ void NRF24L01::ClosePipe(uint8_t pipe) {
 void NRF24L01::EnableAA(uint8_t pipe) {
 	uint8_t reg;
 
-	// Set bit in EN_AA register
-	reg = ReadReg(nRF24_REG_EN_AA);
-	reg |= (1 << pipe);
-	WriteReg(nRF24_REG_EN_AA, reg);
+	if (pipe > 5) {
+		// Disable Auto-ACK for ALL pipes
+		WriteReg(nRF24_REG_EN_AA, 0x3F);
+	} else {
+		// Set bit in EN_AA register
+		reg = ReadReg(nRF24_REG_EN_AA);
+		reg |= (1 << pipe);
+		WriteReg(nRF24_REG_EN_AA, reg);
+	}
 }
 
 // Disable the auto retransmit (a.k.a. enhanced ShockBurst) for one or all RX pipes
@@ -424,14 +459,19 @@ void NRF24L01::WritePayload(uint8_t *pBuf, uint8_t length) {
 	WriteMBReg(nRF24_CMD_W_TX_PAYLOAD, pBuf, length);
 }
 
-// Read top level payload available in the RX FIFO
-// input:
-//   pBuf - pointer to the buffer to store a payload data
-//   length - pointer to variable to store a payload length
-// return: one of nRF24_RX_xx values
-//   nRF24_RX_PIPEX - packet has been received from the pipe number X
-//   nRF24_RX_EMPTY - the RX FIFO is empty
-nRF24_RXResult NRF24L01::ReadPayload(uint8_t *pBuf, uint8_t *length) {
+uint8_t NRF24L01::GetRxDplPayloadWidth(void) {
+	uint8_t value;
+
+	CSN_L();
+	LL_RW(nRF24_CMD_R_RX_PL_WID);
+	value = LL_RW(nRF24_CMD_NOP);
+	CSN_H();
+
+	return value;
+}
+
+nRF24_RXResult NRF24L01::ReadPayloadGeneric(uint8_t *pBuf,
+		uint8_t *length, uint8_t dpl) {
 	uint8_t pipe;
 
 	// Extract a payload pipe number from the STATUS register
@@ -440,24 +480,44 @@ nRF24_RXResult NRF24L01::ReadPayload(uint8_t *pBuf, uint8_t *length) {
 	// RX FIFO empty?
 	if (pipe < 6) {
 		// Get payload length
-		*length = ReadReg(nRF24_RX_PW_PIPE[pipe]);
+		if (dpl) {
+			*length = GetRxDplPayloadWidth();
+			if (*length > 32) { //broken packet
+				*length = 0;
+				FlushRX();
+			}
+		} else {
+			*length = ReadReg(nRF24_RX_PW_PIPE[pipe]);
+		}
 
 		// Read a payload from the RX FIFO
 		if (*length) {
 			ReadMBReg(nRF24_CMD_R_RX_PAYLOAD, pBuf, *length);
 		}
-
 		return ((nRF24_RXResult) pipe);
 	}
-
 	// The RX FIFO is empty
 	*length = 0;
 
 	return nRF24_RX_EMPTY;
 }
 
-std::string NRF24L01::txResultToStr(nRF24_TXResult errorCode)
-{
+// Read top level payload available in the RX FIFO
+// input:
+//   pBuf - pointer to the buffer to store a payload data
+//   length - pointer to variable to store a payload length
+// return: one of nRF24_RX_xx values
+//   nRF24_RX_PIPEX - packet has been received from the pipe number X
+//   nRF24_RX_EMPTY - the RX FIFO is empty
+nRF24_RXResult NRF24L01::ReadPayload(uint8_t *pBuf, uint8_t *length) {
+	return ReadPayloadGeneric(pBuf, length, 0);
+}
+
+nRF24_RXResult NRF24L01::ReadPayloadDpl(uint8_t *pBuf, uint8_t *length) {
+	return ReadPayloadGeneric(pBuf, length, 1);
+}
+
+std::string NRF24L01::txResultToStr(nRF24_TXResult errorCode) {
 	if (errorCode == NRF24L01::nRF24_TX_ERROR) {
 		return string("nRF24_TX_ERROR");
 	} else if (errorCode == NRF24L01::nRF24_TX_SUCCESS) {
@@ -471,6 +531,7 @@ std::string NRF24L01::txResultToStr(nRF24_TXResult errorCode)
 }
 
 // Print nRF24L01+ current configuration (for debug purposes)
+// in tx_printf the tmp_buff size has to be 512 bytes!!
 void NRF24L01::DumpConfig(void) {
 	/*	uint8_t i,j;
 	 uint8_t aw;
@@ -478,40 +539,45 @@ void NRF24L01::DumpConfig(void) {
 
 	 // Dump nRF24L01+ configuration
 	 // CONFIG
-	 i = nRF24_ReadReg(nRF24_REG_CONFIG);
-	 USART_printf(USART1,"[0x%02X] 0x%02X MASK:%03b CRC:%02b PWR:%s MODE:P%s\n",
+	 i = ReadReg(nRF24_REG_CONFIG);
+	 tx_buff_clear();
+	 tx_printf("[0x%02X] 0x%02X  MASK:%03b CRC:%02b ",
 	 nRF24_REG_CONFIG,
 	 i,
 	 i >> 4,
-	 (i & 0x0c) >> 2,
-	 (i & 0x02) ? "ON" : "OFF",
-	 (i & 0x01) ? "RX" : "TX"
+	 (i & 0x0c) >> 2
 	 );
+	 (i & 0x02) ? tx_printf("PWR: ON ") : tx_printf("PWR: OFF ");
+	 (i & 0x01) ? tx_printf("Mode: RX\n") : tx_printf("Mode: TX\n");
+	 tx_cycle(); OsHelpers::delay(10);
 	 // EN_AA
-	 i = nRF24_ReadReg(nRF24_REG_EN_AA);
-	 USART_printf(USART1,"[0x%02X] 0x%02X ENAA: ",nRF24_REG_EN_AA,i);
+	 i = ReadReg(nRF24_REG_EN_AA);
+	 tx_printf("[0x%02X] 0x%02X ENAA: ",nRF24_REG_EN_AA,i);
 	 for (j = 0; j < 6; j++) {
-	 USART_printf(USART1,"[P%1u%s]%s",j,
+	 tx_printf("[P%1u%s]%s",j,
 	 (i & (1 << j)) ? "+" : "-",
 	 (j == 5) ? "\n" : " "
 	 );
 	 }
+	 tx_cycle(); OsHelpers::delay(10);
 	 // EN_RXADDR
-	 i = nRF24_ReadReg(nRF24_REG_EN_RXADDR);
-	 USART_printf(USART1,"[0x%02X] 0x%02X EN_RXADDR: ",nRF24_REG_EN_RXADDR,i);
+	 i = ReadReg(nRF24_REG_EN_RXADDR);
+	 tx_printf("[0x%02X] 0x%02X EN_RXADDR: ",nRF24_REG_EN_RXADDR,i);
 	 for (j = 0; j < 6; j++) {
-	 USART_printf(USART1,"[P%1u%s]%s",j,
+	 tx_printf("[P%1u%s]%s",j,
 	 (i & (1 << j)) ? "+" : "-",
 	 (j == 5) ? "\n" : " "
 	 );
 	 }
+	 tx_cycle(); OsHelpers::delay(10);
 	 // SETUP_AW
-	 i = nRF24_ReadReg(nRF24_REG_SETUP_AW);
+	 i = ReadReg(nRF24_REG_SETUP_AW);
 	 aw = (i & 0x03) + 2;
-	 USART_printf(USART1,"[0x%02X] 0x%02X EN_RXADDR=%06b (address width = %u)\n",nRF24_REG_SETUP_AW,i,i & 0x03,aw);
+	 tx_printf("[0x%02X] 0x%02X EN_RXADDR=%06b (address width = %u)\n",nRF24_REG_SETUP_AW,i,i & 0x03,aw);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // SETUP_RETR
-	 i = nRF24_ReadReg(nRF24_REG_SETUP_RETR);
-	 USART_printf(USART1,"[0x%02X] 0x%02X ARD=%04b ARC=%04b (retr.delay=%uus, count=%u)\n",
+	 i = ReadReg(nRF24_REG_SETUP_RETR);
+	 tx_printf("[0x%02X] 0x%02X ARD=%04b ARC=%04b (retr.delay=%uus, count=%u)\n",
 	 nRF24_REG_SETUP_RETR,
 	 i,
 	 i >> 4,
@@ -519,118 +585,194 @@ void NRF24L01::DumpConfig(void) {
 	 ((i >> 4) * 250) + 250,
 	 i & 0x0F
 	 );
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RF_CH
-	 i = nRF24_ReadReg(nRF24_REG_RF_CH);
-	 USART_printf(USART1,"[0x%02X] 0x%02X (%.3uGHz)\n",nRF24_REG_RF_CH,i,2400 + i);
+	 i = ReadReg(nRF24_REG_RF_CH);
+	 tx_printf("[0x%02X] 0x%02X (%.3uGHz)\n",nRF24_REG_RF_CH,i,2400 + i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RF_SETUP
-	 i = nRF24_ReadReg(nRF24_REG_RF_SETUP);
-	 USART_printf(USART1,"[0x%02X] 0x%02X CONT_WAVE:%s PLL_LOCK:%s DataRate=",
+	 i = ReadReg(nRF24_REG_RF_SETUP);
+	 tx_printf("[0x%02X] 0x%02X ",
 	 nRF24_REG_RF_SETUP,
-	 i,
-	 (i & 0x80) ? "ON" : "OFF",
-	 (i & 0x80) ? "ON" : "OFF"
+	 i
 	 );
+	 tx_cycle(); OsHelpers::delay(10);
+	 (i & 0x80) ? tx_printf("CONT_WAVE: ON ") : tx_printf("CONT_WAVE: OFF ");
+	 (i & 0x80) ? tx_printf("PLL_LOCK: ON ") : tx_printf("PLL_LOCK: OFF ");
+	 tx_cycle(); OsHelpers::delay(10);
+	 tx_printf("DataRate=");
 	 switch ((i & 0x28) >> 3) {
 	 case 0x00:
-	 USART_printf(USART1,"1M");
+	 tx_printf("1M");
 	 break;
 	 case 0x01:
-	 USART_printf(USART1,"2M");
+	 tx_printf("2M");
 	 break;
 	 case 0x04:
-	 USART_printf(USART1,"250k");
+	 tx_printf("250k");
 	 break;
 	 default:
-	 USART_printf(USART1,"???");
+	 tx_printf("???");
 	 break;
 	 }
-	 USART_printf(USART1,"pbs RF_PWR=");
+	 tx_cycle(); OsHelpers::delay(10);
+	 tx_printf("bps RF_PWR=");
 	 switch ((i & 0x06) >> 1) {
 	 case 0x00:
-	 USART_printf(USART1,"-18");
+	 tx_printf("-18");
 	 break;
 	 case 0x01:
-	 USART_printf(USART1,"-12");
+	 tx_printf("-12");
 	 break;
 	 case 0x02:
-	 USART_printf(USART1,"-6");
+	 tx_printf("-6");
 	 break;
 	 case 0x03:
-	 USART_printf(USART1,"0");
+	 tx_printf("0");
 	 break;
 	 default:
-	 USART_printf(USART1,"???");
+	 tx_printf("???");
 	 break;
 	 }
-	 USART_printf(USART1,"dBm\n");
+	 tx_printf("dBm\n");
+	 tx_cycle(); OsHelpers::delay(10);
 	 // STATUS
-	 i = nRF24_ReadReg(nRF24_REG_STATUS);
-	 USART_printf(USART1,"[0x%02X] 0x%02X IRQ:%03b RX_PIPE:%u TX_FULL:%s\n",
+	 i = ReadReg(nRF24_REG_STATUS);
+	 tx_printf("[0x%02X] 0x%02X IRQ:%03b RX_PIPE:%u ",
 	 nRF24_REG_STATUS,
 	 i,
 	 (i & 0x70) >> 4,
-	 (i & 0x0E) >> 1,
-	 (i & 0x01) ? "YES" : "NO"
+	 (i & 0x0E) >> 1
 	 );
+	 (i & 0x01) ? tx_printf("TX_FULL: YES ") : tx_printf("TX_FULL: NO\n");
+	 tx_cycle(); OsHelpers::delay(10);
 	 // OBSERVE_TX
-	 i = nRF24_ReadReg(nRF24_REG_OBSERVE_TX);
-	 USART_printf(USART1,"[0x%02X] 0x%02X PLOS_CNT=%u ARC_CNT=%u\n",nRF24_REG_OBSERVE_TX,i,i >> 4,i & 0x0F);
+	 i = ReadReg(nRF24_REG_OBSERVE_TX);
+	 tx_printf("[0x%02X] 0x%02X PLOS_CNT=%u ARC_CNT=%u\n",nRF24_REG_OBSERVE_TX,i,i >> 4,i & 0x0F);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RPD
-	 i = nRF24_ReadReg(nRF24_REG_RPD);
-	 USART_printf(USART1,"[0x%02X] 0x%02X RPD=%s\n",nRF24_REG_RPD,i,(i & 0x01) ? "YES" : "NO");
+	 i = ReadReg(nRF24_REG_RPD);
+	 tx_printf("[0x%02X] 0x%02X RPD=%s\n",nRF24_REG_RPD,i,(i & 0x01) ? "YES" : "NO");
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_ADDR_P0
-	 nRF24_ReadMBReg(nRF24_REG_RX_ADDR_P0,buf,aw);
-	 USART_printf(USART1,"[0x%02X] RX_ADDR_P0 \"",nRF24_REG_RX_ADDR_P0);
-	 for (i = 0; i < aw; i++) USART_printf(USART1,"%c",buf[i]);
-	 USART_printf(USART1,"\"\n");
+	 ReadMBReg(nRF24_REG_RX_ADDR_P0,buf,aw);
+	 tx_printf("[0x%02X] RX_ADDR_P0 \"",nRF24_REG_RX_ADDR_P0);
+	 for (i = 0; i < aw; i++) tx_printf("%c",buf[i]);
+	 tx_printf("\"\n");
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_ADDR_P1
-	 nRF24_ReadMBReg(nRF24_REG_RX_ADDR_P1,buf,aw);
-	 USART_printf(USART1,"[0x%02X] RX_ADDR_P1 \"",nRF24_REG_RX_ADDR_P1);
-	 for (i = 0; i < aw; i++) USART_printf(USART1,"%c",buf[i]);
-	 USART_printf(USART1,"\"\n");
+	 ReadMBReg(nRF24_REG_RX_ADDR_P1,buf,aw);
+	 tx_printf("[0x%02X] RX_ADDR_P1 \"",nRF24_REG_RX_ADDR_P1);
+	 for (i = 0; i < aw; i++) tx_printf("%c",buf[i]);
+	 tx_printf("\"\n");
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_ADDR_P2
-	 USART_printf(USART1,"[0x%02X] RX_ADDR_P2 \"",nRF24_REG_RX_ADDR_P2);
-	 for (i = 0; i < aw - 1; i++) USART_printf(USART1,"%c",buf[i]);
-	 i = nRF24_ReadReg(nRF24_REG_RX_ADDR_P2);
-	 USART_printf(USART1,"%c\"\n",i);
+	 tx_printf("[0x%02X] RX_ADDR_P2 \"",nRF24_REG_RX_ADDR_P2);
+	 for (i = 0; i < aw - 1; i++) tx_printf("%c",buf[i]);
+	 i = ReadReg(nRF24_REG_RX_ADDR_P2);
+	 tx_printf("%c\"\n",i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_ADDR_P3
-	 USART_printf(USART1,"[0x%02X] RX_ADDR_P3 \"",nRF24_REG_RX_ADDR_P3);
-	 for (i = 0; i < aw - 1; i++) USART_printf(USART1,"%c",buf[i]);
-	 i = nRF24_ReadReg(nRF24_REG_RX_ADDR_P3);
-	 USART_printf(USART1,"%c\"\n",i);
+	 tx_printf("[0x%02X] RX_ADDR_P3 \"",nRF24_REG_RX_ADDR_P3);
+	 for (i = 0; i < aw - 1; i++) tx_printf("%c",buf[i]);
+	 i = ReadReg(nRF24_REG_RX_ADDR_P3);
+	 tx_printf("%c\"\n",i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_ADDR_P4
-	 USART_printf(USART1,"[0x%02X] RX_ADDR_P4 \"",nRF24_REG_RX_ADDR_P4);
-	 for (i = 0; i < aw - 1; i++) USART_printf(USART1,"%c",buf[i]);
-	 i = nRF24_ReadReg(nRF24_REG_RX_ADDR_P4);
-	 USART_printf(USART1,"%c\"\n",i);
+	 tx_printf("[0x%02X] RX_ADDR_P4 \"",nRF24_REG_RX_ADDR_P4);
+	 for (i = 0; i < aw - 1; i++) tx_printf("%c",buf[i]);
+	 i = ReadReg(nRF24_REG_RX_ADDR_P4);
+	 tx_printf("%c\"\n",i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_ADDR_P5
-	 USART_printf(USART1,"[0x%02X] RX_ADDR_P5 \"",nRF24_REG_RX_ADDR_P5);
-	 for (i = 0; i < aw - 1; i++) USART_printf(USART1,"%c",buf[i]);
-	 i = nRF24_ReadReg(nRF24_REG_RX_ADDR_P5);
-	 USART_printf(USART1,"%c\"\n",i);
+	 tx_printf("[0x%02X] RX_ADDR_P5 \"",nRF24_REG_RX_ADDR_P5);
+	 for (i = 0; i < aw - 1; i++) tx_printf("%c",buf[i]);
+	 i = ReadReg(nRF24_REG_RX_ADDR_P5);
+	 tx_printf("%c\"\n",i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // TX_ADDR
-	 nRF24_ReadMBReg(nRF24_REG_TX_ADDR,buf,aw);
-	 USART_printf(USART1,"[0x%02X] TX_ADDR \"",nRF24_REG_TX_ADDR);
-	 for (i = 0; i < aw; i++) USART_printf(USART1,"%c",buf[i]);
-	 USART_printf(USART1,"\"\n");
+	 ReadMBReg(nRF24_REG_TX_ADDR,buf,aw);
+	 tx_printf("[0x%02X] TX_ADDR \"",nRF24_REG_TX_ADDR);
+	 for (i = 0; i < aw; i++) tx_printf("%c",buf[i]);
+	 tx_printf("\"\n");
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_PW_P0
-	 i = nRF24_ReadReg(nRF24_REG_RX_PW_P0);
-	 USART_printf(USART1,"[0x%02X] RX_PW_P0=%u\n",nRF24_REG_RX_PW_P0,i);
+	 i = ReadReg(nRF24_REG_RX_PW_P0);
+	 tx_printf("[0x%02X] RX_PW_P0=%u\n",nRF24_REG_RX_PW_P0,i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_PW_P1
-	 i = nRF24_ReadReg(nRF24_REG_RX_PW_P1);
-	 USART_printf(USART1,"[0x%02X] RX_PW_P1=%u\n",nRF24_REG_RX_PW_P1,i);
+	 i = ReadReg(nRF24_REG_RX_PW_P1);
+	 tx_printf("[0x%02X] RX_PW_P1=%u\n",nRF24_REG_RX_PW_P1,i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_PW_P2
-	 i = nRF24_ReadReg(nRF24_REG_RX_PW_P2);
-	 USART_printf(USART1,"[0x%02X] RX_PW_P2=%u\n",nRF24_REG_RX_PW_P2,i);
+	 i = ReadReg(nRF24_REG_RX_PW_P2);
+	 tx_printf("[0x%02X] RX_PW_P2=%u\n",nRF24_REG_RX_PW_P2,i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_PW_P3
-	 i = nRF24_ReadReg(nRF24_REG_RX_PW_P3);
-	 USART_printf(USART1,"[0x%02X] RX_PW_P3=%u\n",nRF24_REG_RX_PW_P3,i);
+	 i = ReadReg(nRF24_REG_RX_PW_P3);
+	 tx_printf("[0x%02X] RX_PW_P3=%u\n",nRF24_REG_RX_PW_P3,i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_PW_P4
-	 i = nRF24_ReadReg(nRF24_REG_RX_PW_P4);
-	 USART_printf(USART1,"[0x%02X] RX_PW_P4=%u\n",nRF24_REG_RX_PW_P4,i);
+	 i = ReadReg(nRF24_REG_RX_PW_P4);
+	 tx_printf("[0x%02X] RX_PW_P4=%u\n",nRF24_REG_RX_PW_P4,i);
+	 tx_cycle(); OsHelpers::delay(10);
 	 // RX_PW_P5
-	 i = nRF24_ReadReg(nRF24_REG_RX_PW_P5);
-	 USART_printf(USART1,"[0x%02X] RX_PW_P5=%u\n",nRF24_REG_RX_PW_P5,i);
-	 */
+	 i = ReadReg(nRF24_REG_RX_PW_P5);
+	 tx_printf("[0x%02X] RX_PW_P5=%u\n",nRF24_REG_RX_PW_P5,i);
+	 tx_cycle(); OsHelpers::delay(10); */
 }
+
+/*
+ >Station is Slave, ID is 256, name: SLAVE_01
+ [0x00] 0x0F  MASK:00b CRC:0b PWR: ON Mode: RX
+ [0x01] 0x3F ENAA: [P0+] [P1+] [P2+] [P3+] [P4+] [P5+]
+ [0x02] 0x03 EN_RXADDR: [P0+] [P1+] [P2-] [P3-] [P4-] [P5-]
+ [0x03] 0x03 EN_RXADDR=00000b (address width = 3)
+ [0x04] 0x18 ARD=000b ARC=000b (retr.delay=1us, count=8)
+ [0x05] 0x76 (2518GHz)
+ [0x06] 0x20 CONT_WAVE: OFF PLL_LOCK: OFF DataRate=250k pbs RF_PWR=-18dBm
+ [0x07] 0x0E IRQ:00b RX_PIPE:0 TX_FULL: NO
+ [0x08] 0x00 PLOS_CNT=0 ARC_CNT=0
+ [0x09] 0x00 RPD=NO
+ [0x0A] RX_ADDR_P0 "ZXBSE"
+ [0x0B] RX_ADDR_P1 "▒▒▒▒▒"
+ [0x0C] RX_ADDR_P2 "▒▒▒▒▒"
+ [0x0D] RX_ADDR_P3 "▒▒▒▒▒"
+ [0x0E] RX_ADDR_P4 "▒▒▒▒▒"
+ [0x0F] RX_ADDR_P5 "▒▒▒▒▒"
+ [0x10] TX_ADDR "ZXBSE"
+ [0x11] RX_PW_P0=0
+ [0x12] RX_PW_P1=18
+ [0x13] RX_PW_P2=0
+ [0x14] RX_PW_P3=0
+ [0x15] RX_PW_P4=0
+ [0x16] RX_PW_P5=0
+
+ >Station is Master, ID is 1, name: MASTER
+ [0x00] 0x0F  MASK:00b CRC:0b PWR: ON Mode: RX
+ [0x01] 0x3F ENAA: [P0+] [P1+] [P2+] [P3+] [P4+] [P5+]
+ [0x02] 0x3F EN_RXADDR: [P0+] [P1+] [P2+] [P3+] [P4+] [P5+]
+ [0x03] 0x03 EN_RXADDR=00000b (address width = 3)
+ [0x04] 0x18 ARD=000b ARC=000b (retr.delay=1us, count=8)
+ [0x05] 0x76 (2518GHz)
+ [0x06] 0x20 CONT_WAVE: OFF PLL_LOCK: OFF DataRate=250k pbs RF_PWR=-18dBm
+ [0x07] 0x0E IRQ:00b RX_PIPE:0 TX_FULL: NO
+ [0x08] 0x00 PLOS_CNT=0 ARC_CNT=0
+ [0x09] 0x00 RPD=NO
+ [0x0A] RX_ADDR_P0 "▒▒▒▒▒"
+ [0x0B] RX_ADDR_P1 "ZXBSE"
+ [0x0C] RX_ADDR_P2 "ZXBSY"
+ [0x0D] RX_ADDR_P3 "ZXBSX"
+ [0x0E] RX_ADDR_P4 "ZXBSW"
+ [0x0F] RX_ADDR_P5 "ZXBSV"
+ [0x10] TX_ADDR "nRF24"
+ [0x11] RX_PW_P0=18
+ [0x12] RX_PW_P1=18
+ [0x13] RX_PW_P2=18
+ [0x14] RX_PW_P3=18
+ [0x15] RX_PW_P4=18
+ [0x16] RX_PW_P5=18
+
+
+ */
 #endif

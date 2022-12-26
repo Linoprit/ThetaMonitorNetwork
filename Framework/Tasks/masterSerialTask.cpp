@@ -24,6 +24,7 @@
 #include <System/CommandLine/CommandLine.h>
 #include <Application/Sensors/Sensors.h>
 #include <System/OsHelpers.h>
+#include "cmsis_os.h"
 
 // #include <Devices/Eeprom_at24c256/AT24Cxxx.h>
 // #include <Instances/config.h>
@@ -31,7 +32,8 @@
 // #include "../Tasks/nRF24Task.h"
 // #include <Tasks/masterSerialTask.h>
 // #include <Sockets/CrcSocket.h>
-//int tx_cycle();
+
+
 
 void initCommandLine(void) {
 	cLine::CommandLine::instance().init();
@@ -43,16 +45,20 @@ void initCommandLine(void) {
 					== snsrs::SensorIdTable::MASTER;
 	uint32_t statID =
 			snsrs::Sensors::instance().getNonVolatileData()->getStationId();
+	std::string statTypeStr =
+			snsrs::Sensors::instance().getNonVolatileData()->getStationTypeStr();
 
 	if (isMaster) {
-		tx_printf("Station is Master, ID is %lu\n", statID);
+		tx_printf("Station is Master, ID is %lu, name: %s\n", statID, statTypeStr.c_str());
 	} else {
-		tx_printf("Station is Slave, ID is %lu\n", statID);
+		tx_printf("Station is Slave, ID is %lu, name: %s\n", statID, statTypeStr.c_str());
 	}
 
 #ifndef __x86_64
 	tx_cycle();
 #endif
+
+	osTimerStart(ownSysTickTimerHandle, 1000U);
 	OsHelpers::delay(500);
 }
 
@@ -68,7 +74,6 @@ void startMasterSerialTask(void *argument) {
 	UNUSED(argument);
 
 	initCommandLine();
-
 	HAL_UART_RxCpltCallback(&SERIAL_UART); // init serial reception mechanism
 
 	//
@@ -87,7 +92,8 @@ void startMasterSerialTask(void *argument) {
 	for (;;) {
 		osDelay(20);
 		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-
+		// TODO remove
+		HAL_GPIO_TogglePin(DebLed_2_GPIO_Port, DebLed_2_Pin);
 		//tx_printf("Message from hell\n");
 
 		cLine::CommandLine::instance().cycle();

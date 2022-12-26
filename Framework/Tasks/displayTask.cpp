@@ -21,16 +21,19 @@
 #include <Application/Nokia_LCD/LCDFunctions.h>
 
 
-void startDisplayTask(void * argument)
-{
+void startDisplayTask(void * argument){
 	UNUSED(argument);
-
 	OsHelpers::delay(500); //older LCDs need more time to settle (2500)
+
 	lcd::LCDFunctions::instance().init();
 	lcd::LCDFunctions::instance().initHardware();
 
 	for(;;) {
+		// TODO remove
+		HAL_GPIO_TogglePin(RELAY_2__GPIO_Port, RELAY_2__Pin);
 		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+
 		lcd::LCDFunctions::instance().cycle();
 		lcd::LCDFunctions::instance().incPage();
 		OsHelpers::delay(2000);

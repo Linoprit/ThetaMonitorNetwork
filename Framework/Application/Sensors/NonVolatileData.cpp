@@ -255,6 +255,7 @@ ErrorCode NonVolatileData::writeStatId(uint32_t stationId) {
 	if (currentId != stationId) {
 		AT24Cxxx::write(STAT_ID_START, reinterpret_cast<uint8_t*>(&stationId),
 				sizeof(uint32_t));
+		_statIdBuffered = stationId;
 		return ERR_OK;
 	}
 	_statIdBuffered = currentId;
@@ -274,21 +275,43 @@ SensorIdTable::StationType NonVolatileData::getStationType(void) {
 
 	if (statId == 0) {
 		return SensorIdTable::NONE;
-	} else if (statId < 0xFF) {
+	} else if (statId <= 0xFF) {		// 0 - 255 = Master
 		return SensorIdTable::MASTER;
-	} else if (statId < 0x1FF) {
+	} else if (statId <= 0x1FF) {		// 256 - 511 = SLAVE_01
 		return SensorIdTable::SLAVE_01;
-	} else if (statId < 0x2FF) {
+	} else if (statId <= 0x2FF) {		// 512 - 767 = SLAVE_02
 		return SensorIdTable::SLAVE_02;
-	} else if (statId < 0x3FF) {
+	} else if (statId <= 0x3FF) {		// 768 - 1023 = SLAVE_03
 		return SensorIdTable::SLAVE_03;
-	} else if (statId < 0x4FF) {
+	} else if (statId <= 0x4FF) {		// 1024 - 1279 = SLAVE_04
 		return SensorIdTable::SLAVE_04;
-	} else if (statId < 0x5FF) {
+	} else if (statId <= 0x5FF) {		// 1280 - 1535 = SLAVE_05
 		return SensorIdTable::SLAVE_05;
 	}
 
 	return SensorIdTable::NONE;
+}
+
+std::string NonVolatileData::getStationTypeStr(void) {
+	SensorIdTable::StationType statType = getStationType();
+
+	if (statType == SensorIdTable::StationType::NONE){
+		return "NONE";
+	} else if (statType == SensorIdTable::StationType::MASTER){
+		return "MASTER";
+	} else if (statType == SensorIdTable::StationType::SLAVE_01){
+		return "SLAVE_01";
+	} else if (statType == SensorIdTable::StationType::SLAVE_02){
+		return "SLAVE_02";
+	} else if (statType == SensorIdTable::StationType::SLAVE_03){
+		return "SLAVE_03";
+	} else if (statType == SensorIdTable::StationType::SLAVE_04){
+		return "SLAVE_04";
+	} else if (statType == SensorIdTable::StationType::SLAVE_05){
+		return "SLAVE_05";
+	}
+
+	return "NONE";
 }
 
 bool NonVolatileData::dataIsEmpty(SensorTypeE2 idE2Data) {

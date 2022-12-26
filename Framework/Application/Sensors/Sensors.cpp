@@ -8,6 +8,7 @@
 #include <Application/Sensors/Sensors.h>
 #include <Libraries/HelpersLib.h>
 #include <System/serialPrintf.h>
+#include <System/Sockets/GPIOSocket_Relays.h>
 
 namespace snsrs {
 
@@ -36,24 +37,63 @@ void Sensors::cycle(void) {
 	checkRelays();
 }
 
+/* Switches the relays on or off, regarding to their limits, set in the sensorIdTable
+ * TODO: Discussion - should we add a maxTime for relay on? If a relay is switched on
+ * and the corresponding sensor stops working, the relay stays on forever.
+ */
 void Sensors::checkRelays(void) {
+	uint8_t sensorCount =
+			Sensors::instance().getThetaSensors()->getMeasurements()->getValidCount();
 
-	//SensorIdTable::SensorIdType NonVolatileData::getIdTableData(uint32_t sensorIdHash)
+	for (uint8_t i = 0; i < sensorCount; i++) {
 
-	// TODO checkRelays => _relayStates
+		osSemaphoreAcquire(localMsmntSemHandle, 0);
+		MeasurementType actSensor = _thetaSensors.getMeasurementArray()->at(i);
+		osSemaphoreRelease(localMsmntSemHandle);
 
+		SensorIdTable::SensorIdType sensorConfig =
+				_sensorIdTable.getSensorTableData(&_nonVolatileData,
+						actSensor.sensorIdHash);
+		if ((sensorConfig.sensorIdHash == 0) || // No data for sensor found on E2
+				(sensorConfig.relayNr == 0) ||  // 0 means, no relay to service
+				(ThetaMsmnt::isValueValid(actSensor))) { // NAN means timeout
+			continue;
+		}
+
+		if (actSensor.value < sensorConfig.minVal) {
+			GPIOSocket_Relays::switch_relay_on(sensorConfig.relayNr);
+		}
+		if (actSensor.value > sensorConfig.maxVal) {
+			GPIOSocket_Relays::switch_relay_off(sensorConfig.relayNr);
+		}
+	}
+}
+
+/* For sendStatistics. We have only a uint8-bitfield. So we ignore the possibility
+ * of having more relays.
+ * The relay_1 is at the very right side.
+ * In example, if relay_1 is switched on and relay_2 is off, the returned value is
+ * 00000001b = 1 dec
+ */
+uint8_t Sensors::getRelayStates(void) {
+	uint8_t result = 0;
+	for (uint8_t i = 0; i < 8; i++) {
+		uint8_t state = GPIOSocket_Relays::get_relay_state(i + 1);
+		result = result | state << i;
+	}
+	return result;
 }
 
 /* For debugging, print the contents of the whole measurement-array.
  */
 void Sensors::printMsmntArray(void) {
 	for (uint8_t i = 0; i < MAX_SENSORS; i++) {
-		MeasurementType actSensor =
-				_thetaSensors.getMeasurementArray()->at(i);
+		MeasurementType actSensor = _thetaSensors.getMeasurementArray()->at(i);
 		std::string valueStr = HelpersLib::floatToStr(actSensor.value, 2u);
 
-		SensorIdTable::SensorIdType sensorConfig = _sensorIdTable.getSensorId(
-				&_nonVolatileData, actSensor.sensorIdHash);
+		SensorIdTable::SensorIdType sensorConfig =
+				_sensorIdTable.getSensorTableData(&_nonVolatileData,
+						actSensor.sensorIdHash);
 
 		std::string shortname = std::string(sensorConfig.shortname, 8);
 		std::string sensorTypeStr = SensorIdTable::sensorType2Str(

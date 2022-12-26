@@ -46,6 +46,7 @@ public:
 	uint32_t getLastUpdateTick(void) {
 		return _lastUpdateTick;
 	}
+	void checkForTimeout(void);
 
 private:
 	// measurement of the sensors, directly connected to this station.	.
@@ -71,7 +72,6 @@ private:
 	uint8_t fillSensorIdTable(oneWire::DS18B20 ds18Channel);
 	void initBme280(void);
 	void cycleBme280(void);
-	void checkRelays(void);
 
 	void printDS1820Channel(oneWire::DS18B20 ds18Channel);
 	void initTwoChannelDS1820(void);
