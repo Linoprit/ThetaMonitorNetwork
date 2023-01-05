@@ -52,7 +52,9 @@ int tx_printf(const char *format, ...) {
 	if (tx_free_bytes() < tmpLen)
 		return _FAIL_;
 
-	osSemaphoreAcquire(txPrintSemHandle, 0);
+	if(osSemaphoreAcquire(txPrintSemHandle, 10) != osOK){
+		return _FAIL_;
+	}
 	std::memcpy(&txBuff[tx_act_pos], tmpBuff, tmpLen);
 	tx_act_pos += tmpLen;
 	osSemaphoreRelease(txPrintSemHandle);
@@ -119,7 +121,9 @@ int tx_printBuff(uint8_t *buffer, uint8_t len) {
 	if (tx_free_bytes() < len)
 		return _FAIL_;
 
-	osSemaphoreAcquire(txPrintSemHandle, 0);
+	if(osSemaphoreAcquire(txPrintSemHandle, 10) != osOK){
+		return _FAIL_;
+	}
 	memcpy(&txBuff[tx_act_pos], buffer, (std::size_t) len);
 	tx_act_pos += len;
 	osSemaphoreRelease(txPrintSemHandle);
@@ -127,7 +131,9 @@ int tx_printBuff(uint8_t *buffer, uint8_t len) {
 }
 
 void tx_buff_clear(void) {
-	osSemaphoreAcquire(txPrintSemHandle, 0);
+	if(osSemaphoreAcquire(txPrintSemHandle, 10) != osOK){
+		return;
+	}
 	memset(txBuff, '\0', TX_BUFF_LEN);
 	tx_act_pos = 0;
 	osSemaphoreRelease(txPrintSemHandle);

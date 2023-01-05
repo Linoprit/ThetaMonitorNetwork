@@ -91,6 +91,9 @@ bool DS18B20::doAllMeasure(void) {
 	while (!allDone()) {
 		osDelay(10);
 		timeout -= 1;
+		if(timeout <= 0){
+			break;
+		}
 	}
 	if (timeout == 0) {
 		for (uint8_t i = 0; i < _foundSensors; i++) {
@@ -98,7 +101,6 @@ bool DS18B20::doAllMeasure(void) {
 		}
 		return false;
 	}
-
 	for (uint8_t i = 0; i < _foundSensors; i++) {
 		osDelay(10);
 		_sensors[i].dataIsValid = read(_sensors[i].address,

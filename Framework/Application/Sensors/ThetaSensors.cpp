@@ -44,6 +44,8 @@ void ThetaSensors::initHardware(void) {
 	initTwoChannelDS1820();
 	initBme280();
 
+
+
 	_initIsDone = true;
 }
 
@@ -111,20 +113,11 @@ void ThetaSensors::storeDS1820ToMeasureArray(DS18B20 ds18Channel) {
 			_measurementArray.update(
 					SensorIdTable::sensorID2Hash(sensors[i].address),
 					sensors[i].temperature);
+		} else {
+			_measurementArray.update(
+					SensorIdTable::sensorID2Hash(sensors[i].address),
+					NAN);
 		}
-	}
-}
-
-void ThetaSensors::checkForTimeout(void) {
-	uint8_t sensorCount = _measurementArray.getValidCount();
-
-	for (uint8_t i = 0; i < sensorCount; i++) {
-		osSemaphoreAcquire(localMsmntSemHandle, 0);
-		MeasurementType actSensor = _measurementArray.getArray()->at(i);
-		if(_measurementArray.isTimedOut(actSensor.sensorIdHash)){
-			actSensor.value = NAN;
-		}
-		osSemaphoreRelease(localMsmntSemHandle);
 	}
 }
 
@@ -140,7 +133,6 @@ void ThetaSensors::cycleTwoChannelsDS1820(void) {
 void ThetaSensors::cycle(void) {
 	cycleTwoChannelsDS1820();
 	cycleBme280();
-	checkForTimeout();
 }
 
 } // namespace msmnt

@@ -27,7 +27,7 @@
 
 // C only
 EXTERNC void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
-
+EXTERNC void ownSysTick(void *argument);
 #undef EXTERNC
 #ifdef __cplusplus
 

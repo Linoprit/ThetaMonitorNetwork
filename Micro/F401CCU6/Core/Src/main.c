@@ -142,6 +142,14 @@ const osSemaphoreAttr_t txPrintSem_attributes = {
   .cb_mem = &nRF_txPrintSemControlBlock,
   .cb_size = sizeof(nRF_txPrintSemControlBlock),
 };
+/* Definitions for tableSensDataSem */
+osSemaphoreId_t tableSensDataSemHandle;
+osStaticSemaphoreDef_t tableSensDataSemControlBlock;
+const osSemaphoreAttr_t tableSensDataSem_attributes = {
+  .name = "tableSensDataSem",
+  .cb_mem = &tableSensDataSemControlBlock,
+  .cb_size = sizeof(tableSensDataSemControlBlock),
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -225,10 +233,13 @@ int main(void)
 
   /* Create the semaphores(s) */
   /* creation of localMsmntSem */
-  localMsmntSemHandle = osSemaphoreNew(3, 3, &localMsmntSem_attributes);
+  localMsmntSemHandle = osSemaphoreNew(5, 5, &localMsmntSem_attributes);
 
   /* creation of txPrintSem */
-  txPrintSemHandle = osSemaphoreNew(3, 3, &txPrintSem_attributes);
+  txPrintSemHandle = osSemaphoreNew(5, 5, &txPrintSem_attributes);
+
+  /* creation of tableSensDataSem */
+  tableSensDataSemHandle = osSemaphoreNew(5, 5, &tableSensDataSem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */

@@ -81,15 +81,35 @@ void startnRF24Task(void *argument) {
 	}
 
 #ifdef PRODUCTIVE
+	uint32_t lastTickSeconds = OsHelpers::get_tick_seconds();
+	uint32_t delaySeconds = 10;
+
 	for (;;) {
 		if (isMaster) {
 			//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			radio::RadioMaster::instance().cycle();
-			OsHelpers::delay(500); // TODO what is the exact cycletime?
+
+			uint32_t actTickSeconds = OsHelpers::get_tick_seconds();
+			if(actTickSeconds > 120){
+				delaySeconds = 300;
+			}
+
+			if (lastTickSeconds + delaySeconds < actTickSeconds){
+				radio::RadioMaster::instance().cycleLocal();
+				lastTickSeconds = actTickSeconds;
+			}
+
+			// avoid queue overflow
+			radio::RadioMaster::instance().cycleRemote();
+			OsHelpers::delay(500);
+
 		} else {
 			radio::RadioSlave::instance().cycle();
-			OsHelpers::delay(1000);
-			// TODO OsHelpers::delay(radio::RadioSlave::instance().getTransmitCycleTime());
+
+			if(OsHelpers::get_tick_seconds() < 120){
+				OsHelpers::delay(10000);
+			} else {
+				OsHelpers::delay(radio::RadioSlave::instance().getTransmitCycleTime());
+			}
 		}
 	}
 #endif
@@ -536,7 +556,7 @@ void demoTxSingleAAon(NRF24L01 *nRF24) {
 //
 //
 //	for (;;) {
-//		// TODO remove
+//		// TODO clean up
 //		HAL_GPIO_TogglePin(RELAY_2__GPIO_Port, RELAY_2__Pin);
 //		//HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 //		//tx_printf("nRFTask %i\n", counter++);

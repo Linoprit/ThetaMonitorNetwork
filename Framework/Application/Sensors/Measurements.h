@@ -43,14 +43,17 @@ public:
 	}
 
 	void update(uint32_t sensorIdHash, float value) {
-		osSemaphoreAcquire(_semaphore, 0);
+
+		if (osSemaphoreAcquire(_semaphore, 10) != osOK) {
+			return;
+		}
 		for (MeasurementType &item : _measurementArray) {
 			if ((item.sensorIdHash == sensorIdHash)
 					|| (item.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH)) {
 				item.sensorIdHash = sensorIdHash;
 				item.value = value;
 				item.lastUpdateTick = OsHelpers::get_tick_seconds();
-				return;
+				break;
 			}
 		}
 		osSemaphoreRelease(_semaphore);
@@ -65,17 +68,6 @@ public:
 		return IMVALID_MEASUREMENT;
 	}
 
-	// checks for time-out. Also returns true if sensorId is not found.
-	bool isTimedOut(uint32_t sensorId) {
-		MeasurementType item = getMsmnt(sensorId);
-		if ((item.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH)
-				|| ((item.lastUpdateTick + SENSOR_TIMEOUT)
-						< OsHelpers::get_tick_seconds())) {
-			return true;
-		}
-		return false;
-	}
-
 	// returns how many sensorIdHashes are != EMPTY_SENSOR_HASH
 	uint8_t getValidCount(void) {
 		for (uint8_t i = 0; i < _measurementArray.size(); i++) {
@@ -88,7 +80,7 @@ public:
 	}
 
 	// In case of a sensor-timeout, the value is set to NAN
-	static bool isValueValid(MeasurementType msmntItem){
+	static bool isValueValid(MeasurementType msmntItem) {
 		return !isnan(msmntItem.value);
 	}
 

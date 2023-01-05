@@ -52,8 +52,7 @@ public:
 	}
 
 	void setPayload(T payloadToSend){
-		T* payloadTyped = reinterpret_cast<T*>(_radioMessage.payload);
-		*payloadTyped = payloadToSend;
+		memcpy(_radioMessage.payload, &payloadToSend, nRF_PAYLOAD_LEN);
 	}
 	T& getPayload(void) {
 		return reinterpret_cast<T&>(_radioMessage.payload);

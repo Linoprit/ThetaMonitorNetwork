@@ -49,11 +49,11 @@ constexpr bool OW_LINE_INVERTED = true;
 constexpr uint8_t DS18B20_SEARCH_RETRIES = 6;
 constexpr uint8_t DS18B20_MAX_DEVICES = 4; // in one channel
 // [ms] doAllMeasure(): how long to wait until all devices finished conversion
+// If this time is passed, sensor-value is set to NAN
 constexpr uint32_t DS18B20_CONVERSION_TIMEOUT_MS = 5000;
 // time in [ms] the measureTask delays
 constexpr uint32_t MEASURETASK_CYCLE = 5000;
-// after which time in seconds [s] getting no result from a sensor, it is invalid
-constexpr uint32_t SENSOR_TIMEOUT = 180;
+
 
 // ******* I2C for AT24Cxx EEPROM *******
 extern I2C_HandleTypeDef hi2c1; // see main.c
@@ -94,6 +94,7 @@ extern SPI_HandleTypeDef hspi2;
 constexpr uint32_t STD_TX_CYCLE_TIME = 300000u; // 5min
 // if data could not be provided, nRF-cycleTime will be this
 constexpr uint32_t MAXRT_TX_CYCLE_TIME = 60000u; // 1min
+
 // Statistics of a remote station is timed out after this [ms]
 //constexpr uint32_t STATION_TIMEOUT = 2 * STD_TX_CYCLE_TIME;
 // How many sys-tics do we wait, until as started transmission is timed out
@@ -111,7 +112,7 @@ constexpr uint8_t MAX_REMOTE_MEASUREMENTS = MAX_SENSORS * MAX_SLAVES;
 // ******* RTOS-Semaphores  *******
 extern osSemaphoreId_t localMsmntSemHandle;
 extern osSemaphoreId_t txPrintSemHandle;
-//extern osSemaphoreId_t remoteMsmntSemHandle;
+extern osSemaphoreId_t tableSensDataSemHandle;
 
 // ******* RTOS-Queues  *******
 // Remote-Data-Queue, Size is 20 * RADIO_MESSAGE_LEN

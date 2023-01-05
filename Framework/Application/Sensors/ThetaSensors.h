@@ -46,7 +46,6 @@ public:
 	uint32_t getLastUpdateTick(void) {
 		return _lastUpdateTick;
 	}
-	void checkForTimeout(void);
 
 private:
 	// measurement of the sensors, directly connected to this station.	.

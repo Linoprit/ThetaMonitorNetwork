@@ -56,6 +56,8 @@ class CalcStm32Crc:
         return uint32_buf
 
     def check_crc_from_serial(self, serial_bin_msg: list):
+        if len(serial_bin_msg) == 0:
+            return False
         uint32_list = CalcStm32Crc.uint8_to_uint32_list(
             serial_bin_msg[0:-1])
         crc8 = self.hal_crc_calculate(uint32_list) & 0xFF

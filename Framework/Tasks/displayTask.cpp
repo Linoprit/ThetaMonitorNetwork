@@ -29,10 +29,7 @@ void startDisplayTask(void * argument){
 	lcd::LCDFunctions::instance().initHardware();
 
 	for(;;) {
-		// TODO remove
-		HAL_GPIO_TogglePin(RELAY_2__GPIO_Port, RELAY_2__Pin);
 		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-
 
 		lcd::LCDFunctions::instance().cycle();
 		lcd::LCDFunctions::instance().incPage();

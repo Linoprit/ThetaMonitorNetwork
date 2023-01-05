@@ -20,7 +20,8 @@ class RadioMaster: public RadioBase {
 public:
 	void init(void);
 	static RadioMaster& instance(void);
-	void cycle(void);
+	void cycleLocal(void);
+	void cycleRemote();
 	void sendMessageSerial(uint8_t* msg);
 
 private:

@@ -57,6 +57,7 @@ class MeasurementType(RadioMessageType):
 class RadioStatisticsType(RadioMessageType):
     msgClass = -1
     stationId = -1
+    stationId2 = -1
     relayStates = -1
     lostPkgs = -1
     validSensors = -1
@@ -65,10 +66,10 @@ class RadioStatisticsType(RadioMessageType):
     checksum = -1
 
     def __init__(self, binary_message: list):
-        msgClass, stationId, relayStates, \
+        msgClass, stationId, stationId2, relayStates, \
             lostPkgs, validSensors, rxBufferOverflows, \
             lastUpdateTick, checksum = \
-            unpack(MEASUREMENT_FORMAT, bytes(binary_message))
+            unpack(STATISTIC_FORMAT, bytes(binary_message))
 
         super().__init__(msgClass, stationId, checksum)
         self.relayStates = relayStates

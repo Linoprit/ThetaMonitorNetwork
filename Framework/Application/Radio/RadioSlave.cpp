@@ -16,7 +16,7 @@ namespace radio {
 using namespace snsrs;
 
 // we use this memory with placement-new for instanciating a RadioMessage
-static char RadioMsgBuff[sizeof(RadioMessage<MeasurementType>)];
+static char RadioMsgBuff[sizeof(RadioMessage<MeasurementType> )];
 
 RadioSlave::RadioSlave() :
 		_transmitCycleTime { MAXRT_TX_CYCLE_TIME } {
@@ -31,7 +31,6 @@ RadioSlave& RadioSlave::instance(void) {
 	return radioSlave;
 }
 
-// TODO send only measurement, that are valid (not timed-out)
 void RadioSlave::cycle() {
 	sendMeasurements();
 	sendStatistics();
@@ -43,14 +42,13 @@ void RadioSlave::sendMeasurements(void) {
 
 	// we send all found sensors, even if they timed out
 	for (uint8_t i = 0; i < sensorCount; i++) {
-		osSemaphoreAcquire(localMsmntSemHandle, 0);
-
+		if(osSemaphoreAcquire(localMsmntSemHandle, 0) != osOK){
+			continue;
+		}
 		ThetaMsmnt::MeasurementArray *measurementArray =
-		Sensors::instance().getThetaSensors()->getMeasurementArray();
-
+				Sensors::instance().getThetaSensors()->getMeasurementArray();
 		RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType(
 				MsgClass::MEASUREMENT, measurementArray->at(i));
-
 		osSemaphoreRelease(localMsmntSemHandle);
 
 		_nRF24L01_Basis.transmitPacket_IRQ(radioMessage->asUint8Ptr(),
@@ -77,6 +75,7 @@ void RadioSlave::sendStatistics(void) {
 			Sensors::instance().getNonVolatileData()->getStationId();
 	radiostats.validSensors =
 			Sensors::instance().getThetaSensors()->getFoundDS1820();
+	radiostats.lastUpdateTick = OsHelpers::get_tick_seconds();
 
 	RadioStatMsgType *radioStatistics = new (RadioMsgBuff) RadioStatMsgType(
 			MsgClass::STATISTICS, radiostats);

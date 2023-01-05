@@ -21,18 +21,27 @@ SensorIdTable::SensorIdTable() {
 
 SensorIdTable::SensorIdType SensorIdTable::getSensorTableData(
 		NonVolatileData *nvData, uint32_t hashId) {
-	SensorIdType *sensorId;
+
+	if (osSemaphoreAcquire(tableSensDataSemHandle, 10) != osOK) {
+		SensorIdTable::SensorIdType empty;
+		empty.sensorIdHash = NonVolatileData::EMPTY_SENSOR_HASH;
+		return empty;
+	}
+
+	SensorIdType *sensorId = NULL;
 	for (uint8_t i = 0; i < sensorIdArray.size(); i++) {
 		sensorId = &sensorIdArray.at(i);
 		if (sensorId->sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH) {
+			SensorIdTable::SensorIdType sensorIdE2 = nvData->getIdTableData(
+					hashId);
+			*sensorId = sensorIdE2;
 			break;
 		} else if (sensorId->sensorIdHash == hashId) {
-			return *sensorId;
+			break;
 		}
 	}
 
-	SensorIdTable::SensorIdType sensorIdE2 = nvData->getIdTableData(hashId);
-	*sensorId = sensorIdE2;
+	osSemaphoreRelease(tableSensDataSemHandle);
 	return *sensorId;
 }
 

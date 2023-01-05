@@ -69,6 +69,16 @@ void LCDFunctions::printStates(void) {
 	act_line++;
 	line.clear();
 
+
+	line = snsrs::Sensors::instance().getNonVolatileData()->getStationTypeStr();
+	line.append(" ID: ");
+	line.append(std::to_string(
+			snsrs::Sensors::instance().getNonVolatileData()->getStationId()));
+	_LCD_handle.write_string(0, (_LCD_handle.line_2_y_pix(act_line)),
+			line.c_str());
+	act_line++;
+	line.clear();
+
 	line = "found DS1820: ";
 	line.append(
 			std::to_string(
@@ -123,33 +133,41 @@ void LCDFunctions::cycle(void) {
 		}
 		clrTmpLine();
 
-		MeasurementType actSensor = _sensorMeasureArray->at(i);
-		NonVolatileData *nvData = Sensors::instance().getNonVolatileData();
-		SensorIdTable::SensorIdType sensorConfig = _sensorIdTable->getSensorTableData(
-				nvData, actSensor.sensorIdHash);
-		std::string shortname = std::string(sensorConfig.shortname, 8);
+		if (osSemaphoreAcquire(localMsmntSemHandle, 20) != osOK) {
+			return;
+		}
 
-		if(sensorConfig.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH){
+		MeasurementType actSensor = _sensorMeasureArray->at(i);
+		float actValue = actSensor.value;
+		int32_t actHash = actSensor.sensorIdHash;
+		osSemaphoreRelease(localMsmntSemHandle);
+
+		NonVolatileData *nvData = Sensors::instance().getNonVolatileData();
+		SensorIdTable::SensorIdType sensorConfig =
+				_sensorIdTable->getSensorTableData(nvData, actHash);
+		std::string shortname = std::string(sensorConfig.shortname, 8);
+		if (sensorConfig.sensorIdHash == NonVolatileData::EMPTY_SENSOR_HASH) {
 			shortname = "E2 inval";
 		}
 
 		copyString(_tmpLine, shortname.c_str(), shortname.length());
-		pushTheta(actSensor.value);
+		pushTheta(actValue);
 
-		if ((_pages > 1) && (act_line == 0)) // display page-nr
-				{
+		if ((_pages > 1) && (act_line == 0)) { // display page-nr
 			uint8_t pos = _LCD_handle.get_chars_per_line() - 2;
 			HelpersLib::value2char(&_tmpLine[pos], 2, 0, _act_page);
 		}
 
+//		tx_printf("lcd: %i, %i, %i, %i\n", start, end, i,
+//				_LCD_handle.line_2_y_pix(act_line));
+//		tx_printf("  tmpline: '%s'  ", _tmpLine);
+//		tx_printf("lcd: '%s'\n", shortname.c_str());
+
 		_LCD_handle.write_string(0, (_LCD_handle.line_2_y_pix(act_line)),
 				static_cast<char*>(_tmpLine));
 
-		// tx_printf("  tmpline: '%s'  " , _tmpLine);
-		// tx_printf("lcd: %i, %i, %i, %i\n", start, end, i, _LCD_handle.line_2_y_pix(act_line));
-		// tx_printf("lcd: '%s'\n", shortname.c_str());
-
 		act_line++;
+		OsHelpers::delay(10); // slow down, to avoid blocking E2 or display
 	}
 	_LCD_handle.display(); // push internal buffer to LCD
 }

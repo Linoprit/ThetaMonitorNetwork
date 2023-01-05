@@ -49,21 +49,26 @@ RadioMaster& RadioMaster::instance(void) {
 	return radioMaster;
 }
 
-void RadioMaster::cycle() {
+void RadioMaster::cycleLocal() {
 	uint8_t sensorCount =
 			Sensors::instance().getThetaSensors()->getMeasurements()->getValidCount();
 	ThetaMsmnt::MeasurementArray *measurementArray =
 			Sensors::instance().getThetaSensors()->getMeasurementArray();
 
-	// we send all found sensors, even if they timed out
+	// we send all found sensors, even if they timed out (value = NAN)
 	for (uint8_t i = 0; i < sensorCount; i++) {
-		osSemaphoreAcquire(localMsmntSemHandle, 0);
+		if(osSemaphoreAcquire(localMsmntSemHandle, 0) != osOK){
+			continue;
+		}
 		RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType(
 				MsgClass::MEASUREMENT, measurementArray->at(i));
 		osSemaphoreRelease(localMsmntSemHandle);
 
 		sendMessageSerial(radioMessage->asUint8Ptr());
 	}
+}
+
+void RadioMaster::cycleRemote(){
 	// send remote sensors
 	while (osMessageQueueGetCount(remoteDataQueueHandle) > 0) {
 		uint8_t nRF24_payload[RADIO_MESSAGE_LEN];
@@ -78,6 +83,7 @@ void RadioMaster::cycle() {
 		}
 	}
 }
+
 
 void RadioMaster::sendMessageSerial(uint8_t *msg) {
 	// we do the same, like RadioSlave::sendMeasurements and sendStatistics

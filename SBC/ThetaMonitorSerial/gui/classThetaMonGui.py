@@ -1,11 +1,10 @@
 import pathlib
 import sys
-from _queue import Empty
 from queue import Queue
 import numpy as np
-import serial
 
 import wx
+import wx.html
 from serial.tools import list_ports
 
 import framework.guiHelpers as guiHelpers
@@ -23,6 +22,10 @@ class ThetaMonGui(Tmg.ThetaMonitorFrame):
         self.settings = settings_in
         Tmg.ThetaMonitorFrame.__init__(self, parent)
         guiHelpers.set_logger(self.m_textCtrlStatus)
+
+        self.Bind(
+            event=wx.EVT_TEXT_ENTER, handler=self.on_textCtrl_com_line_enter)
+        self.Bind(wx.EVT_CHAR_HOOK, self.onKey)
 
         self._init_serial_combo()
         self.serial_queue = Queue()
@@ -49,33 +52,64 @@ class ThetaMonGui(Tmg.ThetaMonitorFrame):
         text = ""
         while self.txt_queue.qsize() > 0:
             text += StreamDecoder.get_txt_queue_as_string(self.txt_queue)
-        if text:
-            text = text.replace('\n', "<br>")
-            text = text.replace('\t', "     ")
-            self.m_htmlWinMonitor.AppendToPage(text)
+        if text and self.m_toggleBtnFilterTxt.GetValue():
+            text = self.align_to_html(text)
+            self.shorten_html_content(self.m_htmlWin_console, len(text))
+            self.m_htmlWin_console.AppendToPage(text)
             self.scroll_htmlMonitor_down()
 
     def bin_queue_to_console(self):
-        text = ""
+        text = "<TT>"
         while self.bin_queue.qsize() > 0:
             bin_msg = self.bin_queue.get(block=True, timeout=None)
-            text += " class: " + str(bin_msg.msgClass)
-            text += " station: " + str(bin_msg.stationId)
-            text += " tick: " + str(bin_msg.lastUpdateTick)
-            text += " SnsIdHash: " + str(bin_msg.sensorIdHash)
-            text += " value: " + str(np.around(bin_msg.value, decimals=2))
-            text += " chksum: " + str(bin_msg.checksum)
-            text += "<br>"
+            if bin_msg.msgClass == 0:
+                text += " class: " + str(bin_msg.msgClass)
+                text += " station: " + str(bin_msg.stationId)
+                text += " tick: " + str(bin_msg.lastUpdateTick)
+                text += " SnsIdHash: " + str(bin_msg.sensorIdHash)
+                text += " value: " + str(np.around(bin_msg.value, decimals=2))
+                text += " chksum: " + str(bin_msg.checksum)
+                text += "<br>"
+            elif bin_msg.msgClass == 1:
+                text += " class: " + str(bin_msg.msgClass)
+                text += " station: " + str(bin_msg.stationId)
+                text += " relays: " + str(bin_msg.relayStates)
+                text += " lostPkgs: " + str(bin_msg.lostPkgs)
+                text += " validSensors: " + str(bin_msg.validSensors)
+                text += " rxBufferOverflows: " + str(bin_msg.rxBufferOverflows)
+                text += " lastUpdateTick: " + str(bin_msg.lastUpdateTick)
+                text += " chksum: " + str(bin_msg.checksum)
+                text += "<br>"
             self.bin_queue.task_done()
-        text += "<br>"
-        self.m_htmlWinMonitor.AppendToPage(text)
-        self.scroll_htmlMonitor_down()
+        if self.m_toggleBtnFilterBin.GetValue():
+            text += "<br></TT>"
+            self.shorten_html_content(self.m_htmlWin_console, len(text))
+            self.m_htmlWin_console.AppendToPage(text)
+            self.scroll_htmlMonitor_down()
+
+    def align_to_html(self, text) -> str:
+        text = text.replace('\n', "<br>")
+        text = text.replace('\t', "&nbsp;&nbsp;&nbsp;&nbsp;")
+        text = text.replace(' ', "&nbsp;")
+        text = "<TT>" + text + "</TT>"
+        return text
+
+    def shorten_html_content(self, html_win: wx.html.HtmlWindow, textlen):
+        text = self.m_htmlWin_console.ToText()
+        html_len = len(text)
+        if html_len < 10000:
+            return
+        new_text = text[textlen: -1:]
+        line_break_pos = new_text.find("\n")
+        new_text = new_text[line_break_pos: -1:]
+        new_text = self.align_to_html(new_text) + "<br>"
+        html_win.SetPage(new_text)
 
     def scroll_htmlMonitor_down(self):
-        if self.m_bmToggleBtnAutoScroll.GetValue():
-            maxrange = self.m_htmlWinMonitor.GetScrollRange(wx.VERTICAL)
-            pagesize = self.m_htmlWinMonitor.GetScrollPageSize(wx.VERTICAL)
-            self.m_htmlWinMonitor.Scroll(-1, maxrange - pagesize)
+        # if self.m_bmToggleBtnAutoScroll.GetValue():
+        maxrange = self.m_htmlWin_console.GetScrollRange(wx.VERTICAL)
+        pagesize = self.m_htmlWin_console.GetScrollPageSize(wx.VERTICAL)
+        self.m_htmlWin_console.Scroll(-1, maxrange - pagesize)
 
     # ---------- Callbacks ----------
     def update_gui(self, event):
@@ -113,3 +147,25 @@ class ThetaMonGui(Tmg.ThetaMonitorFrame):
         self.m_bmToggleBtnConnect.SetValue(False)
         self.on_button_connect_toggled(event)
         self._init_serial_combo()
+
+    def on_button_clr_pushed(self, event):
+        self.m_htmlWin_console.SetPage("")
+        event.Skip()
+
+    def on_button_filter_bin_toggled(self, event):
+        event.Skip()
+
+    def on_button_filter_txt_toggled(self, event):
+        event.Skip()
+
+    def on_textCtrl_com_line_enter(self, event):
+        event.Skip()
+        print("text enter")
+
+    def onKey(self, evt):
+        if evt.GetKeyCode() == wx.WXK_DOWN:
+            print("Down key pressed")
+        elif evt.GetKeyCode() == wx.WXK_UP:
+            print("Up key pressed")
+        else:
+            evt.Skip()

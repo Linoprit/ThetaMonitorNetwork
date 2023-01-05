@@ -23,7 +23,7 @@ typedef struct PACKED {
 	uint8_t lostPkgs;
 	uint8_t validSensors;
 	uint8_t rxBufferOverflows;
-	uint32_t lastUpdateTick; // TODO should become a timestamp later!
+	uint32_t lastUpdateTick; // in seconds
 } RadioStatisticsType;
 constexpr RadioStatisticsType INVALID_RADIO_STATISTIC { 0, 0, 0, 0, 0 };
 

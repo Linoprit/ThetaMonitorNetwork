@@ -47,7 +47,9 @@ void Sensors::checkRelays(void) {
 
 	for (uint8_t i = 0; i < sensorCount; i++) {
 
-		osSemaphoreAcquire(localMsmntSemHandle, 0);
+		if(osSemaphoreAcquire(localMsmntSemHandle, 10) != osOK){
+			continue;
+		}
 		MeasurementType actSensor = _thetaSensors.getMeasurementArray()->at(i);
 		osSemaphoreRelease(localMsmntSemHandle);
 
