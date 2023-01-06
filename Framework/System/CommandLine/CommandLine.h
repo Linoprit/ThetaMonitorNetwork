@@ -57,7 +57,9 @@ public:
 
 	// must be called by the serial callback
 	inline void putChar(uint8_t chr) {
-		_keyBuffer.enqueue(chr);
+		if (!_keyBuffer.isFull()) {
+			_keyBuffer.enqueue(chr);
+		}
 	}
 
 	// Terminal control functions

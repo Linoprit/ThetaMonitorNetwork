@@ -39,6 +39,9 @@ bool Interpreter::doit(CmdBufferType comLine) {
 	else if (cmd == 1676458703) { OsHelpers::SYSTEM_REBOOT();		} // reboot
 	else if (cmd == 1973435441) { OsHelpers::SYSTEM_EXIT();			} // exit
 //@formatter:on
+	// cmd       ID (hash)	min   max  tp  rel  shortname (8 bytes)
+	// setSensId 3822322055 10.0  12.5 0   1    "Test 007"
+	// setSensId 3822322055 -12.5 -12.7 0   0    "Test 007"
 
 	return result;
 }

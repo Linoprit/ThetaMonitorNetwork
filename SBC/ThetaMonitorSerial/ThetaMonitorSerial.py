@@ -1,7 +1,5 @@
 import framework.settings
-from serialIO import serialIO_toDelete as Sio
 from serialIO import serialThread as Thr
-from serialIO import serialHelpers as Seh
 import wx
 import gui.classThetaMonGui as Mf
 
@@ -21,8 +19,8 @@ if __name__ == '__main__':
         frame = Mf.ThetaMonGui(None, settings)
         frame.Show(True)
         app.MainLoop()
-    elif what_to_run == 'SERIALIO':
-        Sio.entry()  # testcode
+    # elif what_to_run == 'SERIALIO':
+    #    Sio.entry()  # testcode
     elif what_to_run == 'THREAD':
         Thr.main()
         # Seh.main()

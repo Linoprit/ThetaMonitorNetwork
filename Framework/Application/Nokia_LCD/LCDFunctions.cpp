@@ -34,7 +34,7 @@ using namespace snsrs;
 // how long to keep the backlight on, after button-press
 constexpr uint32_t TICKS_BCKLT_ON = 60000; // [ms]
 // time, to keep the startup-screen, after init is done
-constexpr uint32_t TICKS_KEEP_STATE_SCREEN = 3000; // [ms]
+constexpr uint32_t TICKS_KEEP_STATE_SCREEN = 4000; // [ms]
 
 void LCDFunctions::init(void) {
 	new (&instance()) LCDFunctions();
@@ -68,7 +68,6 @@ void LCDFunctions::printStates(void) {
 			line.c_str());
 	act_line++;
 	line.clear();
-
 
 	line = snsrs::Sensors::instance().getNonVolatileData()->getStationTypeStr();
 	line.append(" ID: ");

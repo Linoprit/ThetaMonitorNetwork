@@ -13,8 +13,9 @@ class CalcStm32Crc:
     def resetCrc(self):
         self.actCrc = self.DEFAULT_CRC_INITVALUE
 
-    def calcCrcUpdate(self, data: np.uint):
+    def calcCrcUpdate(self, data: np.uint32):
         self.actCrc = self.actCrc ^ (data & self.DEFAULT_CRC_INITVALUE)
+
         for i in range(32):
             if self.actCrc & 0x80000000:
                 self.actCrc = (self.actCrc << 1) ^ self.DEFAULT_CRC32_POLY
@@ -23,12 +24,12 @@ class CalcStm32Crc:
             self.actCrc = self.actCrc & self.DEFAULT_CRC_INITVALUE
         return self.actCrc
 
-    def hal_crc_accumulate(self, buffer: list):  # list[np.uint]):
+    def hal_crc_accumulate(self, buffer: list):  # list[np.uint32]):
         for i in range(len(buffer)):
             self.calcCrcUpdate(buffer[i])
         return self.actCrc
 
-    def hal_crc_calculate(self, buffer: list):  # list[np.uint]):
+    def hal_crc_calculate(self, buffer: list):  # list[np.uint32]):
         self.resetCrc()
         for i in range(len(buffer)):
             self.calcCrcUpdate(buffer[i])
@@ -40,7 +41,11 @@ class CalcStm32Crc:
         return CalcStm32Crc.uint8_to_uint32_list(string_as_bytes)
 
     @staticmethod
-    def uint8_to_uint32_list(buffer: list) -> list:  # list[np.byte]
+    def uint8_to_uint32_list(buffer: list) -> list:  # list[np.uint8]
+        """ Takes in a list of uint8 values and interprets them into a uint32 list.
+         This function takes respect to the little-endian thing.
+         Example: [0x28, 0xFF, 0x89, 0x0E, 0x02, 0x17, 0x03, 0x4A]
+         returns [243924776, 1241716482] = [0x0E89FF82, 0x4A031702]"""
         tmp_buffer = copy.copy(buffer)
         uint32len = CrcSocket.calcUint32Len(len(buffer))
         # pad string to a len, multiple of four
@@ -66,7 +71,7 @@ class CalcStm32Crc:
 
 class CrcSocket:
     @staticmethod
-    def calcChksum(data: list) -> np.uint:  # list[np.ubyte]
+    def calcChksum(data: list) -> np.uint8:  # list[np.uint8]
         calc_crc = CalcStm32Crc()
         """ Calls the CRC-Engine and returns a 8-bit CRC, which is
         simply the truncation of the 32-bit result.
@@ -80,7 +85,7 @@ class CrcSocket:
         return crc & 0xFF
 
     @staticmethod
-    def calcUint32Len(sizeInBytes: np.uint) -> np.uint:
+    def calcUint32Len(sizeInBytes: np.uint32) -> np.uint32:
         """ Calculates the size in uint32 multiples. Takes
         in the size in Bytes and returns
         how many uint32 values these are, if rounded up.
@@ -89,7 +94,7 @@ class CrcSocket:
         return int(len32)
 
     @staticmethod
-    def calcBufferedChkSum32(data: list) -> np.uint: # list[np.ubyte]
+    def calcBufferedChkSum32(data: list) -> np.uint32: # list[np.ubyte]
         """ Takes in data of any size, buffers it in a uint32-array
         and pads the remainig bytes. The resulting array can
         directly be passed to the CRC-engine."""

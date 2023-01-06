@@ -62,7 +62,8 @@ uint32_t IdTableParser::calcHash(vector<string> splitted) {
 		uint8_t number = std::stoi(splitted.at(i), 0, 16);
 		crcPtr[i] = number;
 	}
-	return calcCrc.crcCalculate(crcInput, 2);
+	uint32_t result = calcCrc.crcCalculate(crcInput, 2);
+	return result;
 }
 
 vector<string> IdTableParser::splitLine(string line) {

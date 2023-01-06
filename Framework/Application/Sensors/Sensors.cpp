@@ -40,6 +40,7 @@ void Sensors::cycle(void) {
 /* Switches the relays on or off, regarding to their limits, set in the sensorIdTable
  * TODO: Discussion - should we add a maxTime for relay on? If a relay is switched on
  * and the corresponding sensor stops working, the relay stays on forever.
+ * TODO avoid too frequent switching.
  */
 void Sensors::checkRelays(void) {
 	uint8_t sensorCount =
@@ -58,7 +59,7 @@ void Sensors::checkRelays(void) {
 						actSensor.sensorIdHash);
 		if ((sensorConfig.sensorIdHash == 0) || // No data for sensor found on E2
 				(sensorConfig.relayNr == 0) ||  // 0 means, no relay to service
-				(ThetaMsmnt::isValueValid(actSensor))) { // NAN means timeout
+				(!ThetaMsmnt::isValueValid(actSensor))) { // NAN means timeout
 			continue;
 		}
 

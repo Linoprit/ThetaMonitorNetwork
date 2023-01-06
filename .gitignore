@@ -40,3 +40,5 @@
 /doc/schematic/ThetaMonitorF401CEU/ThetaMonitorF401CEU-backups/
 *__pycache__
 /Framework/example
+/SBC/ThetaMonitorSerial/tests/data/temp
+/x86/TableIdProgrammer/ID_TableTestRelayConfig.txt

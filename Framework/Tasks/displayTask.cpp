@@ -33,7 +33,7 @@ void startDisplayTask(void * argument){
 
 		lcd::LCDFunctions::instance().cycle();
 		lcd::LCDFunctions::instance().incPage();
-		OsHelpers::delay(2000);
+		OsHelpers::delay(3000);
 	}
 }
 
