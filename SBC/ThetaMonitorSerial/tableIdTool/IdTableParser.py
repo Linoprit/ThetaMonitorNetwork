@@ -43,8 +43,11 @@ class IdTableParser:
         self._content = []
 
     def parse(self, file_content: list):
-        line_count = 0
+        line_count = -1
         for line in file_content:
+            line_count += 1
+            if line.startswith('#') or line == '\n' or not line :
+                continue
             act_item = SensorId()
             splitted = line.split(",")
             sens_id = splitted[0: self.ID_LEN]
@@ -72,12 +75,18 @@ class IdTableParser:
             if not act_item.set_shortname(shortname):
                 logging.getLogger().error(
                     "shortname too long [max 8] in line " + str(line_count))
-            line_count += 1
+
             self._content.append(act_item)
         logging.getLogger().info("ID Table parsed.")
 
     def get_content(self) -> list:
         return self._content
+
+    def get_with_command(self, command: str):
+        result = []
+        for item in self._content:
+            result.append(command + ' ' + item.to_str())
+        return result
 
     def get_content_strlist(self) -> str:
         result = []

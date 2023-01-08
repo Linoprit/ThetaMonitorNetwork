@@ -1,5 +1,5 @@
 import framework.settings
-from serialIO import serialThread as Thr
+import tableIdTool.TableIdProgrammer as Tip
 import wx
 import gui.classThetaMonGui as Mf
 
@@ -8,29 +8,21 @@ if __name__ == '__main__':
     settings.set_name_and_version('ThetaMonitor', 'v000.001.001')
     settings.print_status()
 
-    # later, we have the SBC configuration
-    # headless = settings.get('options', 'headless', uppercase=True)
-
-    what_to_run = settings.get('devel', 'start', uppercase=True)
-    if what_to_run == 'SBC_TARGET':
-        print("to be implemented")
-    elif what_to_run == 'GUI_TARGET':
+    if settings.args.tool_name == 'gui':
         app = wx.App(False)
         frame = Mf.ThetaMonGui(None, settings)
         frame.Show(True)
         app.MainLoop()
-    # elif what_to_run == 'SERIALIO':
-    #    Sio.entry()  # testcode
-    elif what_to_run == 'THREAD':
-        Thr.main()
-        # Seh.main()
-
+    elif settings.args.tool_name == 'prog':
+        tip = Tip.TableIdProgrammer(settings)
     else:
-        print("No serialIO selected in settings.ini.")
+        # Todo run the deamon
+        print("Deamon not implemented")
+
 
 # Desiderata:
 # Log messages from monitor, Button on off
-# Monitor filter Buttons txt/bin
+# * Monitor filter Buttons txt/bin
 # Console with history and help
 # SensorTable Editor with load and save Table-File
 # SensorTable Write to E2 Button in Console-Win

@@ -1,15 +1,16 @@
 import argparse
 import configparser
 import logging
-from datetime import datetime
 import pathlib
 import sys
+from datetime import datetime
+import tableIdTool.Subparser
 
 
 # noinspection SpellCheckingInspection
 class AppSettings:
     def __init__(self):
-        self.args = self.__command_line_init()
+        self.args = self._command_line_init()
 
         self.workdir = self.__check_workdir(self.args)
         self.__check_workdir_structure(self.workdir)
@@ -61,21 +62,30 @@ class AppSettings:
                 workdir = pathlib.Path("c:/temp/data")  # simple mode
         return workdir
 
-    @staticmethod
-    def __command_line_init():
-        arg_parser = argparse.ArgumentParser()
-        arg_parser.add_argument('-w', '--workdir', help="Path to the working directory, named 'data', where "
-                                                        "the subdirs 'input', 'output' and 'temp' reside. "
-                                                        "Will be created, if not in existence.")
-        arg_parser.add_argument('-s', '--settingsFile', help="settings file to use, without path."
-                                                             "It must be located inside the workdir "
-                                                             "and it will be created, if it doesn't exist. ")
-        arg_parser.add_argument('-v', '--verbose', action='store_true',
-                                help='print verbose messages')
-        arg_parser.add_argument('-d', '--debug', action='store_true',
-                                help='print verbose and debug messages')
-        arg_parser.add_argument('--version', action='store_true', help="Shows programm version and exits")
-        return arg_parser.parse_args()
+    def _command_line_init(self):
+        self.arg_parser = argparse.ArgumentParser()
+        subparsers = self.arg_parser.add_subparsers(title='subcommands',
+                                               description='valid subcommands',
+                                               help='additional help',
+                                               dest='tool_name')
+        tableIdTool.Subparser.add_subparsers(subparsers)
+        self.arg_parser.add_argument(
+            '-w', '--workdir', help="Path to the working directory, named 'data', where "
+                                    "the subdirs 'input', 'output' and 'temp' reside. "
+                                    "Will be created, if not in existence.")
+        self.arg_parser.add_argument(
+            '-s', '--settingsFile', help="settings file to use, without path."
+                                         "It must be located inside the workdir "
+                                         "and it will be created, if it doesn't exist. ")
+        self.arg_parser.add_argument(
+            '-v', '--verbose', action='store_true',
+            help='print verbose messages')
+        self.arg_parser.add_argument(
+            '-d', '--debug', action='store_true',
+            help='print verbose and debug messages')
+        self.arg_parser.add_argument(
+            '--version', action='store_true', help="Shows programm version and exits")
+        return self.arg_parser.parse_args()
 
     @staticmethod
     def __setup_logger(filename, log_level_str):
@@ -126,6 +136,9 @@ class AppSettings:
         if result is None:
             return None
         return pathlib.Path(self.expand(result))
+
+    def set(self, section: str, name: str, value: str):
+        self.settings[section][name] = value
 
     def get_settings(self):
         return self.settings

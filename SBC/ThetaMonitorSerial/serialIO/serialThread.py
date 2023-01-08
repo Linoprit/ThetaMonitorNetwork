@@ -16,7 +16,7 @@ class Worker(Thread):
         except SerialException:
             logging.getLogger().error("Cannot open serial port " + device)
             self._exit_is_requested = True
-        logging.getLogger().error("Opened port " + device)
+        logging.getLogger().info("Opened port " + device)
         self._exit_is_requested = False
         self._serial_queue = serial_queue
 

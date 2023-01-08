@@ -4,14 +4,12 @@ import pathlib
 class Filehelper:
     @staticmethod
     def read_file_to_list(file: pathlib.Path):
-        fileobj = open(file, 'r')
+        fileobject = open(file, 'r')
         content = []
-        for line in fileobj:
+        for line in fileobject:
             line = line.strip()
-            if line.startswith('#') or line == '\n' or not line :
-                continue
             content.append(line)
-        fileobj.close()
+        fileobject.close()
         return content
 
     @staticmethod
