@@ -12,6 +12,7 @@
 #include <System/serialPrintf.h>
 #include <cstring>
 #include <System/OsHelpers.h>
+#include <Application/Radio/RadioSlave.h>
 
 namespace cLine {
 using namespace snsrs;
@@ -36,6 +37,8 @@ bool Interpreter::doit(CmdBufferType comLine) {
 	else if (cmd == 2948963465) { result = getStationId(&lex); 		} // getStationId
 	else if (cmd == 4035361305) { result = clrSensIdTable(&lex); 	} // clrSensIdTable
 	else if (cmd == 1050090700) { result = calcHash(&lex); 			} // calcHash
+	else if (cmd ==  959926194) { result = shutup();                } // shutup
+    else if (cmd == 1639364146) { result = talk();                  } // talk
 	else if (cmd == 1676458703) { OsHelpers::SYSTEM_REBOOT();		} // reboot
 	else if (cmd == 1973435441) { OsHelpers::SYSTEM_EXIT();			} // exit
 //@formatter:on
@@ -44,6 +47,26 @@ bool Interpreter::doit(CmdBufferType comLine) {
 	// setSensId 3822322055 -12.5 -12.7 0   0    "Test 007"
 
 	return result;
+}
+
+bool Interpreter::shutup() {
+	bool isMaster =
+			snsrs::Sensors::instance().getNonVolatileData()->getStationType()
+					== snsrs::SensorIdTable::MASTER;
+	if (isMaster) {
+		radio::RadioMaster::instance().setShutup(true);
+	}
+	return true;
+}
+
+bool Interpreter::talk() {
+	bool isMaster =
+			snsrs::Sensors::instance().getNonVolatileData()->getStationType()
+					== snsrs::SensorIdTable::MASTER;
+	if (isMaster) {
+		radio::RadioMaster::instance().setShutup(false);
+	}
+	return true;
 }
 
 bool Interpreter::clrSensIdTable(Lexer *lex) {
@@ -128,8 +151,7 @@ bool Interpreter::setSensId(Lexer *lex) {
 	memcpy(sens.shortname, chrToken->getVal(), SensorIdTable::SHORTNAME_LEN);
 
 	//ErrorCode result =
-	snsrs::Sensors::instance().getNonVolatileData()->writeIdTableData(
-			sens);
+	snsrs::Sensors::instance().getNonVolatileData()->writeIdTableData(sens);
 
 	return true;
 }

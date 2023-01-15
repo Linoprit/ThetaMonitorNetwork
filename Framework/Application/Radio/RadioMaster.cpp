@@ -1,4 +1,3 @@
-
 /*
  * Gateway.cpp
  *
@@ -37,7 +36,8 @@ static char RadioMsgBuff[sizeof(RadioMessage<MeasurementType> )];
 uint8_t startBytes[] = { 17, 2 }; // serial msg start sequence
 uint8_t tailBytes[] = { 3, 19 };  // serial msg stop sequence
 
-RadioMaster::RadioMaster() {
+RadioMaster::RadioMaster() :
+		_shutup { false } {
 }
 
 void RadioMaster::init(void) {
@@ -50,6 +50,9 @@ RadioMaster& RadioMaster::instance(void) {
 }
 
 void RadioMaster::cycleLocal() {
+	if (_shutup)
+		return;
+
 	uint8_t sensorCount =
 			Sensors::instance().getThetaSensors()->getMeasurements()->getValidCount();
 	ThetaMsmnt::MeasurementArray *measurementArray =
@@ -57,7 +60,7 @@ void RadioMaster::cycleLocal() {
 
 	// we send all found sensors, even if they timed out (value = NAN)
 	for (uint8_t i = 0; i < sensorCount; i++) {
-		if(osSemaphoreAcquire(localMsmntSemHandle, 0) != osOK){
+		if (osSemaphoreAcquire(localMsmntSemHandle, 0) != osOK) {
 			continue;
 		}
 		RadioMsmntType *radioMessage = new (RadioMsgBuff) RadioMsmntType(
@@ -68,7 +71,10 @@ void RadioMaster::cycleLocal() {
 	}
 }
 
-void RadioMaster::cycleRemote(){
+void RadioMaster::cycleRemote() {
+	if (_shutup)
+		return;
+
 	// send remote sensors
 	while (osMessageQueueGetCount(remoteDataQueueHandle) > 0) {
 		uint8_t nRF24_payload[RADIO_MESSAGE_LEN];
@@ -84,7 +90,6 @@ void RadioMaster::cycleRemote(){
 	}
 }
 
-
 void RadioMaster::sendMessageSerial(uint8_t *msg) {
 	// we do the same, like RadioSlave::sendMeasurements and sendStatistics
 	uint8_t msg_length = static_cast<uint8_t>(RADIO_MESSAGE_LEN);
@@ -93,7 +98,6 @@ void RadioMaster::sendMessageSerial(uint8_t *msg) {
 	tx_printBuff(msg, RADIO_MESSAGE_LEN);
 	tx_printBuff(tailBytes, 2);
 }
-
 
 //void RadioMaster::checkRadioBuffer(void) {
 //	uint8_t nRF24_payload[RADIO_MESSAGE_LEN];
@@ -141,6 +145,5 @@ void RadioMaster::sendMessageSerial(uint8_t *msg) {
 //		}
 //	} // other Msg-classes are not used, at the moment
 //}
-
 
 } /* namespace gateway */

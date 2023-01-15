@@ -29,6 +29,8 @@ private:
 	bool getStationId(Lexer *lex);
 	bool clrSensIdTable(Lexer *lex);
 	bool calcHash(Lexer *lex);
+	bool shutup();
+	bool talk();
 };
 
 } /* namespace cLine */

@@ -23,11 +23,13 @@ public:
 	void cycleLocal(void);
 	void cycleRemote();
 	void sendMessageSerial(uint8_t* msg);
+	void setShutup(bool value){_shutup = value;}
 
 private:
 	RadioMaster();
 	virtual ~RadioMaster() {
 	}
+	bool _shutup;
 };
 
 } /* namespace gateway */

@@ -13,6 +13,8 @@ class CommandMap:
             "setStationIdCmd": "setStationId",
             "getStationIdCmd": "getStationId",
             "clrSensIdTableCmd": "clrSensIdTable",
+            "shutupCmd": "shutup",
+            "talkCmd": "talk",
             "calcHashCmd": "calcHash",
             "rebootCmd": "reboot",
             "exitCmd": "exit",

@@ -85,7 +85,7 @@ class IdTableParser:
     def get_with_command(self, command: str):
         result = []
         for item in self._content:
-            result.append(command + ' ' + item.to_str())
+            result.append(command + ' ' + item.to_str() + chr(13) )
         return result
 
     def get_content_strlist(self) -> str:

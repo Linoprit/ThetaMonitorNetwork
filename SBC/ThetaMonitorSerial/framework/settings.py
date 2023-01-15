@@ -4,6 +4,8 @@ import logging
 import pathlib
 import sys
 from datetime import datetime
+
+import gui.Subparser
 import tableIdTool.Subparser
 
 
@@ -69,6 +71,7 @@ class AppSettings:
                                                help='additional help',
                                                dest='tool_name')
         tableIdTool.Subparser.add_subparsers(subparsers)
+        gui.Subparser.add_subparsers(subparsers)
         self.arg_parser.add_argument(
             '-w', '--workdir', help="Path to the working directory, named 'data', where "
                                     "the subdirs 'input', 'output' and 'temp' reside. "
@@ -130,6 +133,12 @@ class AppSettings:
                 return result
         else:
             return None
+
+    def get_as_int(self, section: str, value: str) -> int:
+        result = self.get(section, value)
+        if result is None:
+            return None
+        return int(result)
 
     def get_as_path(self, section: str, value: str) -> pathlib.Path:
         result = self.get(section, value)

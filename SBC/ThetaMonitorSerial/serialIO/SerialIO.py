@@ -1,5 +1,5 @@
 import logging
-
+import binascii
 import serial
 from serial import SerialException
 
@@ -22,12 +22,12 @@ class SerialIO:
         logging.getLogger().info("Serial port closed.")
 
     def write_string(self, message: str):
-        self.serial.write(message)
+        self.serial.write(message.encode())
         self.serial.flush()
 
     def read_string(self) -> str:
         data = self.serial.read(self.serial.inWaiting())
-        return data
+        return data.decode()
 
     def is_port_open(self):
         return self._port_is_open
