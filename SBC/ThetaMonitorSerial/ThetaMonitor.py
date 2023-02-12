@@ -2,6 +2,7 @@ import framework.settings
 import tableIdTool.TableIdProgrammer as Tip
 import wx
 import gui.classThetaMonGui as Mf
+import daemon.ThetaMonDaemon as Dm
 
 if __name__ == '__main__':
     settings = framework.settings.AppSettings()
@@ -16,8 +17,10 @@ if __name__ == '__main__':
     elif settings.args.tool_name == 'prog':
         tip = Tip.TableIdProgrammer(settings)
     else:
-        # Todo run the deamon
-        print("Deamon not implemented")
+        daemon = Dm.ThetaMonDaemon(settings)
+        daemon.entry()
+        # Todo run the daemon
+        # print("Deamon not implemented")
 
 
 # Desiderata:
@@ -30,5 +33,5 @@ if __name__ == '__main__':
 # Writing received data to Database
 # Get Data from DB and build graphs
 # somehow track sensors and show timeout
-# Headless mode
+# Headless / Deamons mode
 

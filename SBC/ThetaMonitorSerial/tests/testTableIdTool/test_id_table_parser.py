@@ -18,6 +18,12 @@ class TestIdTableParser(unittest.TestCase):
         result = sens_id.calc_hash_from_str(hex_list)
         self.assertEqual(result, 3103548024)
 
+    def test_calc_hash_for_test_sensor(self):
+        sens_id = SensorId()
+        hex_list = ['0xFF', '0xFF', '0xFF', '0xFF', '0xFF', '0xFF', '0xFF', '0xFF']
+        result = sens_id.calc_hash_from_str(hex_list)
+        self.assertEqual(result, 3338984827)
+
     def test_set_shortname(self):
         sens_id = SensorId()
         sens_id.set_shortname("\"UNKNOWN \"")

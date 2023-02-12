@@ -29,7 +29,7 @@ class TestAppSettings(unittest.TestCase):
 
         del sys.argv[1:]
         sut_config = AppSettings()
-        self.assertEqual(sut_config.settings['common']['logLevel'], 'info')
+        self.assertEqual(sut_config.settings['common']['logLevel'], 'debug')
 
     def test_expand(self):
         base_path = self.settings.add_workdir("").as_posix()

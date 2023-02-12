@@ -82,7 +82,7 @@ uint8_t Sensors::getRelayStates(void) {
 	uint8_t result = 0;
 	for (uint8_t i = 0; i < 8; i++) {
 		uint8_t state = GPIOSocket_Relays::get_relay_state(i + 1);
-		result = result | state << i;
+		result = result | state << i;  // Little Endian!
 	}
 	return result;
 }
