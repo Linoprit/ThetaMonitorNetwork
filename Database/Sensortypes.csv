@@ -1,0 +1,5 @@
+"PrimKey","SensorType","Shortname","Description"
+1, 0,Temperature,Temperature sensor of any kind
+2, 1,Humidity,Humidity sensor Bosch BME280
+3, 2,Pressure,Airpressure sensor Bosch BME280
+4, 3,Relay,Relaystate from station as sensor
