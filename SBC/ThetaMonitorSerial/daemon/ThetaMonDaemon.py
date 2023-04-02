@@ -2,6 +2,7 @@ import signal
 import sys
 import time
 from queue import Queue
+import serialIO.streamDecoder
 
 import framework.settings
 from daemon.DataBaseConnector import DataBaseConnector as Dbcon
@@ -16,9 +17,6 @@ from datetime import timedelta, datetime
 # html bauen
 
 
-
-
-
 # ctrl+c signal handler
 def signal_handler(sig, frame):
     print('Exit requested, waiting for all threads to exit.')
@@ -27,6 +25,8 @@ def signal_handler(sig, frame):
 
 class ThetaMonDaemon:
     exit_requested = False
+    update_db_freq = 5 #  [min]
+    # update_db_freq = 1 #  [min]
 
     def __init__(self, settings_in: framework.settings.AppSettings):
         self.settings = settings_in
@@ -39,7 +39,8 @@ class ThetaMonDaemon:
         self.worker = None
         signal.signal(signal.SIGINT, signal_handler)
         self.db = Dbcon(self.settings)
-        self.next_time = datetime.now() + timedelta(hours=0, minutes=5)
+        self.next_time = \
+            datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
         self.entry()
 
     def entry(self):
@@ -54,25 +55,30 @@ class ThetaMonDaemon:
                 self.db.close()
                 sys.exit(0)
             # consume queues
+            self.update_queues()
             self.bin_queue_to_struct()
-            if self.next_time >= datetime.now():
-                self.next_time = datetime.now() + timedelta(hours=0, minutes=5)
+            if datetime.now() >= self.next_time:
+                self.next_time = \
+                    datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
                 self.push_dicts_to_db()
                 self.create_html()
             time.sleep(1.0)
 
+    def update_queues(self):
+        data = None
+        for j in range(self.serial_queue.qsize() - 1):
+            data = self.serial_queue.get(block=True, timeout=0.2)
+        if data is None:
+            return
+        self.stream_decoder.proc_serial_stream(data)
+
     def bin_queue_to_struct(self):
         while self.bin_queue.qsize() > 0:
             bin_msg = self.bin_queue.get(block=True, timeout=None)
-            if bin_msg.msgClass == 0:
+            if bin_msg.msgClass == serialIO.streamDecoder.MEASUREMENT_ENUM:
+                self.sensor_val_dic[bin_msg.sensorIdHash] = bin_msg
+            elif bin_msg.msgClass == serialIO.streamDecoder.STATISTICS_ENUM:
                 self.statistic_dic[bin_msg.stationId] = bin_msg
-
-                # Todo we should send the relays as sensorData
-                # relay_0 = self.decode_relay(0, bin_msg.relayStates)
-                # relay_1 = self.decode_relay(1, bin_msg.relayStates)
-
-            elif bin_msg.msgClass == 1:
-                self.sensor_val_dic[bin_msg.stationId] = bin_msg
             self.bin_queue.task_done()
 
     def push_dicts_to_db(self):

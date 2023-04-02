@@ -72,21 +72,6 @@ void Sensors::checkRelays(void) {
 	}
 }
 
-/* For sendStatistics. We have only a uint8-bitfield. So we ignore the possibility
- * of having more relays.
- * The relay_1 is at the very right side.
- * In example, if relay_1 is switched on and relay_2 is off, the returned value is
- * 00000001b = 1 dec
- */
-uint8_t Sensors::getRelayStates(void) {
-	uint8_t result = 0;
-	for (uint8_t i = 0; i < 8; i++) {
-		uint8_t state = GPIOSocket_Relays::get_relay_state(i + 1);
-		result = result | state << i;  // Little Endian!
-	}
-	return result;
-}
-
 /* For debugging, print the contents of the whole measurement-array.
  */
 void Sensors::printMsmntArray(void) {

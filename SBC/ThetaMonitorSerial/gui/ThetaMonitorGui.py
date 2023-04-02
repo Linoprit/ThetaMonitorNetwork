@@ -32,32 +32,32 @@ class ThetaMonitorFrame ( wx.Frame ):
 		self.m_buttonRefreshCombo = wx.Button( self.m_panel4, wx.ID_ANY, u"Serial Device", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_buttonRefreshCombo.SetToolTip( u"Refresh device combo" )
 
-		bSizer5.Add( self.m_buttonRefreshCombo, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+		bSizer5.Add( self.m_buttonRefreshCombo, 0, wx.ALL|wx.EXPAND, 5 )
 
 		m_choiceSerialPortChoices = [ u"Uart" ]
 		self.m_choiceSerialPort = wx.Choice( self.m_panel4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choiceSerialPortChoices, 0 )
 		self.m_choiceSerialPort.SetSelection( 0 )
 		self.m_choiceSerialPort.SetMinSize( wx.Size( 300,-1 ) )
 
-		bSizer5.Add( self.m_choiceSerialPort, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+		bSizer5.Add( self.m_choiceSerialPort, 0, wx.ALL|wx.EXPAND, 5 )
 
 		self.m_bmToggleBtnConnect = wx.BitmapToggleButton( self.m_panel4, wx.ID_ANY, wx.ArtProvider.GetBitmap( wx.ART_TICK_MARK, wx.ART_BUTTON ), wx.DefaultPosition, wx.DefaultSize, 0 )
 
 		self.m_bmToggleBtnConnect.SetBitmap( wx.ArtProvider.GetBitmap( wx.ART_TICK_MARK, wx.ART_BUTTON ) )
 		self.m_bmToggleBtnConnect.SetToolTip( u"Connect to target" )
 
-		bSizer5.Add( self.m_bmToggleBtnConnect, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+		bSizer5.Add( self.m_bmToggleBtnConnect, 0, wx.ALL|wx.EXPAND, 5 )
 
 		self.m_toggleBtnFilterBin = wx.ToggleButton( self.m_panel4, wx.ID_ANY, u"bin", wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
 		self.m_toggleBtnFilterBin.SetValue( True )
-		bSizer5.Add( self.m_toggleBtnFilterBin, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+		bSizer5.Add( self.m_toggleBtnFilterBin, 0, wx.ALL|wx.EXPAND, 5 )
 
 		self.m_toggleBtnFilterTxt = wx.ToggleButton( self.m_panel4, wx.ID_ANY, u"txt", wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
 		self.m_toggleBtnFilterTxt.SetValue( True )
-		bSizer5.Add( self.m_toggleBtnFilterTxt, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+		bSizer5.Add( self.m_toggleBtnFilterTxt, 0, wx.ALL|wx.EXPAND, 5 )
 
 		self.m_button_clr = wx.Button( self.m_panel4, wx.ID_ANY, u"clr", wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-		bSizer5.Add( self.m_button_clr, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+		bSizer5.Add( self.m_button_clr, 0, wx.ALL|wx.EXPAND, 5 )
 
 
 		bSizer5.Add( ( 0, 0), 1, wx.EXPAND, 5 )
@@ -67,7 +67,7 @@ class ThetaMonitorFrame ( wx.Frame ):
 		self.m_bpButtonExit.SetBitmap( wx.ArtProvider.GetBitmap( wx.ART_QUIT, wx.ART_TOOLBAR ) )
 		self.m_bpButtonExit.SetToolTip( u"Exit application" )
 
-		bSizer5.Add( self.m_bpButtonExit, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		bSizer5.Add( self.m_bpButtonExit, 0, wx.ALL, 5 )
 
 
 		self.m_panel4.SetSizer( bSizer5 )

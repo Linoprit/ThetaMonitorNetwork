@@ -69,7 +69,8 @@ void RadioSlave::sendMeasurements(void) {
 void RadioSlave::sendStatistics(void) {
 	radio::RadioStatisticsType radiostats;
 	radiostats.lostPkgs = _nRF24L01_Basis.get_lostPkgCount();
-	radiostats.relayStates = Sensors::instance().getRelayStates();
+	// Todo relaystates are sent as an own measurement now.
+	radiostats.relayStates = 0; //Sensors::instance().getRelayStates();
 	radiostats.rxBufferOverflows = _nRF24L01_Basis.get_rxBufferOverflows();
 	radiostats.stationId =
 			Sensors::instance().getNonVolatileData()->getStationId();

@@ -32,7 +32,6 @@ public:
 	NonVolatileData* getNonVolatileData(void) {
 		return &_nonVolatileData;
 	}
-	uint8_t getRelayStates(void);
 	void printMsmntArray(void);
 
 private:

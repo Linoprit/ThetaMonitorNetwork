@@ -128,10 +128,12 @@ class DataBaseConnector:
         lost_pkgs = str(stats.lostPkgs)
         valid_sensors = str(stats.validSensors)
         rxBuff_ovfl = str(stats.rxBufferOverflows)
-        # lastUpdateTick = str(stats.lastUpdateTick) is unused
-        command = "INSERT INTO {} (Station_ID, Lost_Pkgs, Valid_Sensors , rxBuff_Overflows) " \
-                  "VALUES ({}, {}, {}, {});" \
-            .format(self.station_tbl, stationId, lost_pkgs, valid_sensors, rxBuff_ovfl)
+        lastUpdateTick = str(stats.lastUpdateTick)
+        command = "INSERT INTO {} (Station_ID, Lost_Pkgs, Valid_Sensors," \
+                  " rxBuff_Overflows, Last_Update_Tick) " \
+                  "VALUES ({}, {}, {}, {}, {});" \
+            .format(self.stationdata_tbl, stationId, lost_pkgs,
+                    valid_sensors, rxBuff_ovfl, lastUpdateTick)
         result = self.exec_query(command)
         if result < 0:
             logging.getLogger().error("Update stationdata went wrong, query='{}'"

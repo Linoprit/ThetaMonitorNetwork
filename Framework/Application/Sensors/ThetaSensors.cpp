@@ -11,6 +11,7 @@
 #include <Application/Sensors/NonVolatileData.h>
 #include <new>
 #include <Config/config.h>
+#include <System/Sockets/GPIOSocket_Relays.h>
 
 // remove in productive
 #include <System/serialPrintf.h>
@@ -24,27 +25,27 @@ using namespace boschBme280;
 ThetaSensors::ThetaSensors() :
 		_measurementArray { localMsmntSemHandle }, _lastUpdateTick { 0 }, _initIsDone {
 				false }, _bme280IdTheta { 0 }, _bme280IdHumid { 0 }, _bme280IdPress {
-				0 }, _foundDS1820Count { 0 } {
+				0 }, _relayStatesId { 0 }, _foundDS1820Count { 0 } {
 }
 
 void ThetaSensors::init(uint32_t stationId) {
-	owCh1 = OneWire(OW_CH1_TX_PORT, OW_CH1_TX_PIN, OW_CH1_RX_PORT,
-	OW_CH1_RX_PIN);
-	owCh2 = OneWire(OW_CH2_TX_PORT, OW_CH2_TX_PIN, OW_CH2_RX_PORT,
-	OW_CH2_RX_PIN);
+	owCh1 = OneWire(
+	OW_CH1_TX_PORT, OW_CH1_TX_PIN, OW_CH1_RX_PORT, OW_CH1_RX_PIN);
+	owCh2 = OneWire(
+	OW_CH2_TX_PORT, OW_CH2_TX_PIN, OW_CH2_RX_PORT, OW_CH2_RX_PIN);
 	ds18B20Ch1 = DS18B20(&owCh1);
 	ds18B20Ch2 = DS18B20(&owCh2);
 
 	_bme280IdTheta = makeBmeId(stationId, SensorIdTable::SensorType::TEMP);
 	_bme280IdHumid = makeBmeId(stationId, SensorIdTable::HUMIDITY);
 	_bme280IdPress = makeBmeId(stationId, SensorIdTable::PRESS);
+
+	_relayStatesId = makeBmeId(stationId, SensorIdTable::RELAY);
 }
 
 void ThetaSensors::initHardware(void) {
 	initTwoChannelDS1820();
 	initBme280();
-
-
 
 	_initIsDone = true;
 }
@@ -121,6 +122,21 @@ void ThetaSensors::storeDS1820ToMeasureArray(DS18B20 ds18Channel) {
 	}
 }
 
+/* For sendStatistics. We have only a uint8-bitfield. So we ignore the possibility
+ * of having more relays.
+ * The relay_1 is at the very right side.
+ * In example, if relay_1 is switched on and relay_2 is off, the returned value is
+ * 00000001b = 1 dec
+ */
+uint8_t ThetaSensors::getRelayStates(void) {
+	uint8_t result = 0;
+	for (uint8_t i = 0; i < 8; i++) {
+		uint8_t state = GPIOSocket_Relays::get_relay_state(i + 1);
+		result = result | state << i;  // Little Endian!
+	}
+	return result;
+}
+
 void ThetaSensors::cycleTwoChannelsDS1820(void) {
 	if (ds18B20Ch1.doAllMeasure() == true) {
 		storeDS1820ToMeasureArray(ds18B20Ch1);
@@ -130,9 +146,15 @@ void ThetaSensors::cycleTwoChannelsDS1820(void) {
 	}
 }
 
+void ThetaSensors::cycleRelays(void){
+	uint8_t relayStates = getRelayStates();
+	_measurementArray.update(_relayStatesId, (float) relayStates);
+}
+
 void ThetaSensors::cycle(void) {
 	cycleTwoChannelsDS1820();
 	cycleBme280();
+	cycleRelays();
 }
 
 } // namespace msmnt

@@ -45,7 +45,7 @@ public:
 	static constexpr uint16_t SENSOR_ID_LEN = 8;
 
 	enum SensorType {
-		TEMP = 0, HUMIDITY = 1, PRESS = 2
+		TEMP = 0, HUMIDITY = 1, PRESS = 2, RELAY = 3,
 	};
 	enum StationType {
 		NONE = 0, MASTER, SLAVE_01, SLAVE_02, SLAVE_03, SLAVE_04, SLAVE_05

@@ -61,6 +61,7 @@ private:
 	uint32_t _bme280IdTheta;
 	uint32_t _bme280IdHumid;
 	uint32_t _bme280IdPress;
+	uint32_t _relayStatesId; // Bitfield for Relay on/off states
 
 	oneWire::OneWire owCh1;
 	oneWire::OneWire owCh2;
@@ -71,6 +72,8 @@ private:
 	uint8_t fillSensorIdTable(oneWire::DS18B20 ds18Channel);
 	void initBme280(void);
 	void cycleBme280(void);
+	void cycleRelays(void);
+	uint8_t getRelayStates(void);
 
 	void printDS1820Channel(oneWire::DS18B20 ds18Channel);
 	void initTwoChannelDS1820(void);

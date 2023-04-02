@@ -104,8 +104,8 @@ constexpr uint32_t TX_ONGOING_MAX_TICKS = 10; // here: [ms]
 // how many slaves can connect to the master
 constexpr uint8_t MAX_SLAVES = 3;
 // how many sensors can be present on a device. Should be the same in the whole network.
-// (DS1820 Sensors * Channels + BME280 Temp/Humi/Press)
-constexpr uint8_t MAX_SENSORS = (DS18B20_MAX_DEVICES * 2 + 3);
+// (DS1820 Sensors * Channels + BME280 Temp/Humi/Press + RelayStates)
+constexpr uint8_t MAX_SENSORS = (DS18B20_MAX_DEVICES * 2 + 3 + 1);
 // determines the size of the arrays for received measurements
 constexpr uint8_t MAX_REMOTE_MEASUREMENTS = MAX_SENSORS * MAX_SLAVES;
 
