@@ -85,6 +85,19 @@ class DataBaseConnector:
         cursor.execute(command)
         return cursor.fetchall()
 
+    def get_single_sensordata(self, shortname: str, t_from: datetime, t_till: datetime):
+        sens_hash = self.get_hashes_from_shortnames([shortname])
+        hashFlat = ('"' + str(sens_hash[0]) + '"')
+        from_str = t_from.strftime("%Y-%m-%d %H:%M:%S")
+        till_str = t_till.strftime("%Y-%m-%d %H:%M:%S")
+        # PrimKey 	AddressHash 	SensorType 	Measurement 	TimeStamp
+        command = "SELECT TimeStamp, Measurement FROM {} WHERE `AddressHash` IN({}) and " \
+                  "`TimeStamp` BETWEEN '{}' AND '{}'" \
+            .format(self.sens_tbl, hashFlat, from_str, till_str)
+        cursor = self.db_conn.cursor()
+        cursor.execute(command)
+        return cursor.fetchall()
+
     def get_hashes_from_shortnames(self, shortnames: list): # string-list
         newShortnames = []
         for name in shortnames:  # pad strings to eight chars
@@ -167,7 +180,9 @@ class DataBaseConnector:
         return cursor.fetchall()
 
     def update_id_table(self):
+        # ToDo implement update_id_table
         pass
 
     def update_sensortypes_tbl(self):
+        # ToDo implement update_sensortypes_tbl
         pass

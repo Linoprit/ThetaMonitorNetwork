@@ -1,3 +1,5 @@
+import logging
+
 import framework.settings
 import tableIdTool.TableIdProgrammer as Tip
 import wx
@@ -9,29 +11,29 @@ if __name__ == '__main__':
     settings.set_name_and_version('ThetaMonitor', 'v000.001.001')
     settings.print_status()
 
-    if settings.args.tool_name == 'gui':
+    what_to_run = settings.get('common', 'tool_name')
+    if what_to_run == 'gui':
         app = wx.App(False)
         frame = Mf.ThetaMonGui(None, settings)
         frame.Show(True)
         app.MainLoop()
-    elif settings.args.tool_name == 'prog':
+    elif what_to_run == 'prog':
         tip = Tip.TableIdProgrammer(settings)
-    else:
+    elif what_to_run == 'daemon':
         daemon = Dm.ThetaMonDaemon(settings)
         daemon.entry()
-        # Todo run the daemon
-        # print("Deamon not implemented")
+    elif what_to_run == 'devel':
+        pass
+    else:
+        logging.error("No tool_name specified.")
 
 
 # Desiderata:
-# Log messages from monitor, Button on off
-# * Monitor filter Buttons txt/bin
 # Console with history and help
-# SensorTable Editor with load and save Table-File
+# SensorTable Editor with load and save Table-File and export to .txt
 # SensorTable Write to E2 Button in Console-Win
 # SensorTable Write/Read to/from DB
-# Writing received data to Database
 # Get Data from DB and build graphs
 # somehow track sensors and show timeout
-# Headless / Deamons mode
+# Headless / Deamon mode
 
