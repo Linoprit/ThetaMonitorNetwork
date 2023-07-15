@@ -40,12 +40,15 @@ class ThetaMonGui(Tmg.ThetaMonitorFrame):
     # ---------- Helpers ----------
     def _init_serial_combo(self):
         portlist = list_ports.comports()
+        configured_port = self.settings.get('common', 'serial_port')
         self.m_choiceSerialPort.Clear()
         [self.m_choiceSerialPort.Append(x.device) for x in portlist]
         self.m_choiceSerialPort.SetSelection(0)
-        index = self.m_choiceSerialPort.FindString(
-            self.settings.get('common', 'serial_port'))
-        if index != wx.NOT_FOUND:
+        index = self.m_choiceSerialPort.FindString(configured_port)
+        if index == wx.NOT_FOUND:
+            self.m_choiceSerialPort.Append(configured_port)
+            self.m_choiceSerialPort.SetSelection(0)
+        else:
             self.m_choiceSerialPort.SetSelection(index)
 
     def txt_queue_to_console(self):
