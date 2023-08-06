@@ -1,14 +1,18 @@
+import datetime
 import signal
+import sys
 from queue import Queue
 import serialIO.streamDecoder
-
+import time
+import logging
 import framework.settings
 from daemon.DataBaseConnector import DataBaseConnector as Dbcon
 from daemon.PlotCreator import PlotCreator as PlotCreator
 from serialIO.serialThread import Worker
 from serialIO.streamDecoder import StreamDecoder as StreamDecoder
-from datetime import timedelta, datetime
 from daemon.HtmlCreator import HtmlCreator as Hc
+from datetime import datetime, timedelta
+
 #import daemon.HtmlCreator
 
 
@@ -52,22 +56,22 @@ class ThetaMonDaemon:
         self.db.connect()
 
         # TODO remove after devel
-        self.create_html()
+        #self.create_html()
 
-        # while 1:
-        #     if self.exit_requested:
-        #         self.worker.request_exit()
-        #         self.db.close()
-        #         sys.exit(0)
-        #     # consume serial queues
-        #     self.update_queues()
-        #     self.bin_queue_to_struct()
-        #     if datetime.now() >= self.next_time:
-        #         self.next_time = \
-        #             datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
-        #         self.push_dicts_to_db()
-        #         self.create_html()
-        #     time.sleep(1.0)  # wecould sleep for update_db_freq
+        while 1:
+            if self.exit_requested:
+                self.worker.request_exit()
+                self.db.close()
+                sys.exit(0)
+            # consume serial queues
+            self.update_queues()
+            self.bin_queue_to_struct()
+            if datetime.now() >= self.next_time:
+                self.next_time = \
+                    datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
+                self.push_dicts_to_db()
+                # self.create_html() TODO enable after devel
+            time.sleep(1.0)  # we could sleep for update_db_freq
 
     def update_queues(self):
         data = None
@@ -87,10 +91,22 @@ class ThetaMonDaemon:
             self.bin_queue.task_done()
 
     def push_dicts_to_db(self):
+        sens_dat_count = 0
+        stat_dat_count = 0
         for msmnt in self.sensor_val_dic.values():
             self.db.update_sensordata(msmnt)
+            sens_dat_count += 1
         for stats in self.statistic_dic.values():
             self.db.update_stationdata_tbl(stats)
+            stat_dat_count += 1
+        self.statistic_dic.clear()
+        self.sensor_val_dic.clear()
+        if sens_dat_count > 0:
+            logging.getLogger().info(
+                "Updated sensordata with {} items".format(sens_dat_count))
+        if stat_dat_count > 0:
+            logging.getLogger().info(
+                "Updated stationdata with {} items.".format(stat_dat_count))
 
     def create_html(self):
         html_creator = Hc(self.settings)

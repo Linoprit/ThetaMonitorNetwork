@@ -1,4 +1,5 @@
 import logging
+import math
 
 import framework.settings
 import pymysql.connections
@@ -60,12 +61,15 @@ class DataBaseConnector:
     def update_sensordata(self, measurement: MeasurementType):
         #  	PrimKey AddressHash SensorType Measurement  	TimeStamp
         address_hash = str(measurement.sensorIdHash)
+        if math.isnan(measurement.value):
+            logging.getLogger().error("Tried to write NaN-value to DB: {}".format(address_hash))
+            return -1
         value = f"{measurement.value:.3f}"
-        # lastUpdateTick = str(measurement.lastUpdateTick) is unused
+        last_update_tick = str(measurement.lastUpdateTick)
         sensor_type = self.get_sens_type(address_hash)
-        command = "INSERT INTO {} (AddressHash, SensorType, Measurement) " \
-                  "VALUES ({}, {}, {});" \
-            .format(self.sens_tbl, address_hash, sensor_type, value)
+        command = "INSERT INTO {} (AddressHash, SensorType, Measurement, LastUpdateTick) " \
+                  "VALUES ({}, {}, {}, {});" \
+            .format(self.sens_tbl, address_hash, sensor_type, value, last_update_tick)
         result = self.exec_query(command)
         if result < 0:
             logging.getLogger().error("Update sensordata went wrong, query='{}'"

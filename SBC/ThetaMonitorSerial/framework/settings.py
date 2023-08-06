@@ -4,11 +4,11 @@ import logging
 import pathlib
 import sys
 from datetime import datetime
-
+from os.path import exists
 import daemon.Subparser
 import gui.Subparser
 import tableIdTool.Subparser
-
+import os
 
 # noinspection SpellCheckingInspection
 class AppSettings:
@@ -99,6 +99,11 @@ class AppSettings:
             log_level = logging.DEBUG
         elif log_level_str.lower() == "verbose":
             log_level = logging.INFO
+
+        if exists(filename):
+            new_filename = os.path.splitext(filename)[0] + "_old" \
+                           + os.path.splitext(filename)[1]
+            os.rename(filename, new_filename)
 
         logging.basicConfig(filename=filename,
                             filemode='w',

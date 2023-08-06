@@ -1,3 +1,5 @@
+import logging
+import math
 from enum import Enum, auto
 from queue import Queue
 from struct import *
@@ -150,7 +152,8 @@ class StreamDecoder:
             crc_ok = CalcStm32Crc().check_crc_from_serial(self._bin_tmp_buffer)
             if crc_ok:
                 msmt = self.get_bin_msg_decoded(self._bin_tmp_buffer)
-                self._bin_queue.put(msmt, block=True, timeout=None)
+                if msmt is not None:
+                    self._bin_queue.put(msmt, block=True, timeout=None)
             else:
                 self._crc_fail_count += 1
 
@@ -209,6 +212,10 @@ class StreamDecoder:
             if len(bin_msg) != 18:
                 return None
             result = MeasurementType(bin_msg)
+            if math.isnan(result.value):
+                logging.getLogger().error(
+                    "Received NaN-value. SensorId: {}".format(result.sensorIdHash))
+                return None
             return result
         elif message_class == STATISTICS_ENUM:
             result = RadioStatisticsType(bin_msg)
