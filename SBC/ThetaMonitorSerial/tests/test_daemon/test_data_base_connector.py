@@ -79,7 +79,7 @@ class TestDataBaseConnector(unittest.TestCase):
         self.assertEqual(result[0][4], expect[4])
 
     def clear_test_data_from_db(self, db: DbConn):
-        sens_tbl = self.settings.get("deamon", "sens_tbl")
+        sens_tbl = self.settings.get("daemon", "sens_tbl")
         command = "DELETE FROM {} WHERE AddressHash = '3338984827';"\
             .format(sens_tbl)
         db.exec_query(command)

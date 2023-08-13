@@ -35,5 +35,5 @@ if __name__ == '__main__':
 # SensorTable Write/Read to/from DB
 # Get Data from DB and build graphs
 # somehow track sensors and show timeout
-# Headless / Deamon mode
+# Headless / daemon mode
 

@@ -1,4 +1,6 @@
-import datetime
+import os
+from datetime import date
+from datetime import datetime
 import signal
 import sys
 from queue import Queue
@@ -12,6 +14,8 @@ from serialIO.serialThread import Worker
 from serialIO.streamDecoder import StreamDecoder as StreamDecoder
 from daemon.HtmlCreator import HtmlCreator as Hc
 from datetime import datetime, timedelta
+import json
+from pathlib import Path
 
 #import daemon.HtmlCreator
 
@@ -56,22 +60,22 @@ class ThetaMonDaemon:
         self.db.connect()
 
         # TODO remove after devel
-        #self.create_html()
+        self.create_html()
 
-        while 1:
-            if self.exit_requested:
-                self.worker.request_exit()
-                self.db.close()
-                sys.exit(0)
-            # consume serial queues
-            self.update_queues()
-            self.bin_queue_to_struct()
-            if datetime.now() >= self.next_time:
-                self.next_time = \
-                    datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
-                self.push_dicts_to_db()
-                # self.create_html() TODO enable after devel
-            time.sleep(1.0)  # we could sleep for update_db_freq
+        # while 1:
+        #     if self.exit_requested:
+        #         self.worker.request_exit()
+        #         self.db.close()
+        #         sys.exit(0)
+        #     # consume serial queues
+        #     self.update_queues()
+        #     self.bin_queue_to_struct()
+        #     if datetime.now() >= self.next_time:
+        #         self.next_time = \
+        #             datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
+        #         self.push_dicts_to_db()
+        #         # self.create_html() TODO enable after devel
+        #     time.sleep(1.0)  # we could sleep for update_db_freq
 
     def update_queues(self):
         data = None
@@ -109,8 +113,10 @@ class ThetaMonDaemon:
                 "Updated stationdata with {} items.".format(stat_dat_count))
 
     def create_html(self):
-        html_creator = Hc(self.settings)
-        html_creator.create_testpage()
+        self.create_plots()
+
+        # html_creator = Hc(self.settings)
+        # html_creator.create_testpage()
 
         # create plots
         # title = "Temperatur Werkstatt"
@@ -123,7 +129,26 @@ class ThetaMonDaemon:
         # filename = self.settings.add_temp_path(self.create_filename(title) + ".png")
         # self.plot_creator.plot_to_png(title, shortnames, t_from, t_till, filename)
 
+    def create_plots(self):
+        plot_conf_file = self.settings.expand(self.settings.get("daemon", "plot_config"))
+        plot_dir = self.settings.expand(self.settings.get("daemon", "plot_dir"))
+
+        # t_from_dt = datetime.today() - timedelta(days=1)
+        # t_from = t_from_dt.strftime("%Y-%m-%d %H:%M:%S")
+        # t_till = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+        t_from = "2023-08-05 00:00:00"
+        t_till = "2023-08-06 23:59:00"
+
+        with open(plot_conf_file, 'r') as plt_config:
+            configs = json.load(plt_config)
+            for conf in configs:
+                filename = self.create_filename(plot_dir, conf["title"])
+                shortnames = conf["shortnames"]
+                self.plot_creator.plot_to_png(
+                    conf["title"], shortnames, t_from, t_till, filename)
+
     @staticmethod
-    def create_filename(plot_title: str):
+    def create_filename(out_dir: str, plot_title: str):
         title_split = plot_title.split(' ')
-        return str.join("_", title_split)
+        filename = str.join("_", title_split)
+        return os.path.join(out_dir, plot_title)

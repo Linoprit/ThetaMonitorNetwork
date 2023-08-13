@@ -12,15 +12,15 @@ from datetime import datetime
 class DataBaseConnector:
     def __init__(self, settings_in: framework.settings.AppSettings):
         self.settings = settings_in
-        self.db_name = self.settings.get("deamon", "db_name")
-        self.sens_tbl = self.settings.get("deamon", "sens_tbl")
-        self.senstype_tbl = self.settings.get("deamon", "senstype_tbl")
-        self.sensid_tbl = self.settings.get("deamon", "sensid_tbl")
-        self.stationdata_tbl = self.settings.get("deamon", "station_tbl")
-        self.stationIds_tbl = self.settings.get("deamon", "stationId_tbl")
-        self.user_id = self.settings.get("deamon", "user_id")
-        self.host = self.settings.get("deamon", "host")
-        self.passwd = self.settings.get("deamon", "entry")
+        self.db_name = self.settings.get("daemon", "db_name")
+        self.sens_tbl = self.settings.get("daemon", "sens_tbl")
+        self.senstype_tbl = self.settings.get("daemon", "senstype_tbl")
+        self.sensid_tbl = self.settings.get("daemon", "sensid_tbl")
+        self.stationdata_tbl = self.settings.get("daemon", "station_tbl")
+        self.stationIds_tbl = self.settings.get("daemon", "stationId_tbl")
+        self.user_id = self.settings.get("daemon", "user_id")
+        self.host = self.settings.get("daemon", "host")
+        self.passwd = self.settings.get("daemon", "entry")
         self.db_conn = None
 
     def connect(self):
@@ -91,6 +91,9 @@ class DataBaseConnector:
 
     def get_single_sensordata(self, shortname: str, t_from: datetime, t_till: datetime):
         sens_hash = self.get_hashes_from_shortnames([shortname])
+        if len(sens_hash) == 0:
+            logging.getLogger().info("No hash found for " + shortname)
+            return
         hashFlat = ('"' + str(sens_hash[0]) + '"')
         from_str = t_from.strftime("%Y-%m-%d %H:%M:%S")
         till_str = t_till.strftime("%Y-%m-%d %H:%M:%S")

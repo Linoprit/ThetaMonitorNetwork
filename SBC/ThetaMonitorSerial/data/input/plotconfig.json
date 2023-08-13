@@ -1,0 +1,59 @@
+[
+    {
+      "title": "Temperatur Werkstatt",
+      "shortnames": [
+        "Test 007",
+        "Test 004",
+        "Test 006",
+        "Test 005",
+        "WrkstTmp",
+        "WrkstRel"
+    ]
+  },
+  {
+    "title": "Temperatur Lager",
+    "shortnames": [
+      "LGR_U",
+      "LGR_O",
+      "LGR_U2",
+      "LGR_O2",
+      "LagerTmp",
+      "LagerRel"
+    ]
+  },
+  {
+    "title": "Temperatur Innen",
+    "shortnames": [
+      "Test 008",
+      "Test 003",
+      "Test 002",
+      "Test 001",
+      "InnenTmp",
+      "InnenRel"
+      ]
+  },
+  {
+    "title": "Temperatur Außen",
+    "shortnames": [
+      "LGRASN_O",
+      "LGRASN_U",
+      "ASN_O"
+    ]
+  },
+  {
+    "title": "Luftdruck",
+    "shortnames": [
+      "InnenPrs",
+      "LagerPrs",
+      "WrkstPrs"
+    ]
+  },
+  {
+    "title": "Luftfeuchte",
+    "shortnames": [
+      "InnenHum",
+      "LagerHum",
+      "WrkstHum"
+    ]
+  }
+]

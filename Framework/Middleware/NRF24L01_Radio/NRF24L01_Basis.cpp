@@ -81,7 +81,7 @@ void NRF24L01_Basis::init() {
 
 	_nRF24.EnableAA(0xFF);  // for all pipes
 	_nRF24.SetAutoRetr(nRF24_ARD_2500us, 10); // auto-retransmission
-	_nRF24.SetTXPower(nRF24_TXPWR_18dBm); // TODO power up, when deploy
+	_nRF24.SetTXPower(nRF24_TXPWR_0dBm); // TODO power up, when deploy
 	_nRF24.SetOperationalMode(nRF24_MODE_RX);
 	_nRF24.ClearIRQFlags();
 	_nRF24.SetPowerMode(nRF24_PWR_UP); // Wake the transceiver

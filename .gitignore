@@ -41,4 +41,8 @@
 *__pycache__
 /Framework/example
 /SBC/ThetaMonitorSerial/tests/data/temp
+/SBC/ThetaMonitorSerial/data/output
+/SBC/ThetaMonitorSerial/data/temp
+/SBC/SqlDumps
+/SBC/ThetaMonitorSerial/.idea/
 /x86/TableIdProgrammer/ID_TableTestRelayConfig.txt
