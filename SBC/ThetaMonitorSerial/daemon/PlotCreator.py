@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from daemon.DataBaseConnector import DataBaseConnector as Dbcon
 import framework.settings
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+import matplotlib.ticker as ticker
 # from matplotlib.ticker import (MultipleLocator, AutoMinorLocator, AutoLocator)
 
 
@@ -19,20 +20,24 @@ class PlotCreator:
 
         fig, ax = plt.subplots(figsize=(10, 6))
         plt.title(
-            title, fontweight="bold", fontsize=20, loc='center', pad=10, color='#FF9900')
-        # plt.ylabel("Temp [°C]", fontdict=None, labelpad=None, loc=None)
+            title, fontweight="bold", fontsize=20, loc='center', pad=50, color='#FF9900')
         date_form = mpl.dates.DateFormatter("%d.%m.%y %H:%M")
+        ax.margins(0.01) # padding in all directions
 
-        # ax.set_yticks( AutoMinorLocator())
-        # ax.set_yticks(minor_yticks, minor=True)
-        ax.yaxis.set_major_locator(MultipleLocator(0.2))
-        ax.xaxis.set_major_formatter(date_form)
-        ax.xaxis.set_major_locator(MultipleLocator(0.02))
-        # ax.xaxis.set_minor_locator(AutoMinorLocator())
-
-        ax.secondary_yaxis('right')
         plt.xticks(rotation=90)
-        plt.grid(color='grey', linestyle=(1, (5, 5)), linewidth=0.5)
+        plt.grid(which='major', color='grey',  linestyle=(1, (5, 5)), linewidth=0.5)
+        plt.grid(which='minor', color='lightgrey', linestyle='--', linewidth=0.5)
+
+        ax.xaxis.set_major_formatter(date_form)
+        ax.xaxis.set_major_locator(MultipleLocator(0.03))
+        ax.xaxis.set_minor_locator(MultipleLocator(0.015))
+
+        ax.yaxis.set_major_formatter('{x:1.1f}')
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
+
+        secax = ax.secondary_yaxis('right')
+        secax.yaxis.set_major_formatter('{x:1.1f}')
+        secax.yaxis.set_minor_locator(AutoMinorLocator())
 
         for shortname in shortnames:
             db_result = self.db.get_single_sensordata(shortname, t_from, t_till)
@@ -46,13 +51,8 @@ class PlotCreator:
                     x2.append(item[0])
                     y2.append(item[1])
                 ax2 = ax.twinx()
-                # color = 'tab:blue'
-                # ax2.set_ylabel(shortname)
                 ax2.axis('off')
                 ax2.plot(x2, y2, label=shortname, linewidth=0.5)
-                # ax2.tick_params(axis='y', labelcolor=color)
-                # fig.tight_layout()  # otherwise the right y-label is slightly clipped
-                # plt.show()
                 x2.clear()
                 y2.clear()
                 continue
@@ -66,5 +66,6 @@ class PlotCreator:
             x1.clear()
             y1.clear()
 
-        ax.legend(loc='upper left')
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.14),
+          ncol=4, fancybox=True, shadow=True)
         plt.savefig(filename, bbox_inches='tight')

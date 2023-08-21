@@ -8,11 +8,25 @@ class HtmlCreator:
     def __init__(self, settings_in: framework.settings.AppSettings):
         self.settings = settings_in
 
-    def create_main_page(self):
-        pass
+    def create_index_page(self):
+        doc = dominate.document(title='Theta Monitor')
+
 
     def create_subpage(self, image_names):
         pass
+
+    def create_head(self, doc: dominate.document):
+        with doc.head:
+            meta(charset="UTF-8")
+            meta(name="viewport", content="width=device-width, initial-scale=1")
+            link(rel='stylesheet', href='w3.css')
+            link(rel='stylesheet', href='w3-theme-black.css')
+            style("""\
+                .owntable{border-collapse:collapse; border-spacing:0; display: fixed;}
+                table.center { margin-left: auto; margin-right: auto; }
+                img {max-width: 900px;}
+                img.center { display: block; margin-left: auto; margin-right: auto; width: 100%; }
+            """)
 
     def create_testpage(self):
         doc = dominate.document(title='Theta Monitor')
@@ -52,13 +66,15 @@ class HtmlCreator:
                 br()
                 img(src='plots/Temperatur_Lager.png', cls='w3-border w3-padding center', alt='Lager')
                 br()
-                img(src='plots/Temperatur_Wohnzimmer.png', cls='w3-border w3-padding center', alt='Wohnzimmer')
+                img(src='plots/Temperatur_Innen.png', cls='w3-border w3-padding center', alt='Innen')
                 hr()
 
             comment('Luft-Tab')
             with div(id='Luft', cls='ww3-container city w3-animate-opacity w3-center'):
                 hr()
-                img(src='plots/Temperatur_Werkstatt.png', cls='w3-border w3-padding center', alt='Werkstatt')
+                img(src='plots/Luftdruck.png', cls='w3-border w3-padding center', alt='Luftdruck')
+                br()
+                img(src='plots/Luftfeuchte.png', cls='w3-border w3-padding center', alt='Luftfeuchte')
                 hr()
 
             comment('Statistik-Tab')
@@ -133,7 +149,7 @@ class HtmlCreator:
             mybtn.click();
         """)))
 
-        print(doc)
+        #print(doc)
         filename = self.settings.add_output_path('index.html')
         with open(filename, 'w') as f:
             f.write(doc.render())

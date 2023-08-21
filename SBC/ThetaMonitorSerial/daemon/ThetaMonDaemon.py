@@ -114,30 +114,24 @@ class ThetaMonDaemon:
 
     def create_html(self):
         self.create_plots()
+        html_creator = Hc(self.settings)
+        html_creator.create_testpage()
 
-        # html_creator = Hc(self.settings)
-        # html_creator.create_testpage()
 
-        # create plots
-        # title = "Temperatur Werkstatt"
-        # shortnames = ["WST_O", "WST_U"]
-        # t_till = "2022-11-22 18:09:11"
-        # t_from = "2022-11-21 18:04:11"
-        # # shortnames = ["Test 003", "Test 008"]
-        # # t_from = "2023-04-02 15:00:00"
-        # # t_till = "2023-04-22 19:00:00"
-        # filename = self.settings.add_temp_path(self.create_filename(title) + ".png")
-        # self.plot_creator.plot_to_png(title, shortnames, t_from, t_till, filename)
 
     def create_plots(self):
         plot_conf_file = self.settings.expand(self.settings.get("daemon", "plot_config"))
         plot_dir = self.settings.expand(self.settings.get("daemon", "plot_dir"))
 
+        # TODO enable this
         # t_from_dt = datetime.today() - timedelta(days=1)
         # t_from = t_from_dt.strftime("%Y-%m-%d %H:%M:%S")
         # t_till = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-        t_from = "2023-08-05 00:00:00"
-        t_till = "2023-08-06 23:59:00"
+
+        # t_from = "2023-08-05 00:00:00"
+        # t_till = "2023-08-06 23:59:00"
+        t_from = "2023-08-05 19:30:00"
+        t_till = "2023-08-06 19:30:09"
 
         with open(plot_conf_file, 'r') as plt_config:
             configs = json.load(plt_config)
@@ -151,4 +145,4 @@ class ThetaMonDaemon:
     def create_filename(out_dir: str, plot_title: str):
         title_split = plot_title.split(' ')
         filename = str.join("_", title_split)
-        return os.path.join(out_dir, plot_title)
+        return os.path.join(out_dir, filename)
