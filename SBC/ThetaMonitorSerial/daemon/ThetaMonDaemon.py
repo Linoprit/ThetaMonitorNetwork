@@ -1,29 +1,28 @@
+import json
+import logging
 import os
-from datetime import date
-from datetime import datetime
+
 import signal
 import sys
-from queue import Queue
-import serialIO.streamDecoder
 import time
-import logging
+from datetime import date
+from datetime import datetime
+from datetime import datetime, timedelta
+from daemon.HtmlConfigStructure import HtmlConfig
+from queue import Queue
+
 import framework.settings
+import serialIO.streamDecoder
 from daemon.DataBaseConnector import DataBaseConnector as Dbcon
+from daemon.HtmlCreator import HtmlCreator as HtmlCreator
 from daemon.PlotCreator import PlotCreator as PlotCreator
 from serialIO.serialThread import Worker
 from serialIO.streamDecoder import StreamDecoder as StreamDecoder
-from daemon.HtmlCreator import HtmlCreator as Hc
-from datetime import datetime, timedelta
-import json
-from pathlib import Path
-
-#import daemon.HtmlCreator
 
 
 # Desiderata:
 # Ungültige Sensordaten kennzeichnen und nicht mehr in die db schieben
 #   (ticks checken und wenn zu alt aus liste löschen)
-# html bauen
 
 
 # ctrl+c signal handler
@@ -34,7 +33,8 @@ def signal_handler(sig, frame):
 
 class ThetaMonDaemon:
     exit_requested = False
-    update_db_freq = 5 #  [min]
+    update_db_freq = 5  # [min]
+
     # update_db_freq = 1 #  [min]
 
     def __init__(self, settings_in: framework.settings.AppSettings):
@@ -45,10 +45,10 @@ class ThetaMonDaemon:
         self.stream_decoder = StreamDecoder(self.txt_queue, self.bin_queue)
         self.sensor_val_dic = {}  # { sensorId, MeasurementType }
         self.statistic_dic = {}  # { sensorId, RadioStatisticsType }
+        self.html_conf = HtmlConfig(self.settings)
         self.worker = None
         signal.signal(signal.SIGINT, signal_handler)
         self.db = Dbcon(self.settings)
-        self.plot_creator = PlotCreator(self.settings, self.db)
         self.next_time = \
             datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
         self.entry()
@@ -62,6 +62,7 @@ class ThetaMonDaemon:
         # TODO remove after devel
         self.create_html()
 
+        # TODO enable after devel
         # while 1:
         #     if self.exit_requested:
         #         self.worker.request_exit()
@@ -113,36 +114,12 @@ class ThetaMonDaemon:
                 "Updated stationdata with {} items.".format(stat_dat_count))
 
     def create_html(self):
-        self.create_plots()
-        html_creator = Hc(self.settings)
-        html_creator.create_testpage()
+        plot_creator = PlotCreator(self.settings, self.db, self.html_conf)
+        start = time.time()
+        plot_creator.create_plots()
+        end = time.time()
+        elapsed = end - start
+        logging.getLogger().info("Time needed to create plots: {}".format(elapsed))
+        html_creator = HtmlCreator(self.settings, self.html_conf)
+        html_creator.create_html_pages()
 
-
-
-    def create_plots(self):
-        plot_conf_file = self.settings.expand(self.settings.get("daemon", "plot_config"))
-        plot_dir = self.settings.expand(self.settings.get("daemon", "plot_dir"))
-
-        # TODO enable this
-        # t_from_dt = datetime.today() - timedelta(days=1)
-        # t_from = t_from_dt.strftime("%Y-%m-%d %H:%M:%S")
-        # t_till = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-
-        # t_from = "2023-08-05 00:00:00"
-        # t_till = "2023-08-06 23:59:00"
-        t_from = "2023-08-05 19:30:00"
-        t_till = "2023-08-06 19:30:09"
-
-        with open(plot_conf_file, 'r') as plt_config:
-            configs = json.load(plt_config)
-            for conf in configs:
-                filename = self.create_filename(plot_dir, conf["title"])
-                shortnames = conf["shortnames"]
-                self.plot_creator.plot_to_png(
-                    conf["title"], shortnames, t_from, t_till, filename)
-
-    @staticmethod
-    def create_filename(out_dir: str, plot_title: str):
-        title_split = plot_title.split(' ')
-        filename = str.join("_", title_split)
-        return os.path.join(out_dir, filename)

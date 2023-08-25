@@ -1,0 +1,119 @@
+[
+  {
+    "content_config": [
+      {
+        "name": "1_Week",
+        "filename": "page_1_week.html",
+        "time_back": "days=7"
+      },
+      {
+        "name": "48h",
+        "filename": "page_48h.html",
+        "time_back": "days=2"
+      },
+      {
+        "name": "24h",
+        "filename": "index.html",
+        "time_back": "days=1"
+      }
+    ]
+  },
+  {
+    "plot_config": [
+      {
+        "name": "Temp_Werkstatt",
+        "title": "Temperatur Werkstatt",
+        "shortnames": [
+          "Test 007",
+          "Test 004",
+          "Test 006",
+          "Test 005",
+          "WrkstTmp",
+          "WrkstRel"
+        ]
+      },
+      {
+        "name": "Temp_Lager",
+        "title": "Temperatur Lager",
+        "shortnames": [
+          "LGR_U",
+          "LGR_O",
+          "LGR_U2",
+          "LGR_O2",
+          "LagerTmp",
+          "LagerRel"
+        ]
+      },
+      {
+        "name": "Temp_Innen",
+        "title": "Temperatur Innen",
+        "shortnames": [
+          "Test 008",
+          "Test 003",
+          "Test 002",
+          "Test 001",
+          "InnenTmp",
+          "InnenRel"
+        ]
+      },
+      {
+        "name": "Temp_Aussen",
+        "title": "Temperatur Aussen",
+        "shortnames": [
+          "LGRASN_O",
+          "LGRASN_U",
+          "ASN_O"
+        ]
+      },
+      {
+        "name": "Luftdruck",
+        "title": "Luftdruck",
+        "shortnames": [
+          "InnenPrs",
+          "LagerPrs",
+          "WrkstPrs"
+        ]
+      },
+      {
+        "name": "Luftfeuchte",
+        "title": "Luftfeuchte",
+        "shortnames": [
+          "InnenHum",
+          "LagerHum",
+          "WrkstHum"
+        ]
+      }
+    ]
+  },
+  {
+    "page_config": {
+      "divisions": [
+        {
+          "name": "Temperaturen",
+          "div_name": "Thetas",
+          "plots": [
+            "Temp_Lager",
+            "Temp_Werkstatt",
+            "Temp_Innen",
+            "Temp_Aussen"
+          ]
+        },
+        {
+          "name": "Luftwerte",
+          "div_name": "Luft",
+          "plots": [
+            "Luftdruck",
+            "Luftfeuchte"
+          ]
+        },
+        {
+          "name": "Statistiken",
+          "div_name": "Statistik",
+          "plots": [
+            "Lost_packages"
+          ]
+        }
+      ]
+    }
+  }
+]
