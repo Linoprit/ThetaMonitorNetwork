@@ -1,40 +1,51 @@
-Get the ThetaMonSerial running
+refer to
+https://www.linode.com/docs/guides/how-to-install-a-lamp-stack-on-ubuntu-20-04/
 
+Install Apache2:
+- apt install apache2
+- create file: /etc/ufw/applications.d/ufw-apache-full
+   [Apache Full]
+     title=Apache Full
+     description=Apache config
+     ports=80/tcp|443/tcp
+- don't configure virtual hosts
+- ufw allow in "Apache Full"
+
+Install mySql, php, phpmyadmin:
+- apt install mysql-server
+- apt install php libapache2-mod-php php-mysql 
+- apt install phpmyadmin
+- => http://localhost/phpmyadmin/
+
+config mysql:
+set root pwd:
+- login: mysql --user=root
+- flush privileges;
+- USE mysql
+- ALTER USER `root`@`localhost` IDENTIFIED BY 'the-new-password';
+- quit;
+
+set up database:
+- CREATE DATABASE IF NOT EXISTS `ThetaMonitor` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+- GRANT ALL PRIVILEGES ON `ThetaMonitor`.* TO `phpmyadmin`@`localhost`;
+- Import CreateDataBases.sql into ThetaMonitor
+- Import Insert_ID_Table_Data.sql into ThetaMonitor
+- create user `stmclient`@`localhost`;
+- GRANT INSERT, UPDATE, SELECT on ThetaMonitor.* TO `stmclient`@`localhost`;
+- ALTER USER `stmclient`@`localhost` IDENTIFIED BY 'the-new-password';
+- FLUSH PRIVILEGES;
+
+
+Get the ThetaMonSerial running:
 python packages to install:
-- python3-wxgtk4.0
-- python3-mysqldb
-- python3-matplotlib
-- python3-dominate
-- python3-pymysql
-- python3-
-- python3-
+- apt install python3-wxgtk4.0 python3-mysqldb python3-matplotlib
+python3-dominate python3-pymysql python3-serial 
 
+Run the tool:
 Get help: python3 ThetaMonitor.py -h
 Get help on specific tool: python3 ThetaMonitor.py gui -h
 Start specific tool: python3 ThetaMonitor.py gui
 Tools for now are: python3 ThetaMonitor.py {prog,gui,daemon}
 
 
-Install mySql:
-refer to https://www.linode.com/docs/guides/how-to-install-a-lamp-stack-on-ubuntu-20-04/
-packages to install:
-- phpmyadmin
-- ufw:
-create file: /etc/ufw/applications.d/ufw-apache-full
-   [Apache Full]
-     title=Apache Full
-     description=Apache config
-     ports=80/tcp|443/tcp
 
-- don't configure virtual hosts
-
-config mysql:
-- create database 'ThetaMonitor'
-- Import CreateDataBases.sql into ThetaMonitor
-- Import Insert_ID_Table_Data.sql into ThetaMonitor
-- create user 'stmclient'
-- GRANT INSERT, UPDATE, SELECT on ThetaMonitor.* TO 'stmclient'@'localhost';
-- FLUSH PRIVILEGES;
-
-phpsysinfo & lmsensors & psensors:
-- 

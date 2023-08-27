@@ -1,12 +1,13 @@
 import logging
 import math
+from datetime import datetime
 
-import framework.settings
 import pymysql.connections
 from pymysql import Error
+
+import framework.settings
 from serialIO.streamDecoder import MeasurementType as MeasurementType
 from serialIO.streamDecoder import RadioStatisticsType as RadioStatisticsType
-from datetime import datetime
 
 
 class DataBaseConnector:
@@ -45,7 +46,7 @@ class DataBaseConnector:
         try:
             self.db_conn.ping(reconnect=False)
         except Error:
-                return False
+            return False
         return True
 
     def reconnect(self):
@@ -95,23 +96,61 @@ class DataBaseConnector:
             logging.getLogger().info("No hash found for " + shortname)
             return
         hashFlat = ('"' + str(sens_hash[0]) + '"')
-        from_str = t_from.strftime("%Y-%m-%d %H:%M:%S")
-        till_str = t_till.strftime("%Y-%m-%d %H:%M:%S")
+        from_str = self.datetime_to_str(t_from)  # t_from.strftime("%Y-%m-%d %H:%M:%S")
+        till_str = self.datetime_to_str(t_till)  # t_till.strftime("%Y-%m-%d %H:%M:%S")
         # PrimKey 	AddressHash 	SensorType 	Measurement 	TimeStamp
-        command = "SELECT TimeStamp, Measurement FROM {} WHERE `AddressHash` IN({}) and " \
-                  "`TimeStamp` BETWEEN '{}' AND '{}'" \
-            .format(self.sens_tbl, hashFlat, from_str, till_str)
+        command = ("SELECT TimeStamp, Measurement FROM {} WHERE `AddressHash` IN({}) "
+                   "and `TimeStamp` BETWEEN '{}' AND '{}'"
+                   .format(self.sens_tbl, hashFlat, from_str, till_str))
         cursor = self.db_conn.cursor()
         cursor.execute(command)
         return cursor.fetchall()
 
-    def get_hashes_from_shortnames(self, shortnames: list): # string-list
+    def get_statistikdata(self, t_from: datetime, t_till: datetime):
+        # from_str = self.datetime_to_str(t_from)
+        # till_str = self.datetime_to_str(t_till)
+        from_str = "2023-08-05 19:30:09"
+        till_str = "2023-08-06 19:30:09"
+
+        station_ids = self.get_station_ids_from_statistik(from_str, till_str)
+        for stat_id in station_ids:
+            command = ("SELECT Station_ID FROM {} WHERE `Station_ID` = '{}' AND"
+                       "`TimeStamp` BETWEEN '{}' AND '{}' "
+                       "GROUP BY Station_ID"
+                       .format(self.stationdata_tbl, stat_id, from_str, till_str))
+        #
+        #
+        # hier weiter
+        #
+        #
+        result = []
+
+        return result
+
+    def get_station_ids_from_statistik(self, from_str: str, till_str: str):
+        command = ("SELECT Station_ID FROM {} WHERE `TimeStamp` BETWEEN '{}' AND '{}' "
+                   "GROUP BY Station_ID"
+                   .format(self.stationdata_tbl, from_str, till_str))
+        cursor = self.db_conn.cursor()
+        cursor.execute(command)
+        station_ids = cursor.fetchall()
+        result = []
+        for i in range(len(station_ids)):
+            result.append(station_ids[i][0])
+        return result
+
+
+    @staticmethod
+    def datetime_to_str(t_datetime: datetime):
+        return t_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+    def get_hashes_from_shortnames(self, shortnames: list):  # string-list
         newShortnames = []
         for name in shortnames:  # pad strings to eight chars
             newName = name.ljust(8)
             newShortnames.append(newName)
         shortNamesFlat = (', '.join('"' + item + '"' for item in newShortnames))
-        command = "SELECT `AddressHash` FROM {} WHERE `ShortName` IN({})"\
+        command = "SELECT `AddressHash` FROM {} WHERE `ShortName` IN({})" \
             .format(self.sensid_tbl, shortNamesFlat)
         cursor = self.db_conn.cursor()
         cursor.execute(command)
@@ -161,7 +200,7 @@ class DataBaseConnector:
             return -1
         return 0
 
-    def get_id_from_station_name(self, station_names: list): # string-list
+    def get_id_from_station_name(self, station_names: list):  # string-list
         # PrimKey 	StationId 	Shortname 	Description
         shortNamesFlat = (', '.join('"' + item + '"' for item in station_names))
         command = "SELECT `StationId` FROM {} WHERE `ShortName` IN({})" \

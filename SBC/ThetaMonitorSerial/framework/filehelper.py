@@ -1,4 +1,5 @@
 import pathlib
+import json
 
 
 class Filehelper:
@@ -17,3 +18,10 @@ class Filehelper:
         file = open(file, "w")
         file.write(content)
         file.close()
+
+    @staticmethod
+    def json_dump(file: pathlib.Path, json_structure):
+        json_object = json.dumps(json_structure, indent=4)
+        with open(file, "w") as outfile:
+            outfile.write(json_object)
+
