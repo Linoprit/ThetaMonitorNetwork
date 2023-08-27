@@ -1,19 +1,14 @@
-import json
 import logging
-import os
-
 import signal
 import sys
 import time
-from datetime import date
-from datetime import datetime
 from datetime import datetime, timedelta
-from daemon.HtmlConfigStructure import HtmlConfig
 from queue import Queue
 
 import framework.settings
 import serialIO.streamDecoder
 from daemon.DataBaseConnector import DataBaseConnector as Dbcon
+from daemon.HtmlConfigStructure import HtmlConfig
 from daemon.HtmlCreator import HtmlCreator as HtmlCreator
 from daemon.PlotCreator import PlotCreator as PlotCreator
 from serialIO.serialThread import Worker
@@ -51,6 +46,8 @@ class ThetaMonDaemon:
         self.db = Dbcon(self.settings)
         self.next_time = \
             datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
+        self.plot_creator = PlotCreator(self.settings, self.db, self.html_conf)
+        self.html_creator = HtmlCreator(self.settings, self.db, self.html_conf)
         self.entry()
 
     def entry(self):
@@ -58,25 +55,22 @@ class ThetaMonDaemon:
         self.worker = Worker(self.serial_queue, device, 115200, 0.5)
         self.worker.start()
         self.db.connect()
+        self.create_html()  # initial creation
 
-        # TODO remove after devel
-        self.create_html()
-
-        # TODO enable after devel
-        # while 1:
-        #     if self.exit_requested:
-        #         self.worker.request_exit()
-        #         self.db.close()
-        #         sys.exit(0)
-        #     # consume serial queues
-        #     self.update_queues()
-        #     self.bin_queue_to_struct()
-        #     if datetime.now() >= self.next_time:
-        #         self.next_time = \
-        #             datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
-        #         self.push_dicts_to_db()
-        #         # self.create_html() TODO enable after devel
-        #     time.sleep(1.0)  # we could sleep for update_db_freq
+        while 1:
+            if self.exit_requested:
+                self.worker.request_exit()
+                self.db.close()
+                sys.exit(0)
+            # consume serial queues
+            self.update_queues()
+            self.bin_queue_to_struct()
+            if datetime.now() >= self.next_time:
+                self.next_time = \
+                    datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
+                self.push_dicts_to_db()
+                self.create_html()
+            time.sleep(1.0)  # we could sleep for update_db_freq
 
     def update_queues(self):
         data = None
@@ -114,12 +108,10 @@ class ThetaMonDaemon:
                 "Updated stationdata with {} items.".format(stat_dat_count))
 
     def create_html(self):
-        plot_creator = PlotCreator(self.settings, self.db, self.html_conf)
         start = time.time()
-        plot_creator.create_plots()
+        self.plot_creator.create_plots()
         end = time.time()
-        elapsed = end - start
-        logging.getLogger().info("Time needed to create plots: {}".format(elapsed))
-        html_creator = HtmlCreator(self.settings, self.html_conf)
-        html_creator.create_html_pages()
+        logging.getLogger().info("Time needed to create plots: {}"
+                                 .format(end - start))
+        self.html_creator.create_html_pages()
 

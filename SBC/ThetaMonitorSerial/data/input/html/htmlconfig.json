@@ -52,8 +52,7 @@
           "Test 003",
           "Test 002",
           "Test 001",
-          "InnenTmp",
-          "InnenRel"
+          "InnenTmp"
         ]
       },
       {
@@ -86,6 +85,16 @@
     ]
   },
   {
+    "statistik_plot_config": {
+      "name": "Station_Statistics",
+      "title": "Station Statistics",
+      "data_names": [
+          "Lost_Pkgs",
+          "Valid_Sensors"
+        ]
+    }
+  },
+  {
     "page_config": {
       "divisions": [
         {
@@ -110,7 +119,8 @@
           "name": "Statistiken",
           "div_name": "Statistik",
           "plots": [
-            "Lost_packages"
+            "Station_Statistics",
+            "$LAST_SENSOR_DATA_TABLE"
           ]
         }
       ]

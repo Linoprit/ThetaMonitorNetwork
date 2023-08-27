@@ -7,12 +7,15 @@ from pathlib import Path
 import framework.settings
 import shutil
 from daemon.HtmlConfigStructure import HtmlConfig
+from daemon.DataBaseConnector import DataBaseConnector as Dbcon
 
 
 class HtmlCreator:
     def __init__(self,
                  settings_in: framework.settings.AppSettings,
+                 db_con: Dbcon,
                  html_conf: HtmlConfig):
+        self.db = db_con
         self.settings = settings_in
         self.html_config = html_conf
         html_outdir = self.settings.expand(
@@ -38,8 +41,6 @@ class HtmlCreator:
                 self.create_divisions(conf_name)
                 self.create_footer()
                 self.add_script(button_name)
-            # print(doc)
-            # filename = 'index.html'
             self.write_htmldoc(doc, filename)
 
     @staticmethod
@@ -106,20 +107,43 @@ class HtmlCreator:
     def create_divisions(self, content_config_name):
         cls_str = 'w3-border w3-padding center'
         divs = self.html_config.get_page_config()["divisions"]
+        result = None
         for one_div in divs:
             div_name = one_div["div_name"]
-            with (div(id=div_name, cls='ww3-container city w3-animate-opacity w3-center')
-                  as result):
-                comment(div_name)
-                hr()
-                plots = one_div["plots"]
-                for plot in plots:
-                    filename = plot + "_" + content_config_name + ".png"
-                    path = os.path.join("plots", filename)
-                    img(src=path, cls=cls_str, alt=plot)
-                    br()
-                hr()
+            result = div(id=div_name, cls='ww3-container city w3-animate-opacity w3-center')
+            result.add(comment(div_name))
+            result.add(hr())
+            plots = one_div["plots"]
+            for plot in plots:
+                if plot == "$LAST_SENSOR_DATA_TABLE":
+                    if content_config_name == "24h":
+                        self.add_last_values_tbl(result)
+                    continue
+                filename = plot + "_" + content_config_name + ".png"
+                path = os.path.join("plots", filename)
+                result.add(img(src=path, cls=cls_str, alt=plot))
+                result.add(br())
+            result.add(hr())
         return result
+
+    def add_last_values_tbl(self, division: div):
+        db_result = (self.db.get_last_sensordata())
+        division.add(hr())
+        with table(cls='owntable w3-bordered center', style="width:40%") as tbl:
+            with tr(cls='w3-theme'):
+                th("TimeStamp")
+                th("AddressHash")
+                th("SensorType")
+                th("Measurement")
+                th("LastUpdateTick")
+            for sens_data in db_result:
+                with tr(cls='w3-white'):
+                    td(Dbcon.datetime_to_str(sens_data[4]))  # TimeStamp
+                    td(sens_data[0])  # AddressHash
+                    td(sens_data[1])  # SensorType
+                    td(sens_data[2])  # Measurement
+                    td(sens_data[3])  # LastUpdateTick
+        division.add(tbl)
 
     @staticmethod
     def add_script(button_name):
@@ -149,80 +173,3 @@ class HtmlCreator:
         if not Path(dst).is_file():
             src = os.path.join(src_dir, filename)
             shutil.copyfile(src, dst)
-
-    # @staticmethod
-    # def create_stats_tab_24h():
-    #     result = div(id='Statistik', cls='w3-container city w3-animate-opacity w3-center')
-    #     cls_str = 'w3-border w3-padding center'
-    #     result.add(comment('Statistik-Tab'))
-    #     result.add(hr())
-    #     with table(cls='owntable w3-bordered center') as tbl:
-    #         with tr(cls='w3-theme'):
-    #             th('Sensor')
-    #             th('Temp')
-    #             th('Last Update')
-    #         with tr(cls='w3-white'):
-    #             td('ASN_O')
-    #             td('9.5')
-    #             td('2023-04-24 14:13:08')
-    #         with tr(cls='w3-white'):
-    #             td('GGE_U')
-    #             td('13.8125')
-    #             td('2023-04-24 14:13:08')
-    #         with tr(cls='w3-white'):
-    #             td('INNEN')
-    #             td('17.25')
-    #             td('2023-04-24 14:13:08')
-    #         with tr(cls='w3-white'):
-    #             td('LGR_O')
-    #             td('12.1875')
-    #             td('2023-04-24 14:13:08')
-    #         with tr(cls='w3-white'):
-    #             td('LGR_O')
-    #             td('12.1875')
-    #             td('2023-04-24 14:08:08')
-    #         with tr(cls='w3-white'):
-    #             td('GR_U')
-    #             td('11.5')
-    #             td('2023-04-24 14:13:08')
-    #         with tr(cls='w3-white'):
-    #             td('ST_O')
-    #             td('13.75')
-    #             td('2023-04-24 14:13:08')
-    #         with tr(cls='w3-white'):
-    #             td('WST_U')
-    #             td('12.1875')
-    #             td('2023-04-24 14:13:08')
-    #     result.add(tbl)
-    #     result.add(br())
-    #     result.add(p('Plot alle Stationen \'lost packages\''))
-    #     result.add(img(src='plots/Temperatur_Werkstatt.png', cls=cls_str, alt='Werkstatt'))
-    #     return result
-
-    # @staticmethod
-    # def create_theta_tab_24h():
-    #     cls_str = 'w3-border w3-padding center'
-    #     with (div(id='Thetas', cls='ww3-container city w3-animate-opacity w3-center')
-    #           as result):
-    #         comment('Theta-Tab')
-    #         hr()
-    #         img(src='plots/Temperatur_Werkstatt.png', cls=cls_str, alt='Werkstatt')
-    #         br()
-    #         img(src='plots/Temperatur_Lager.png', cls=cls_str, alt='Lager')
-    #         br()
-    #         img(src='plots/Temperatur_Innen.png', cls=cls_str, alt='Innen')
-    #         hr()
-    #     return result
-
-    # @staticmethod
-    # def create_luft_tab_24h():
-    #     cls_str = 'w3-border w3-padding center'
-    #     with (div(id='Luft', cls='ww3-container city w3-animate-opacity w3-center')
-    #           as result):
-    #         comment('Luft-Tab')
-    #         hr()
-    #         img(src='plots/Luftdruck.png', cls=cls_str, alt='Luftdruck')
-    #         br()
-    #         img(src='plots/Luftfeuchte.png', cls=cls_str, alt='Luftfeuchte')
-    #         hr()
-    #     return result

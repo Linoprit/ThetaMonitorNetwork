@@ -1,14 +1,18 @@
 import logging
 import os
-from datetime import datetime
+from datetime import timedelta, datetime
+from itertools import cycle
+from pathlib import Path
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from daemon.DataBaseConnector import DataBaseConnector as Dbcon
-import framework.settings
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
-from pathlib import Path
+
+import framework.settings
+from daemon.DataBaseConnector import DataBaseConnector as Dbcon
 from daemon.HtmlConfigStructure import HtmlConfig
-from datetime import datetime, timedelta
+
+mpl.use('Agg')
 
 
 class PlotCreator:
@@ -18,9 +22,11 @@ class PlotCreator:
                  html_conf: HtmlConfig):
         self.settings = settings_in
         self.db = db_con
+        self.statistic_config = html_conf.get_statistic_config()
         self.plot_config = html_conf.get_plot_config()
         self.content_config = html_conf.get_content_config()
         self.plot_dir = self.check_or_create_plot_dir()
+        self.this_midnight = self.get_midnight() - timedelta(days=1)  # first run
 
     def check_or_create_plot_dir(self):
         html_outdir = self.settings.expand(
@@ -33,24 +39,51 @@ class PlotCreator:
 
     def create_plots(self):
         for conf in self.content_config:
-            delta = conf["time_back"].split("=")[1]
-            t_from_dt = datetime.today() - timedelta(days=int(delta))
-            t_till_dt = datetime.today()
-            # t_from = t_from_dt.strftime("%Y-%m-%d %H:%M:%S")
-            # t_till = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
             content_config_name = conf["name"]
+            elapsed = datetime.now() - self.this_midnight
+            if content_config_name == "1_Week" or content_config_name == "48h":
+                if elapsed.days < 1:
+                    continue
+            delta = conf["time_back"].split("=")[1]
+            # t_till_dt = Dbcon.str_to_datetime("2023-08-06 19:30:09")
+            t_till_dt = datetime.today()
+            t_from_dt = t_till_dt - timedelta(days=int(delta))
             self.do_sensor_plots(content_config_name, t_from_dt, t_till_dt)
-            self.do_statistik_plot(t_from_dt, t_till_dt)
+            self.do_statistik_plot(content_config_name, t_from_dt, t_till_dt)
+        self.this_midnight = self.get_midnight()
 
-    def do_statistik_plot(self, t_from, t_till):
-        db_result = self.db.get_statistikdata(t_from, t_till)
-        if db_result is None:
-            logging.getLogger().info(
-                "No stat-data found from {} to {}"
-                .format(t_from.strftime("%Y-%m-%d %H:%M:%S"),
-                        t_till.strftime("%Y-%m-%d %H:%M:%S")))
+    @staticmethod
+    def get_midnight():
+        now = datetime.now()
+        return datetime(now.year, now.month, now.day, 0, 0, 0)
+
+    def do_statistik_plot(self, content_config_name, t_from, t_till):
+        if self.statistic_config is None:
             return
-        # else...
+        data_names = self.statistic_config["data_names"]
+        filename = (self.create_fullpath(
+                self.plot_dir, self.statistic_config["name"], content_config_name))
+        station_ids = self.db.get_station_ids_from_statistik(t_from, t_till)
+        ax, ax2, colors = self.prepare_plot("Station Statistics", sec_axis_visible=True)
+        lns = []
+        x1 = []
+        y1 = []
+        y2 = []
+        for stat_id in station_ids:
+            db_result = self.db.get_station_stats(stat_id, data_names, t_from, t_till)
+            for station_data in db_result:
+                x1.append(station_data[0])
+                y1.append(station_data[1])
+                y2.append(station_data[2])
+            label_ax = "({}) {}".format(str(stat_id), data_names[0])
+            label_ax2 = "({}) {}".format(str(stat_id), data_names[1])
+            lns += ax.plot(x1, y1, color=next(colors), label=label_ax, linewidth=1.0)
+            lns += ax2.plot(x1, y2, color=next(colors), label=label_ax2, linewidth=1.0)
+            x1.clear()
+            y1.clear()
+            y2.clear()
+        self.make_legend(lns, ax)
+        self.save_plot(filename, ax)
 
     def do_sensor_plots(self, content_config_name, t_from, t_till):
         if self.plot_config is None:
@@ -63,8 +96,37 @@ class PlotCreator:
                 conf["title"], shortnames, t_from, t_till, filename)
 
     def plot_to_png(self, title, shortnames, t_from, t_till, filename):
-        # t_from = datetime.strptime(from_str, "%Y-%m-%d %H:%M:%S")
-        # t_till = datetime.strptime(till_str, "%Y-%m-%d %H:%M:%S")
+        ax, ax2, colors = self.prepare_plot(title)
+        lns = []
+        for shortname in shortnames:
+            db_result = self.db.get_single_sensordata(shortname, t_from, t_till)
+            if db_result is None:
+                logging.getLogger().info("No data found for " + shortname)
+                return
+            if "Rel" in shortname:
+                x2 = []
+                y2 = []
+                for item in db_result:
+                    x2.append(item[0])
+                    y2.append(item[1])
+                lns += ax2.plot(x2, y2, color=next(colors), label=shortname, linewidth=0.5)
+                x2.clear()
+                y2.clear()
+                continue
+
+            x1 = []
+            y1 = []
+            for item in db_result:
+                x1.append(item[0])
+                y1.append(item[1])
+            lns += ax.plot(x1, y1, color=next(colors), label=shortname, linewidth=1.0)
+            x1.clear()
+            y1.clear()
+        self.make_legend(lns, ax)
+        self.save_plot(filename, ax)
+
+    @staticmethod
+    def prepare_plot(title, sec_axis_visible=False):
         fig, ax = plt.subplots(figsize=(10, 6))
         plt.title(
             title, fontweight="bold", fontsize=20, loc='center', pad=50, color='#FF9900')
@@ -82,38 +144,26 @@ class PlotCreator:
         ax.yaxis.set_major_formatter('{x:1.1f}')
         ax.yaxis.set_minor_locator(AutoMinorLocator())
 
-        secax = ax.secondary_yaxis('right')
-        secax.yaxis.set_major_formatter('{x:1.1f}')
-        secax.yaxis.set_minor_locator(AutoMinorLocator())
+        ax2 = ax.twinx()
+        if sec_axis_visible:
+            ax2.axis('on')
+        else:
+            secax = ax.secondary_yaxis('right')
+            secax.yaxis.set_major_formatter('{x:1.1f}')
+            secax.yaxis.set_minor_locator(AutoMinorLocator())
+            ax2.axis('off')
 
-        for shortname in shortnames:
-            db_result = self.db.get_single_sensordata(shortname, t_from, t_till)
-            if db_result is None:
-                logging.getLogger().info("No data found for " + shortname)
-                return
-            if "Rel" in shortname:
-                x2 = []
-                y2 = []
-                for item in db_result:
-                    x2.append(item[0])
-                    y2.append(item[1])
-                ax2 = ax.twinx()
-                ax2.axis('off')
-                ax2.plot(x2, y2, label=shortname, linewidth=0.5)
-                x2.clear()
-                y2.clear()
-                continue
+        prop_cycle = plt.rcParams['axes.prop_cycle']
+        colors = cycle(prop_cycle.by_key()['color'])
+        return ax, ax2, colors
 
-            x1 = []
-            y1 = []
-            for item in db_result:
-                x1.append(item[0])
-                y1.append(item[1])
-            ax.plot(x1, y1, label=shortname, linewidth=1.0)
-            x1.clear()
-            y1.clear()
+    @staticmethod
+    def make_legend(lines, ax):
+        labs = [line.get_label() for line in lines]
+        ax.legend(lines, labs, loc='upper center', bbox_to_anchor=(0.5, 1.14), ncol=4, fancybox=True, shadow=True)
 
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.14), ncol=4, fancybox=True, shadow=True)
+    @staticmethod
+    def save_plot(filename, ax):
         plt.savefig(filename, bbox_inches='tight')
         plt.close('all')
 

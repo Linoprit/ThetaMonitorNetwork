@@ -1,10 +1,9 @@
 import logging
 import math
-from datetime import datetime
 
 import pymysql.connections
 from pymysql import Error
-
+from datetime import datetime, timedelta
 import framework.settings
 from serialIO.streamDecoder import MeasurementType as MeasurementType
 from serialIO.streamDecoder import RadioStatisticsType as RadioStatisticsType
@@ -96,8 +95,8 @@ class DataBaseConnector:
             logging.getLogger().info("No hash found for " + shortname)
             return
         hashFlat = ('"' + str(sens_hash[0]) + '"')
-        from_str = self.datetime_to_str(t_from)  # t_from.strftime("%Y-%m-%d %H:%M:%S")
-        till_str = self.datetime_to_str(t_till)  # t_till.strftime("%Y-%m-%d %H:%M:%S")
+        from_str = self.datetime_to_str(t_from)
+        till_str = self.datetime_to_str(t_till)
         # PrimKey 	AddressHash 	SensorType 	Measurement 	TimeStamp
         command = ("SELECT TimeStamp, Measurement FROM {} WHERE `AddressHash` IN({}) "
                    "and `TimeStamp` BETWEEN '{}' AND '{}'"
@@ -106,26 +105,43 @@ class DataBaseConnector:
         cursor.execute(command)
         return cursor.fetchall()
 
-    def get_statistikdata(self, t_from: datetime, t_till: datetime):
-        # from_str = self.datetime_to_str(t_from)
-        # till_str = self.datetime_to_str(t_till)
-        from_str = "2023-08-05 19:30:09"
-        till_str = "2023-08-06 19:30:09"
+    def get_last_sensordata(self):
+        # from_str = "2023-08-06 19:24:09"
+        # till_str = "2023-08-06 19:30:09"
+        from_str = self.datetime_to_str(datetime.today())
+        till_str = self.datetime_to_str(datetime.today() - timedelta(minutes=6))
+        vals_str = "AddressHash, SensorType, Measurement, LastUpdateTick, TimeStamp"
+        command = ("SELECT {} FROM {} WHERE `TimeStamp` BETWEEN '{}' AND '{}'"
+                   .format(vals_str, self.sens_tbl, from_str, till_str))
+        cursor = self.db_conn.cursor()
+        cursor.execute(command)
+        return cursor.fetchall()
 
+    def get_station_stats(self, station_id, data_names: [], t_from: datetime, t_till: datetime):
+        from_str = self.datetime_to_str(t_from)
+        till_str = self.datetime_to_str(t_till)
+        data_str = ", ".join(data_names)
+        command = ("SELECT TimeStamp, {} FROM {} WHERE `Station_ID` = '{}' AND"
+                   "`TimeStamp` BETWEEN '{}' AND '{}' "
+                   .format(data_str, self.stationdata_tbl, station_id, from_str, till_str))
+        cursor = self.db_conn.cursor()
+        cursor.execute(command)
+        return cursor.fetchall()
+
+    def get_statistikdata(self, t_from: datetime, t_till: datetime):
+        from_str = self.datetime_to_str(t_from)
+        till_str = self.datetime_to_str(t_till)
+        station_data = []
         station_ids = self.get_station_ids_from_statistik(from_str, till_str)
         for stat_id in station_ids:
-            command = ("SELECT Station_ID FROM {} WHERE `Station_ID` = '{}' AND"
+            command = ("SELECT Station_ID, Lost_Pkgs, Valid_Sensors FROM {} "
+                       "WHERE `Station_ID` = '{}' AND"
                        "`TimeStamp` BETWEEN '{}' AND '{}' "
-                       "GROUP BY Station_ID"
                        .format(self.stationdata_tbl, stat_id, from_str, till_str))
-        #
-        #
-        # hier weiter
-        #
-        #
-        result = []
-
-        return result
+            cursor = self.db_conn.cursor()
+            cursor.execute(command)
+            station_data.append(cursor.fetchall())
+        return station_data
 
     def get_station_ids_from_statistik(self, from_str: str, till_str: str):
         command = ("SELECT Station_ID FROM {} WHERE `TimeStamp` BETWEEN '{}' AND '{}' "
@@ -138,11 +154,6 @@ class DataBaseConnector:
         for i in range(len(station_ids)):
             result.append(station_ids[i][0])
         return result
-
-
-    @staticmethod
-    def datetime_to_str(t_datetime: datetime):
-        return t_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
     def get_hashes_from_shortnames(self, shortnames: list):  # string-list
         newShortnames = []
@@ -224,6 +235,15 @@ class DataBaseConnector:
         cursor = self.db_conn.cursor()
         cursor.execute(command)
         return cursor.fetchall()
+
+    @staticmethod
+    def str_to_datetime(date_str: str):
+        format_str = "%Y-%m-%d %H:%M:%S"
+        return datetime.strptime(date_str, format_str)
+
+    @staticmethod
+    def datetime_to_str(t_datetime: datetime):
+        return t_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
     def update_id_table(self):
         # ToDo implement update_id_table

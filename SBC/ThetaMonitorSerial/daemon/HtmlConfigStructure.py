@@ -10,6 +10,7 @@ class HtmlConfig:
         self.page_conf = None
         self.plot_conf = None
         self.content_conf = None
+        self.statistic_conf = None
         self.conf_file_ok = self.open_htmlconf_file()
 
     def open_htmlconf_file(self):
@@ -28,6 +29,8 @@ class HtmlConfig:
                     self.page_conf = conf["page_config"]
                 if "content_config" in conf:
                     self.content_conf = conf["content_config"]
+                if "statistik_plot_config" in conf:
+                    self.statistic_conf = conf["statistik_plot_config"]
         return True
 
     def get_plot_config(self):
@@ -43,4 +46,9 @@ class HtmlConfig:
     def get_content_config(self):
         if self.conf_file_ok:
             return self.content_conf
+        return None
+
+    def get_statistic_config(self):
+        if self.conf_file_ok:
+            return self.statistic_conf
         return None
