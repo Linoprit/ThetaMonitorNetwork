@@ -23,6 +23,8 @@ void Sensors::init(void) {
 }
 
 void Sensors::initHardware(void) {
+	GPIOSocket_Relays::switch_relay_off(1);
+	GPIOSocket_Relays::switch_relay_off(2);
 	_thetaSensors.initHardware();
 }
 

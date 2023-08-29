@@ -32,12 +32,12 @@ void startMeasureTask(void *argument) {
 	UNUSED(argument);
 
 	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+	OsHelpers::delay(2000);
 	snsrs::Sensors::instance().init();
 	snsrs::Sensors::instance().initHardware();
 
 	for (;;) {
-		// TODO remove
-		HAL_GPIO_TogglePin(DebLed_1_GPIO_Port, DebLed_1_Pin);
+		//HAL_GPIO_TogglePin(DebLed_1_GPIO_Port, DebLed_1_Pin);
 
 		snsrs::Sensors::instance().cycle();
 		OsHelpers::delay(MEASURETASK_CYCLE);

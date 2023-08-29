@@ -79,8 +79,7 @@ void startMasterSerialTask(void *argument) {
 	for (;;) {
 		osDelay(20);
 
-		// TODO remove
-		HAL_GPIO_TogglePin(DebLed_2_GPIO_Port, DebLed_2_Pin);
+		//HAL_GPIO_TogglePin(DebLed_2_GPIO_Port, DebLed_2_Pin);
 		// HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
 		cLine::CommandLine::instance().cycle();

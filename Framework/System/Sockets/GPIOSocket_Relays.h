@@ -17,9 +17,9 @@ public:
 		if(relayNo == 0){ // by convention, 0 means no relay
 			return;
 		} else if (relayNo == 1){
-			HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_RESET);
 		} else if (relayNo == 2){
-			HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_RESET);
 		}
 		else {
 			return; // channels 3 - 15 are not used, at the moment
@@ -31,9 +31,9 @@ public:
 		if(relayNo == 0){ // by convention, 0 means no relay
 			return;
 		} else if (relayNo == 1){
-			HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(RELAY_1__GPIO_Port, RELAY_1__Pin, GPIO_PIN_SET);
 		} else if (relayNo == 2){
-			HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(RELAY_2__GPIO_Port, RELAY_2__Pin, GPIO_PIN_SET);
 		}
 		else {
 			return; // channels 3 - 15 are not used, at the moment
@@ -44,9 +44,9 @@ public:
 		if(relayNo == 0){ // by convention, 0 means no relay
 			return 0;
 		} else if (relayNo == 1){
-			return HAL_GPIO_ReadPin(RELAY_1__GPIO_Port, RELAY_1__Pin);
+			return !HAL_GPIO_ReadPin(RELAY_1__GPIO_Port, RELAY_1__Pin);
 		} else if (relayNo == 2){
-			return HAL_GPIO_ReadPin(RELAY_2__GPIO_Port, RELAY_2__Pin);
+			return !HAL_GPIO_ReadPin(RELAY_2__GPIO_Port, RELAY_2__Pin);
 		}
 		else {
 			return 0; // channels 3 - 15 are not used, at the moment

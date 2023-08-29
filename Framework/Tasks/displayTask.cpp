@@ -23,7 +23,7 @@
 
 void startDisplayTask(void * argument){
 	UNUSED(argument);
-	OsHelpers::delay(500); //older LCDs need more time to settle (2500)
+	OsHelpers::delay(1000); //older LCDs need more time to settle (2500)
 
 	lcd::LCDFunctions::instance().init();
 	lcd::LCDFunctions::instance().initHardware();

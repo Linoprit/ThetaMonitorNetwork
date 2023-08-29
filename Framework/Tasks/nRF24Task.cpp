@@ -51,7 +51,7 @@ void startnRF24Task(void *argument) {
 			snsrs::Sensors::instance().getNonVolatileData()->getStationType()
 					== snsrs::SensorIdTable::MASTER;
 
-	OsHelpers::delay(500);
+	OsHelpers::delay(1000);
 
 	if (isMaster) {
 		radio::RadioMaster::instance().init();
