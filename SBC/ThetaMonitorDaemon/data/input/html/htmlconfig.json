@@ -1,0 +1,131 @@
+[
+  {
+    "content_config": [
+      {
+        "name": "1_Week",
+        "filename": "page_1_week.html",
+        "time_back": "days=7"
+      },
+      {
+        "name": "48h",
+        "filename": "page_48h.html",
+        "time_back": "days=2"
+      },
+      {
+        "name": "24h",
+        "filename": "index.html",
+        "time_back": "days=1"
+      }
+    ]
+  },
+  {
+    "plot_config": [
+      {
+        "name": "Temp_Werkstatt",
+        "title": "Temperatur Werkstatt",
+        "shortnames": [
+          "WST_O   ",
+          "WST_U   ",
+          "GGE_U   ",
+          "WST_O2  ",
+          "WST_U2  ",
+          "WrkstTmp",
+          "LGRASN_U",
+          "WrkstRel"
+        ]
+      },
+      {
+        "name": "Temp_Lager",
+        "title": "Temperatur Lager",
+        "shortnames": [
+          "LGR_U",
+          "LGR_O",
+          "LGR_U2",
+          "LGR_O2",
+          "LagerTmp",
+          "LGRASN_U",
+          "LagerRel"
+        ]
+      },
+      {
+        "name": "Temp_Innen",
+        "title": "Temperatur Innen",
+        "shortnames": [
+          "INNEN_O2",
+          "INNEN_U2",
+          "InnenTmp",
+          "LGRASN_U"
+        ]
+      },
+      {
+        "name": "Temp_Aussen",
+        "title": "Temperatur Aussen",
+        "shortnames": [
+          "LGRASN_O",
+          "LGRASN_U",
+          "ASN_O"
+        ]
+      },
+      {
+        "name": "Luftdruck",
+        "title": "Luftdruck",
+        "shortnames": [
+          "InnenPrs",
+          "LagerPrs",
+          "WrkstPrs"
+        ]
+      },
+      {
+        "name": "Luftfeuchte",
+        "title": "Luftfeuchte",
+        "shortnames": [
+          "InnenHum",
+          "LagerHum",
+          "WrkstHum"
+        ]
+      }
+    ]
+  },
+  {
+    "statistik_plot_config": {
+      "name": "Station_Statistics",
+      "title": "Station Statistics",
+      "data_names": [
+          "Lost_Pkgs",
+          "Valid_Sensors"
+        ]
+    }
+  },
+  {
+    "page_config": {
+      "divisions": [
+        {
+          "name": "Temperaturen",
+          "div_name": "Thetas",
+          "plots": [
+            "Temp_Lager",
+            "Temp_Werkstatt",
+            "Temp_Innen",
+            "Temp_Aussen"
+          ]
+        },
+        {
+          "name": "Luftwerte",
+          "div_name": "Luft",
+          "plots": [
+            "Luftdruck",
+            "Luftfeuchte"
+          ]
+        },
+        {
+          "name": "Statistiken",
+          "div_name": "Statistik",
+          "plots": [
+            "Station_Statistics",
+            "$LAST_SENSOR_DATA_TABLE"
+          ]
+        }
+      ]
+    }
+  }
+]

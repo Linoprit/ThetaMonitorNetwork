@@ -35,6 +35,7 @@
 *Release/
 *.metadata/
 *.log
+*.log.*
 *~
 *#
 /doc/schematic/ThetaMonitorF401CEU/ThetaMonitorF401CEU-backups/
@@ -43,6 +44,10 @@
 /SBC/ThetaMonitorSerial/tests/data/temp
 /SBC/ThetaMonitorSerial/data/output
 /SBC/ThetaMonitorSerial/data/temp
-/SBC/SqlDumps
 /SBC/ThetaMonitorSerial/.idea/
+/SBC/ThetaMonitorDaemon/tests/data/temp
+/SBC/ThetaMonitorDaemon/data/output
+/SBC/ThetaMonitorDaemon/data/temp
+/SBC/ThetaMonitorDaemon/.idea/
+/SBC/SqlDumps
 /x86/TableIdProgrammer/ID_TableTestRelayConfig.txt

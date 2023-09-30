@@ -4,7 +4,6 @@ import framework.settings
 import tableIdTool.TableIdProgrammer as Tip
 import wx
 import gui.classThetaMonGui as Mf
-import daemon.ThetaMonDaemon as Dm
 
 if __name__ == '__main__':
     settings = framework.settings.AppSettings()
@@ -19,9 +18,6 @@ if __name__ == '__main__':
         app.MainLoop()
     elif what_to_run == 'prog':
         tip = Tip.TableIdProgrammer(settings)
-    elif what_to_run == 'daemon':
-        daemon = Dm.ThetaMonDaemon(settings)
-        daemon.entry()
     elif what_to_run == 'devel':
         pass
     else:

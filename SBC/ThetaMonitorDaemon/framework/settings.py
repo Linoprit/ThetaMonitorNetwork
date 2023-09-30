@@ -4,8 +4,6 @@ import logging
 import pathlib
 import sys
 from datetime import datetime
-import gui.Subparser
-import tableIdTool.Subparser
 import logging.handlers
 
 
@@ -66,12 +64,6 @@ class AppSettings:
 
     def _command_line_init(self):
         self.arg_parser = argparse.ArgumentParser()
-        subparsers = self.arg_parser.add_subparsers(title='subcommands',
-                                               description='valid subcommands',
-                                               help='additional help',
-                                               dest='tool_name')
-        tableIdTool.Subparser.add_subparsers(subparsers)
-        gui.Subparser.add_subparsers(subparsers)
         self.arg_parser.add_argument(
             '-w', '--workdir', help="Path to the working directory, named 'data', where "
                                     "the subdirs 'input', 'output' and 'temp' reside. "
@@ -118,8 +110,6 @@ class AppSettings:
             self.settings['common']['logLevel'] = 'verbose'
         if args.debug:
             self.settings['common']['logLevel'] = 'debug'
-        if args.tool_name:
-            self.settings['common']['tool_name'] = args.tool_name
 
     def print_status(self):
         if self.args.version:
