@@ -127,7 +127,7 @@ class HtmlCreator:
         return result
 
     def add_last_values_tbl(self, division: div):
-        db_result = (self.db.get_last_sensordata())
+        db_result = self.db.get_last_sensordata()
         division.add(hr())
         with table(cls='owntable w3-bordered center', style="width:40%") as tbl:
             with tr(cls='w3-theme'):

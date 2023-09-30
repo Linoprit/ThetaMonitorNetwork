@@ -100,9 +100,9 @@ class PlotCreator:
         lns = []
         for shortname in shortnames:
             db_result = self.db.get_single_sensordata(shortname, t_from, t_till)
-            if db_result is None:
+            if (db_result is None) or (len(db_result) == 0):
                 logging.getLogger().info("No data found for " + shortname)
-                return
+                continue
             if "Rel" in shortname:
                 x2 = []
                 y2 = []

@@ -24,11 +24,13 @@
         "name": "Temp_Werkstatt",
         "title": "Temperatur Werkstatt",
         "shortnames": [
-          "Test 007",
-          "Test 004",
-          "Test 006",
-          "Test 005",
+          "WST_O   ",
+          "WST_U   ",
+          "GGE_U   ",
+          "WST_O2  ",
+          "WST_U2  ",
           "WrkstTmp",
+          "LGRASN_U",
           "WrkstRel"
         ]
       },
@@ -41,6 +43,7 @@
           "LGR_U2",
           "LGR_O2",
           "LagerTmp",
+          "LGRASN_U",
           "LagerRel"
         ]
       },
@@ -48,11 +51,10 @@
         "name": "Temp_Innen",
         "title": "Temperatur Innen",
         "shortnames": [
-          "Test 008",
-          "Test 003",
-          "Test 002",
-          "Test 001",
-          "InnenTmp"
+          "INNEN_O2",
+          "INNEN_U2",
+          "InnenTmp",
+          "LGRASN_U"
         ]
       },
       {
