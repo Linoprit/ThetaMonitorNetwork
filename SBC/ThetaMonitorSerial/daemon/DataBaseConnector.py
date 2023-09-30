@@ -108,8 +108,8 @@ class DataBaseConnector:
     def get_last_sensordata(self):
         # from_str = "2023-08-06 19:24:09"
         # till_str = "2023-08-06 19:30:09"
-        from_str = self.datetime_to_str(datetime.today())
-        till_str = self.datetime_to_str(datetime.today() - timedelta(minutes=6))
+        from_str = self.datetime_to_str(datetime.today() - timedelta(minutes=6))
+        till_str = self.datetime_to_str(datetime.today())
         vals_str = "AddressHash, SensorType, Measurement, LastUpdateTick, TimeStamp"
         command = ("SELECT {} FROM {} WHERE `TimeStamp` BETWEEN '{}' AND '{}'"
                    .format(vals_str, self.sens_tbl, from_str, till_str))

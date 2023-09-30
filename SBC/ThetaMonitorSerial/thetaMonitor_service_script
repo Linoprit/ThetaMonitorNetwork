@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# skeleton        example file to build /etc/init.d/ scripts.
+#                This file should be used to construct scripts for /etc/init.d.
+#
+#                Written by Miquel van Smoorenburg <miquels@cistron.nl>.
+#                Modified for Debian GNU/Linux
+#                by Ian Murdock <imurdock@gnu.ai.mit.edu>.
+#
+# Version:        @(#)skeleton  1.8  03-Mar-1998  miquels@cistron.nl
+#
+
+### BEGIN INIT INFO
+# Provides:          hddtemp
+# Required-Start:    $remote_fs $syslog $network
+# Required-Stop:     $remote_fs $syslog $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: disk temperature monitoring daemon
+# Description:       hddtemp is a disk temperature monitoring daemon
+### END INIT INFO
+
+
+
+SERVICE_NAME=ThetaMonitor
+SERVICE_PATH=/opt/ThetaMonitorNetwork/SBC/ThetaMonitorSerial/
+SERVICE_SCRIPT="ThetaMonitor.py daemon"
+INTERPRETER=/usr/bin/python3
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+NAME=ThetaMonitor
+DAEMON_PATH=/opt/ThetaMonitorNetwork/SBC/ThetaMonitorSerial
+DAEMON=ThetaMonitor.py
+DAEMON_ARG=daemon
+DESC="ThetaMonitor daemon"
+INTERPRETER=/usr/bin/python3
+COMMAND="$INTERPRETER $DAEMON_PATH/$DAEMON $DAEMON_ARG"
+
+
+if [ -n "$RUN_SYSLOG" ] && [ "$RUN_SYSLOG" != "0" ] ; then
+  SYSLOG_ARG="-S $RUN_SYSLOG"
+fi
+
+[ -x "$DAEMON" ] || exit 0
+
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+    start-stop-daemon --start --quiet --exec $COMMAND
+    log_progress_msg "starting done."
+    log_end_msg $ret
+    ;;
+  stop)
+    if [ "$RUN_DAEMON" = "true" ] || [ "$RUN_DAEMON" = "yes" ] ; then
+      log_daemon_msg "Stopping $DESC" "$NAME"
+      start-stop-daemon --stop --oknodo --exec $DAEMON --retry 30
+      log_end_msg $?
+    fi
+    ;;
+  force-reload|reload)
+    exit 3
+    ;;
+  restart)
+    $0 stop && $0 start
+    ;;
+  status)
+    status_of_proc $DAEMON $NAME
+    exit $?
+    ;;
+  *)
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart|status}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

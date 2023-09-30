@@ -4,11 +4,11 @@ import logging
 import pathlib
 import sys
 from datetime import datetime
-from os.path import exists
 import daemon.Subparser
 import gui.Subparser
 import tableIdTool.Subparser
-import os
+import logging.handlers
+
 
 # noinspection SpellCheckingInspection
 class AppSettings:
@@ -100,20 +100,19 @@ class AppSettings:
         elif log_level_str.lower() == "verbose":
             log_level = logging.INFO
 
-        if exists(filename):
-            new_filename = os.path.splitext(filename)[0] + "_old" \
-                           + os.path.splitext(filename)[1]
-            os.rename(filename, new_filename)
-
-        logging.basicConfig(filename=filename,
-                            filemode='w',
-                            format='%(asctime)s %(levelname)s: %(message)s',
+        logging.basicConfig(format='%(asctime)s [%(levelname)-7.7s] %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S',
                             level=log_level)
-        log_formatter = logging.Formatter("[%(levelname)-7.7s]  %(message)s")
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setFormatter(log_formatter)
-        logging.getLogger().addHandler(console_handler)
+        log_formatter = logging.Formatter("%(asctime)s [%(levelname)-7.7s] %(message)s")
+
+        file_handler = logging.handlers.TimedRotatingFileHandler(
+            filename, when='midnight', backupCount=5)
+        file_handler.setFormatter(log_formatter)
+        logging.getLogger().addHandler(file_handler)
+
+        # console_handler = logging.StreamHandler(sys.stdout)
+        # console_handler.setFormatter(log_formatter)
+        # logging.getLogger().addHandler(console_handler)
 
     # overwrite the settings from ini-file with commandline-args, if present
     def __overlay_settings(self, args):

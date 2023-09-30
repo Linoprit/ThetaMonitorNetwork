@@ -29,7 +29,6 @@ def signal_handler(sig, frame):
 class ThetaMonDaemon:
     exit_requested = False
     update_db_freq = 5  # [min]
-
     # update_db_freq = 1 #  [min]
 
     def __init__(self, settings_in: framework.settings.AppSettings):
@@ -73,12 +72,12 @@ class ThetaMonDaemon:
             time.sleep(1.0)  # we could sleep for update_db_freq
 
     def update_queues(self):
-        data = None
+        # data = bytes()
         for j in range(self.serial_queue.qsize() - 1):
             data = self.serial_queue.get(block=True, timeout=0.2)
-        if data is None:
-            return
-        self.stream_decoder.proc_serial_stream(data)
+            # if data is None:
+            #     return
+            self.stream_decoder.proc_serial_stream(data)
 
     def bin_queue_to_struct(self):
         while self.bin_queue.qsize() > 0:
