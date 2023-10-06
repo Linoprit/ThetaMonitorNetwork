@@ -54,12 +54,10 @@ class AppSettings:
     def __check_workdir(self, args) -> pathlib.Path:
         if args.workdir:
             workdir = pathlib.Path(args.workdir)
-            if not workdir.exists():
-                workdir.mkdir(parents=True)
         else:
             workdir = pathlib.Path("./data")  # standard
-            if not workdir.exists():
-                workdir = pathlib.Path("c:/temp/data")  # simple mode
+        if not workdir.exists():
+            workdir.mkdir(parents=True)
         return workdir
 
     def _command_line_init(self):

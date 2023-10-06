@@ -37,6 +37,7 @@ class TestDataBaseConnector(unittest.TestCase):
         result = db.get_hashes_from_shortnames(unknown)
         self.assertEqual(result, [])
 
+    @unittest.skip(reason="Test-DB is not installed")
     def test_get_sensordata(self):
         shortnames = ["WST_O", "WrkstHum", "LGR_U"]
         db = DbConn(self.settings)
@@ -51,6 +52,7 @@ class TestDataBaseConnector(unittest.TestCase):
              (13, 1294211458, 0, 8.8125, datetime(2022, 11, 21, 18, 9, 11)))
         self.assertEqual(result, expect)
 
+    @unittest.skip(reason="Test-DB is not installed")
     def test_update_sensordata_tbl(self):
         import datetime
 

@@ -34,7 +34,7 @@ class Worker(Thread):
                 if data:
                     self._serial_queue.put(data, block=True, timeout=0.5)
             except:
-                logging.getLogger().info("Connection lost. Exiting serial thread.")
+                logging.getLogger().info("Serial connection lost. Exiting serial thread.")
                 return
             time.sleep(1.0)
         # some exit code
