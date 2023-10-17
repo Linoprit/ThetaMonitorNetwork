@@ -145,10 +145,12 @@ class PlotCreator:
         else:
             secax = ax.secondary_yaxis('right')
             secax.yaxis.set_major_formatter('{x:1.1f}')
+            secax.yaxis.set_major_locator(MultipleLocator(0.5))
             secax.yaxis.set_minor_locator(AutoMinorLocator())
             ax2.axis('off')
 
         ax.yaxis.set_major_formatter('{x:1.1f}')
+        ax.yaxis.set_major_locator(MultipleLocator(0.5))
         ax.yaxis.set_minor_locator(AutoMinorLocator())
 
         prop_cycle = plt.rcParams['axes.prop_cycle']
