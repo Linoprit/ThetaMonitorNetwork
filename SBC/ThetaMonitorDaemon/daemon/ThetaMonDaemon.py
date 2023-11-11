@@ -29,7 +29,7 @@ def signal_handler(sig, frame):
 class ThetaMonDaemon:
     exit_requested = False
     update_db_freq = 5  # [min]
-    # update_db_freq = 1 #  [min]
+    # update_db_freq = 1  #  [min]
 
     def __init__(self, settings_in: framework.settings.AppSettings):
         self.settings = settings_in
@@ -54,7 +54,7 @@ class ThetaMonDaemon:
         self.worker = Worker(self.serial_queue, device, 115200, 0.5)
         self.worker.start()
         self.db.connect()
-        self.create_html()  # initial creation
+        # self.create_html()  # initial creation
 
         while 1:
             if self.exit_requested:
@@ -65,10 +65,13 @@ class ThetaMonDaemon:
             self.update_queues()
             self.bin_queue_to_struct()
             if datetime.now() >= self.next_time:
+                logging.getLogger().info("Starting to update DB and Html.")
                 self.next_time = \
                     datetime.now() + timedelta(hours=0, minutes=self.update_db_freq)
                 self.push_dicts_to_db()
                 self.create_html()
+                logging.getLogger().info("Next time for updating DB is {}".format(
+                    self.next_time.strftime("%H:%M:%S")))
             time.sleep(1.0)  # we could sleep for update_db_freq
 
     def update_queues(self):
@@ -105,6 +108,8 @@ class ThetaMonDaemon:
         if stat_dat_count > 0:
             logging.getLogger().info(
                 "Updated stationdata with {} items.".format(stat_dat_count))
+        if sens_dat_count == 0 and stat_dat_count == 0:
+            logging.getLogger().info("Got no sensordata for updating database.")
 
     def create_html(self):
         start = time.time()

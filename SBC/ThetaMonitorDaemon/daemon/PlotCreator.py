@@ -4,15 +4,13 @@ from datetime import timedelta, datetime
 from itertools import cycle
 from pathlib import Path
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+import matplotlib.dates as mdates
 
 import framework.settings
 from daemon.DataBaseConnector import DataBaseConnector as Dbcon
 from daemon.HtmlConfigStructure import HtmlConfig
-
-mpl.use('Agg')
 
 
 class PlotCreator:
@@ -97,6 +95,7 @@ class PlotCreator:
 
     def plot_to_png(self, title, shortnames, t_from, t_till, filename):
         ax, ax2, colors = self.prepare_plot(title)
+        x_data_count = 0
         lns = []
         for shortname in shortnames:
             db_result = self.db.get_single_sensordata(shortname, t_from, t_till)
@@ -120,8 +119,12 @@ class PlotCreator:
                 x1.append(item[0])
                 y1.append(item[1])
             lns += ax.plot(x1, y1, color=next(colors), label=shortname, linewidth=1.0)
+            x_data_count = max(len(x1), x_data_count)
             x1.clear()
             y1.clear()
+
+        self.set_axis_attribs(ax, x_data_count)
+        self.set_axis_attribs(ax2, x_data_count)
         self.make_legend(lns, ax)
         self.save_plot(filename, ax)
 
@@ -130,19 +133,11 @@ class PlotCreator:
         fig, ax = plt.subplots(figsize=(10, 6))
         plt.title(
             title, fontweight="bold", fontsize=20, loc='center', pad=50, color='#FF9900')
-        date_form = mpl.dates.DateFormatter("%d.%m.%y %H:%M")
         ax.margins(0.01)  # padding in all directions
 
         plt.xticks(rotation=90)
         plt.grid(which='major', color='grey', linestyle=(1, (5, 5)), linewidth=0.5)
         plt.grid(which='minor', color='lightgrey', linestyle='--', linewidth=0.5)
-
-        ax.xaxis.set_major_formatter(date_form)
-        ax.xaxis.set_major_locator(MultipleLocator(0.03))
-        ax.xaxis.set_minor_locator(MultipleLocator(0.015))
-
-        ax.yaxis.set_major_formatter('{x:1.1f}')
-        ax.yaxis.set_minor_locator(AutoMinorLocator())
 
         ax2 = ax.twinx()
         if sec_axis_visible:
@@ -150,12 +145,23 @@ class PlotCreator:
         else:
             secax = ax.secondary_yaxis('right')
             secax.yaxis.set_major_formatter('{x:1.1f}')
+            secax.yaxis.set_major_locator(MultipleLocator(0.5))
             secax.yaxis.set_minor_locator(AutoMinorLocator())
             ax2.axis('off')
+
+        ax.yaxis.set_major_formatter('{x:1.1f}')
+        ax.yaxis.set_major_locator(MultipleLocator(0.5))
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
 
         prop_cycle = plt.rcParams['axes.prop_cycle']
         colors = cycle(prop_cycle.by_key()['color'])
         return ax, ax2, colors
+
+    @staticmethod
+    def set_axis_attribs(axis, data_count):
+        axis.xaxis.set_major_formatter(mdates.DateFormatter("%d.%m.%y %H:%M"))
+        axis.xaxis.set_major_locator(MultipleLocator(data_count / 9500.0))  # 0.03))
+        axis.xaxis.set_minor_locator(MultipleLocator(data_count / 19000.0))  # 0.015))
 
     @staticmethod
     def make_legend(lines, ax):
