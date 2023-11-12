@@ -1,12 +1,12 @@
 import logging
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+import matplotlib.ticker as tkr
 import os
 from datetime import timedelta, datetime
 from itertools import cycle
-from pathlib import Path
-
-import matplotlib.pyplot as plt
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
-import matplotlib.dates as mdates
+from pathlib import Path
 
 import framework.settings
 from daemon.DataBaseConnector import DataBaseConnector as Dbcon
@@ -60,9 +60,9 @@ class PlotCreator:
             return
         data_names = self.statistic_config["data_names"]
         filename = (self.create_fullpath(
-                self.plot_dir, self.statistic_config["name"], content_config_name))
+            self.plot_dir, self.statistic_config["name"], content_config_name))
         station_ids = self.db.get_station_ids_from_statistik(t_from, t_till)
-        ax, ax2, colors = self.prepare_plot("Station Statistics", sec_axis_visible=True)
+        ax, ax2, colors = self.prepare_plot("Station Statistics")
         lns = []
         x1 = []
         y1 = []
@@ -80,8 +80,9 @@ class PlotCreator:
             x1.clear()
             y1.clear()
             y2.clear()
+        self.tweak_plot(ax, ax2, sec_axis_visible=True)
         self.make_legend(lns, ax)
-        self.save_plot(filename, ax)
+        self.save_plot(filename)
 
     def do_sensor_plots(self, content_config_name, t_from, t_till):
         if self.plot_config is None:
@@ -123,45 +124,53 @@ class PlotCreator:
             x1.clear()
             y1.clear()
 
-        self.set_axis_attribs(ax, x_data_count)
-        self.set_axis_attribs(ax2, x_data_count)
-        self.make_legend(lns, ax)
-        self.save_plot(filename, ax)
+        if x_data_count > 0:
+            self.tweak_plot(ax, ax2)
+            self.set_axis_attribs(ax, x_data_count)
+            self.set_axis_attribs(ax2, x_data_count)
+            self.make_legend(lns, ax)
+            self.save_plot(filename)
 
     @staticmethod
-    def prepare_plot(title, sec_axis_visible=False):
+    def prepare_plot(title):
         fig, ax = plt.subplots(figsize=(10, 6))
         plt.title(
             title, fontweight="bold", fontsize=20, loc='center', pad=50, color='#FF9900')
-        ax.margins(0.01)  # padding in all directions
 
         plt.xticks(rotation=90)
         plt.grid(which='major', color='grey', linestyle=(1, (5, 5)), linewidth=0.5)
         plt.grid(which='minor', color='lightgrey', linestyle='--', linewidth=0.5)
 
         ax2 = ax.twinx()
+
+        prop_cycle = plt.rcParams['axes.prop_cycle']
+        colors = cycle(prop_cycle.by_key()['color'])
+
+        return ax, ax2, colors
+
+    @staticmethod
+    def tweak_plot(ax, ax2, sec_axis_visible=False):
         if sec_axis_visible:
             ax2.axis('on')
         else:
             secax = ax.secondary_yaxis('right')
             secax.yaxis.set_major_formatter('{x:1.1f}')
-            secax.yaxis.set_major_locator(MultipleLocator(0.5))
-            secax.yaxis.set_minor_locator(AutoMinorLocator())
+            secax.yaxis.set_major_locator(tkr.MaxNLocator(40))
+            secax.yaxis.set_minor_locator(AutoMinorLocator(2))
             ax2.axis('off')
 
+        ax.margins(0.01)  # padding in all directions
         ax.yaxis.set_major_formatter('{x:1.1f}')
-        ax.yaxis.set_major_locator(MultipleLocator(0.5))
-        ax.yaxis.set_minor_locator(AutoMinorLocator())
+        ax.yaxis.set_major_locator(tkr.MaxNLocator(40))
+        ax.yaxis.set_minor_locator(AutoMinorLocator(2))
 
-        prop_cycle = plt.rcParams['axes.prop_cycle']
-        colors = cycle(prop_cycle.by_key()['color'])
-        return ax, ax2, colors
+        return
 
     @staticmethod
     def set_axis_attribs(axis, data_count):
         axis.xaxis.set_major_formatter(mdates.DateFormatter("%d.%m.%y %H:%M"))
-        axis.xaxis.set_major_locator(MultipleLocator(data_count / 9500.0))  # 0.03))
-        axis.xaxis.set_minor_locator(MultipleLocator(data_count / 19000.0))  # 0.015))
+        axis.xaxis.set_major_locator(tkr.MaxNLocator(50))
+        axis.xaxis.set_minor_locator(AutoMinorLocator(4))
 
     @staticmethod
     def make_legend(lines, ax):
@@ -169,7 +178,7 @@ class PlotCreator:
         ax.legend(lines, labs, loc='upper center', bbox_to_anchor=(0.5, 1.14), ncol=4, fancybox=True, shadow=True)
 
     @staticmethod
-    def save_plot(filename, ax):
+    def save_plot(filename):
         plt.savefig(filename, bbox_inches='tight')
         plt.close('all')
 
