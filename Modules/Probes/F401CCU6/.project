@@ -34,7 +34,7 @@
 		<link>
 			<name>Framework</name>
 			<type>2</type>
-			<location>/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Framework</location>
+			<location>/home/harald/eclipse_workspaces/ThetaMonitorNetwork/Modules/Framework</location>
 		</link>
 	</linkedResources>
 </projectDescription>
