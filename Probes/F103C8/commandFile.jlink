@@ -1,0 +1,5 @@
+r
+h
+loadbin /home/harald/eclipse_workspaces/ThetaMonitorNetwork/Probes/F103C8/Debug/F103C8.bin ,0x08000000
+r
+exit
