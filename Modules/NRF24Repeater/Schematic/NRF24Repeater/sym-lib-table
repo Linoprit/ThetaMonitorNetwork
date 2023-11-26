@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "blue-pill-lib")(type "KiCad")(uri "/home/harald/eclipse_workspaces/ThetaMonitorNetwork/doc/schematic/KiCadLibs/blue-pill-lib.kicad_sym")(options "")(descr ""))
+  (lib (name "Stm32_lib")(type "KiCad")(uri "${KIPRJMOD}/Stm32_lib.kicad_sym")(options "")(descr ""))
+  (lib (name "OwnParts")(type "KiCad")(uri "${KIPRJMOD}/OwnParts.kicad_sym")(options "")(descr ""))
+)

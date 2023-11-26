@@ -248,20 +248,6 @@
 		<project id="ThetaMonitorNetwork.null.914137078" name="ThetaMonitorNetwork"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.981743244;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.981743244.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.1877256725;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.1805806605">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.138187323;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.138187323.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.2062184909;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1731196791">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.981743244;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.981743244.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1297338579;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1333250928">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.138187323;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.138187323.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.590862249;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.2000398059">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="scannerConfiguration"/>
 </cproject>
