@@ -51,5 +51,9 @@
 /SBC/ThetaMonitorDaemon/.idea/
 /SBC/SqlDumps
 /x86/TableIdProgrammer/ID_TableTestRelayConfig.txt
-/Micro_toDelete/
-
+ToDelete/
+/Modules/NRF24Repeater/Schematic/NRF24Repeater/NRF24Repeater-backups/NRF24Repeater-2023-11-26_111614.zip
+/Modules/NRF24Repeater/Schematic/NRF24Repeater/NRF24Repeater-backups/NRF24Repeater-2023-11-26_115952.zip
+/Modules/NRF24Repeater/Schematic/NRF24Repeater/NRF24Repeater-backups/NRF24Repeater-2023-11-26_155602.zip
+/Modules/NRF24Repeater/Schematic/NRF24Repeater/NRF24Repeater-backups/NRF24Repeater-2023-11-26_121059.zip
+/doc/schematic/KiCadLibs/Kicad-STM32-master/
